@@ -26,7 +26,7 @@ public class NettyClient implements Client {
     private Channel channel;
 
     @Override
-    public void init(CaoyxRpcReferenceBean caoyxRpcReferenceBean) {
+    public void init(CaoyxRpcReferenceBean caoyxRpcReferenceBean) throws InterruptedException {
         group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
@@ -39,12 +39,7 @@ public class NettyClient implements Client {
                                 .addLast(new NettyClientHandler(caoyxRpcReferenceBean.getInvokerFactory()));
                     }
                 });
-
-        try {
-            channel = bootstrap.connect(caoyxRpcReferenceBean.getIp(), caoyxRpcReferenceBean.getPort()).sync().channel();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        channel = bootstrap.connect(caoyxRpcReferenceBean.getIp(), caoyxRpcReferenceBean.getPort()).sync().channel();
     }
 
     @Override
@@ -56,6 +51,7 @@ public class NettyClient implements Client {
 
     @Override
     public void doSend(CaoyxRpcRequest requestPacket) throws InterruptedException {
+        int a = 0;
         if (channel != null) {
             channel.writeAndFlush(requestPacket).sync();
         }

@@ -10,5 +10,5 @@ import java.io.Serializable;
 
 @Data
 public abstract class Packet implements Serializable {
-    Byte version = 1;
+    int version = 0;
 }

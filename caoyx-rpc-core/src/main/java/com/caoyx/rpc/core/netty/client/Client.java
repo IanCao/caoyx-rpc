@@ -8,7 +8,7 @@ import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
  */
 public interface Client {
 
-    void init(CaoyxRpcReferenceBean caoyxRpcReferenceBean);
+    void init(CaoyxRpcReferenceBean caoyxRpcReferenceBean) throws InterruptedException;
 
     void stop();
 

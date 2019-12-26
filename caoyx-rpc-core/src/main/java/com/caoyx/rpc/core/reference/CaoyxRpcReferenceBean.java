@@ -25,22 +25,24 @@ public class CaoyxRpcReferenceBean {
     private Class<? extends Serializer> serializer = JDKSerializerImpl.class;
     private String ip;
     private int port;
+    private int version;
     private Class<?> iFace;
     //TODO 负载均衡
 
     private CaoyxRpcInvokerFactory invokerFactory;
 
 
-    public CaoyxRpcReferenceBean(String ip, int port, Class<?> iFace) {
+    public CaoyxRpcReferenceBean(String ip, int port, Class<?> iFace, int version) {
         this.ip = ip;
         this.port = port;
         this.iFace = iFace;
+        this.version = version;
     }
 
     private Client clientInstance = null;
     private Serializer serializerInstance = null;
 
-    public CaoyxRpcReferenceBean init() throws IllegalAccessException, InstantiationException {
+    public CaoyxRpcReferenceBean init() throws IllegalAccessException, InstantiationException, InterruptedException {
         clientInstance = client.newInstance();
         serializerInstance = serializer.newInstance();
         if (invokerFactory == null) {
@@ -76,6 +78,7 @@ public class CaoyxRpcReferenceBean {
 
                         CaoyxRpcRequest rpcRequestPacket = new CaoyxRpcRequest();
                         rpcRequestPacket.setRequestId(UUID.randomUUID().toString());
+                        rpcRequestPacket.setVersion(version);
                         rpcRequestPacket.setClassName(className);
                         rpcRequestPacket.setMethodName(methodName);
                         rpcRequestPacket.setParameters(args);

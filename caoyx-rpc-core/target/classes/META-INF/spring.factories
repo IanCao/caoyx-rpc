@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.caoyx.rpc.core.spring.autoconfiguration.CaoyxRpcSpringConfiguration
