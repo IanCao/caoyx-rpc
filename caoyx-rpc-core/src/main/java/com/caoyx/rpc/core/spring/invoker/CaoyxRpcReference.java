@@ -1,8 +1,9 @@
 package com.caoyx.rpc.core.spring.invoker;
 
+import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.netty.client.Client;
 import com.caoyx.rpc.core.netty.client.NettyClient;
-import com.caoyx.rpc.core.register.CaoyxRpcRegister;
+import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.register.impl.ZookeeperRegister;
 import com.caoyx.rpc.core.serializer.Serializer;
 import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
@@ -30,7 +31,13 @@ public @interface CaoyxRpcReference {
 
     int version() default 0;
 
-    Class<? extends CaoyxRpcRegister> register() default ZookeeperRegister.class;
+    Class<? extends Register> register() default ZookeeperRegister.class;
 
-    String[] addressList() default "[]";
+    CallType callType() default CallType.DIRECT;
+
+    String registerAddress() default "";
+
+    String address() default "";
+
+    String remoteApplicationName() default "";
 }

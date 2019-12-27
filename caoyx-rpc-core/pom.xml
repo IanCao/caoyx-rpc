@@ -31,28 +31,35 @@
     </properties>
 
     <dependencies>
+        <!--  commons    -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.22</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.8.0-beta4</version>
+            <scope>compile</scope>
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.6.Final</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.101tec/zkclient -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.22</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.8.0-beta4</version>
-            <scope>compile</scope>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>0.11</version>
         </dependency>
 
         <!-- ********************** spring (default=provided) ********************** -->

@@ -2,12 +2,16 @@ package com.caoyx.rpc.core.reference;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.enums.CallType;
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.netty.client.Client;
-import com.caoyx.rpc.core.netty.client.NettyClient;
+import com.caoyx.rpc.core.netty.client.ClientManager;
+import com.caoyx.rpc.core.rebalance.Rebalance;
+import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.serializer.Serializer;
-import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 import lombok.Data;
 
 import java.lang.reflect.InvocationHandler;
@@ -21,34 +25,47 @@ import java.util.concurrent.TimeUnit;
  */
 @Data
 public class CaoyxRpcReferenceBean {
-    private Class<? extends Client> client = NettyClient.class;
-    private Class<? extends Serializer> serializer = JDKSerializerImpl.class;
-    private String ip;
-    private int port;
+    private Class<? extends Client> client;
+    private Class<? extends Serializer> serializer;
+
+    private Address address;
+    private CallType callType;
+
+    private String applicationName;
     private int version;
     private Class<?> iFace;
-    //TODO 负载均衡
+
+    private Register register;
+    private Rebalance rebalance;
 
     private CaoyxRpcInvokerFactory invokerFactory;
 
 
-    public CaoyxRpcReferenceBean(String ip, int port, Class<?> iFace, int version) {
-        this.ip = ip;
-        this.port = port;
+    public CaoyxRpcReferenceBean(Address address,
+                                 Class<?> iFace,
+                                 int version,
+                                 String applicationName,
+                                 Class<? extends Client> client,
+                                 Class<? extends Serializer> serializer) {
+        this.address = address;
         this.iFace = iFace;
         this.version = version;
+        this.applicationName = applicationName;
+        this.client = client;
+        this.serializer = serializer;
     }
 
-    private Client clientInstance = null;
+    private ClientManager clientManager = null;
     private Serializer serializerInstance = null;
 
-    public CaoyxRpcReferenceBean init() throws IllegalAccessException, InstantiationException, InterruptedException {
-        clientInstance = client.newInstance();
+    public CaoyxRpcReferenceBean init() throws Exception {
+        clientManager = new ClientManager();
+
         serializerInstance = serializer.newInstance();
         if (invokerFactory == null) {
             invokerFactory = CaoyxRpcInvokerFactory.getInstance();
         }
-        clientInstance.init(this);
+
         return this;
     }
 
@@ -78,12 +95,25 @@ public class CaoyxRpcReferenceBean {
 
                         CaoyxRpcRequest rpcRequestPacket = new CaoyxRpcRequest();
                         rpcRequestPacket.setRequestId(UUID.randomUUID().toString());
+                        rpcRequestPacket.setApplicationName(applicationName);
                         rpcRequestPacket.setVersion(version);
                         rpcRequestPacket.setClassName(className);
                         rpcRequestPacket.setMethodName(methodName);
                         rpcRequestPacket.setParameters(args);
                         rpcRequestPacket.setParameterTypes(parameterTypes);
                         rpcRequestPacket.setCreatedTimeMills(System.currentTimeMillis());
+
+                        //负载均衡
+                        Address targetAddress = null;
+                        if (callType == CallType.DIRECT) {
+                            targetAddress = address;
+                        } else if (callType == CallType.REGISTER) {
+                            targetAddress = rebalance.rebalance(register.getAllRegister(applicationName, version));
+                        }
+                        if (targetAddress == null) {
+                            throw new CaoyxRpcException("targetAddress is null");
+                        }
+                        Client clientInstance = clientManager.getOrCreateClient(targetAddress, client, serializer, invokerFactory);
 
                         clientInstance.doSend(rpcRequestPacket);
 

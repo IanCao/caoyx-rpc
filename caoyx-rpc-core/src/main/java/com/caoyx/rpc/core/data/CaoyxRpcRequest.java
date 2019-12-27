@@ -11,6 +11,8 @@ public class CaoyxRpcRequest extends Packet {
 
     private String requestId;
 
+    private String applicationName;
+
     private String className;
 
     private String methodName;

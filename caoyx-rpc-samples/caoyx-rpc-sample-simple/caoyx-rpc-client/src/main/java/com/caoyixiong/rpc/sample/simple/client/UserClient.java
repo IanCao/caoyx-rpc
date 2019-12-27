@@ -3,7 +3,10 @@ package com.caoyixiong.rpc.sample.simple.client;
 import com.caoyixiong.rpc.sample.simple.api.IUser;
 import com.caoyixiong.rpc.sample.simple.api.UserCatDto;
 import com.caoyixiong.rpc.sample.simple.api.UserDto;
+import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
+import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +16,8 @@ import java.util.List;
  */
 public class UserClient {
 
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
-        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean("127.0.0.1", 1118, IUser.class);
+    public static void main(String[] args) throws Exception {
+        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(new Address("127.0.0.1", 1118), IUser.class, 0, "caoyixiong", NettyClient.class, JDKSerializerImpl.class);
         rpcReferenceBean.init();
 
         IUser user = (IUser) rpcReferenceBean.getObject();

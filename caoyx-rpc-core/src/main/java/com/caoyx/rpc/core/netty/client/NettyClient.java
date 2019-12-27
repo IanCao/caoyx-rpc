@@ -2,10 +2,11 @@ package com.caoyx.rpc.core.netty.client;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.netty.codec.CaoyxRpcEncoder;
-import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
-import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
+import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.serializer.Serializer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -26,7 +27,7 @@ public class NettyClient implements Client {
     private Channel channel;
 
     @Override
-    public void init(CaoyxRpcReferenceBean caoyxRpcReferenceBean) throws InterruptedException {
+    public void init(Address address, Serializer serializer, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException {
         group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
@@ -34,26 +35,34 @@ public class NettyClient implements Client {
                 .handler(new ChannelInitializer<Channel>() {
                     protected void initChannel(Channel channel) throws Exception {
                         channel.pipeline()
-                                .addLast(new CaoyxRpcEncoder(CaoyxRpcRequest.class, new JDKSerializerImpl()))
-                                .addLast(new CaoyxRpcDecoder(CaoyxRpcResponse.class, new JDKSerializerImpl()))
-                                .addLast(new NettyClientHandler(caoyxRpcReferenceBean.getInvokerFactory()));
+                                .addLast(new CaoyxRpcEncoder(CaoyxRpcRequest.class, serializer))
+                                .addLast(new CaoyxRpcDecoder(CaoyxRpcResponse.class, serializer))
+                                .addLast(new NettyClientHandler(invokerFactory));
                     }
                 });
-        channel = bootstrap.connect(caoyxRpcReferenceBean.getIp(), caoyxRpcReferenceBean.getPort()).sync().channel();
+        channel = bootstrap.connect(address.getIp(), address.getPort()).sync().channel();
+    }
+
+
+    @Override
+    public void doSend(CaoyxRpcRequest requestPacket) throws InterruptedException {
+        if (channel != null) {
+            channel.writeAndFlush(requestPacket).sync();
+        }
     }
 
     @Override
-    public void stop() {
+    public void close() {
+        if (channel != null) {
+            channel.close();
+        }
         if (group != null) {
             group.shutdownGracefully();
         }
     }
 
     @Override
-    public void doSend(CaoyxRpcRequest requestPacket) throws InterruptedException {
-        int a = 0;
-        if (channel != null) {
-            channel.writeAndFlush(requestPacket).sync();
-        }
+    public boolean isValid() {
+        return channel != null && channel.isActive();
     }
 }

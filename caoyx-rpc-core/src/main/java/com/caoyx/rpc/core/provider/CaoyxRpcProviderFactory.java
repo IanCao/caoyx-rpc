@@ -2,10 +2,10 @@ package com.caoyx.rpc.core.provider;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
-import com.caoyx.rpc.core.netty.server.NettyServer;
 import com.caoyx.rpc.core.netty.server.Server;
+import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.serializer.Serializer;
-import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
+import com.caoyx.rpc.core.utils.IpUtils;
 import lombok.Data;
 
 import java.lang.reflect.Method;
@@ -18,19 +18,34 @@ import java.util.Map;
 @Data
 public class CaoyxRpcProviderFactory {
 
-    private Class<? extends Server> server = NettyServer.class;
-    private Class<? extends Serializer> serializer = JDKSerializerImpl.class;
+    private Server server;
+    private Serializer serializer;
+    private Register register;
 
+    private String applicationName;
     private int port = 1118;
+    private int version;
+
     private String accessToken = null;
 
-    private Server serverInstance;
-    private Serializer serializerInstance;
+
+    public CaoyxRpcProviderFactory(String applicationName,
+                                   Server server,
+                                   Serializer serializer,
+                                   Register register,
+                                   int version) {
+        this.applicationName = applicationName;
+        this.server = server;
+        this.serializer = serializer;
+        this.register = register;
+        this.version = version;
+    }
 
     public void init() throws IllegalAccessException, InstantiationException, InterruptedException {
-        serverInstance = server.newInstance();
-        serializerInstance = serializer.newInstance();
-        serverInstance.start(this);
+        server.start(this);
+        if (register != null) {
+            register.register(applicationName, IpUtils.getLocalIp(), port, version);
+        }
     }
 
     private Map<String, Object> serviceBeanMap = new HashMap<String, Object>();

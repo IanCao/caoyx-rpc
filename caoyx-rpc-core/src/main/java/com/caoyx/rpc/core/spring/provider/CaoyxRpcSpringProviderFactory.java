@@ -1,6 +1,9 @@
 package com.caoyx.rpc.core.spring.provider;
 
+import com.caoyx.rpc.core.netty.server.Server;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
+import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.serializer.Serializer;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -13,6 +16,11 @@ import java.util.Map;
  */
 
 public class CaoyxRpcSpringProviderFactory extends CaoyxRpcProviderFactory implements ApplicationContextAware {
+
+    public CaoyxRpcSpringProviderFactory(String applicationName, Server server, Serializer serializer, Register register, int version) {
+        super(applicationName, server, serializer, register, version);
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(CaoyxRpcService.class);

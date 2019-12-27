@@ -41,8 +41,8 @@ public class NettyServer implements Server {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     protected void initChannel(NioSocketChannel channel) throws Exception {
                         channel.pipeline()
-                                .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class, caoyxRpcProviderFactory.getSerializerInstance()))
-                                .addLast(new CaoyxRpcEncoder(CaoyxRpcResponse.class, caoyxRpcProviderFactory.getSerializerInstance()))
+                                .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class, caoyxRpcProviderFactory.getSerializer()))
+                                .addLast(new CaoyxRpcEncoder(CaoyxRpcResponse.class, caoyxRpcProviderFactory.getSerializer()))
                                 .addLast(new NettyServerHandler(caoyxRpcProviderFactory));
                     }
                 });
