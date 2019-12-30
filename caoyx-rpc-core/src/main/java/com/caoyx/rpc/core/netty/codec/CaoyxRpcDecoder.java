@@ -1,5 +1,7 @@
 package com.caoyx.rpc.core.netty.codec;
 
+import com.caoyx.rpc.core.data.CaoyxRpcPacket;
+import com.caoyx.rpc.core.serializer.CaoyxRpcSerializer;
 import com.caoyx.rpc.core.serializer.Serializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,32 +15,36 @@ import java.util.List;
 public class CaoyxRpcDecoder extends ByteToMessageDecoder {
 
     private Class<?> genericClass;
-    private Serializer serializer;
 
-    public CaoyxRpcDecoder(Class<?> genericClass, Serializer serializer) {
+    public CaoyxRpcDecoder(Class<?> genericClass) {
         this.genericClass = genericClass;
-        this.serializer = serializer;
     }
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        System.out.println("CaoyxRpcDecoder decode " + byteBuf.readableBytes());
-        if (byteBuf.readableBytes() < 4) {
+
+        int magicNumber = byteBuf.readInt();
+
+        // not caoyxRpc data
+        if (magicNumber != CaoyxRpcPacket.MAGIC_NUMBER) {
             return;
         }
-        byteBuf.markReaderIndex();
+
+        byte serializerAlgorithm = byteBuf.readByte();
+
         int dataLength = byteBuf.readInt();
         if (dataLength < 0) {
             channelHandlerContext.close();
         }
         if (byteBuf.readableBytes() < dataLength) {
             byteBuf.resetReaderIndex();
-            return;    // fix 1024k buffer splice limix
+            return;
         }
         byte[] data = new byte[dataLength];
         byteBuf.readBytes(data);
 
-        Object obj = serializer.deserialize(genericClass, data);
+        Object obj = CaoyxRpcSerializer.INSTANCE.deserialize(genericClass, data, serializerAlgorithm);
+
         list.add(obj);
     }
 }

@@ -11,7 +11,7 @@ import com.caoyx.rpc.core.netty.client.ClientManager;
 import com.caoyx.rpc.core.rebalance.Rebalance;
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.Register;
-import com.caoyx.rpc.core.serializer.Serializer;
+import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
 import lombok.Data;
 
 import java.lang.reflect.InvocationHandler;
@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 @Data
 public class CaoyxRpcReferenceBean {
     private Class<? extends Client> client;
-    private Class<? extends Serializer> serializer;
 
     private Address address;
     private CallType callType;
@@ -37,31 +36,29 @@ public class CaoyxRpcReferenceBean {
 
     private Register register;
     private Rebalance rebalance;
+    private SerializerAlgorithm serializerAlgorithm;
 
     private CaoyxRpcInvokerFactory invokerFactory;
-
 
     public CaoyxRpcReferenceBean(Address address,
                                  Class<?> iFace,
                                  int version,
                                  String applicationName,
                                  Class<? extends Client> client,
-                                 Class<? extends Serializer> serializer) {
+                                 SerializerAlgorithm serializerAlgorithm) {
         this.address = address;
         this.iFace = iFace;
         this.version = version;
         this.applicationName = applicationName;
         this.client = client;
-        this.serializer = serializer;
+        this.serializerAlgorithm = serializerAlgorithm;
     }
 
     private ClientManager clientManager = null;
-    private Serializer serializerInstance = null;
 
     public CaoyxRpcReferenceBean init() throws Exception {
         clientManager = new ClientManager();
 
-        serializerInstance = serializer.newInstance();
         if (invokerFactory == null) {
             invokerFactory = CaoyxRpcInvokerFactory.getInstance();
         }
@@ -97,6 +94,7 @@ public class CaoyxRpcReferenceBean {
                         rpcRequestPacket.setRequestId(UUID.randomUUID().toString());
                         rpcRequestPacket.setApplicationName(applicationName);
                         rpcRequestPacket.setVersion(version);
+                        rpcRequestPacket.setSerializerAlgorithm(serializerAlgorithm.getAlgorithmId());
                         rpcRequestPacket.setClassName(className);
                         rpcRequestPacket.setMethodName(methodName);
                         rpcRequestPacket.setParameters(args);
@@ -113,7 +111,7 @@ public class CaoyxRpcReferenceBean {
                         if (targetAddress == null) {
                             throw new CaoyxRpcException("targetAddress is null");
                         }
-                        Client clientInstance = clientManager.getOrCreateClient(targetAddress, client, serializer, invokerFactory);
+                        Client clientInstance = clientManager.getOrCreateClient(targetAddress, client, invokerFactory);
 
                         clientInstance.doSend(rpcRequestPacket);
 

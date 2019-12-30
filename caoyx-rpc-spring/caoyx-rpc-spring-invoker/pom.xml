@@ -9,6 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>caoyx-rpc-spring-consumer</artifactId>
+    <artifactId>caoyx-rpc-spring-invoker</artifactId>
 
 </project>

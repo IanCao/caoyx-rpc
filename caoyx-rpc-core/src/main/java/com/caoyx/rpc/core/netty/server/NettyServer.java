@@ -1,7 +1,6 @@
 package com.caoyx.rpc.core.netty.server;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
-import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.netty.codec.CaoyxRpcEncoder;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
@@ -41,8 +40,8 @@ public class NettyServer implements Server {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     protected void initChannel(NioSocketChannel channel) throws Exception {
                         channel.pipeline()
-                                .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class, caoyxRpcProviderFactory.getSerializer()))
-                                .addLast(new CaoyxRpcEncoder(CaoyxRpcResponse.class, caoyxRpcProviderFactory.getSerializer()))
+                                .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class))
+                                .addLast(new CaoyxRpcEncoder())
                                 .addLast(new NettyServerHandler(caoyxRpcProviderFactory));
                     }
                 });

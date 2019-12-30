@@ -27,7 +27,7 @@ public class NettyClient implements Client {
     private Channel channel;
 
     @Override
-    public void init(Address address, Serializer serializer, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException {
+    public void init(Address address, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException {
         group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
@@ -35,8 +35,8 @@ public class NettyClient implements Client {
                 .handler(new ChannelInitializer<Channel>() {
                     protected void initChannel(Channel channel) throws Exception {
                         channel.pipeline()
-                                .addLast(new CaoyxRpcEncoder(CaoyxRpcRequest.class, serializer))
-                                .addLast(new CaoyxRpcDecoder(CaoyxRpcResponse.class, serializer))
+                                .addLast(new CaoyxRpcEncoder())
+                                .addLast(new CaoyxRpcDecoder(CaoyxRpcResponse.class))
                                 .addLast(new NettyClientHandler(invokerFactory));
                     }
                 });

@@ -7,9 +7,7 @@ import lombok.Data;
  * @author caoyixiong
  */
 @Data
-public class CaoyxRpcRequest extends Packet {
-
-    private String requestId;
+public class CaoyxRpcRequest extends CaoyxRpcPacket {
 
     private String applicationName;
 
@@ -22,6 +20,4 @@ public class CaoyxRpcRequest extends Packet {
     private Object[] parameters;
 
     private long createdTimeMills;
-
-    private String accessToken;
 }

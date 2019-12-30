@@ -6,9 +6,7 @@ import lombok.Data;
  * @author caoyixiong
  */
 @Data
-public class CaoyxRpcResponse extends Packet {
-
-    private String requestId;
+public class CaoyxRpcResponse extends CaoyxRpcPacket {
 
     private String errorMsg;
 

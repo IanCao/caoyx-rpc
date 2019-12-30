@@ -1,0 +1,20 @@
+package com.caoyx.rpc.core.data;
+
+import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
+import lombok.Data;
+
+/**
+ * @Author: caoyixiong
+ * @Date: 2019-12-30 11:32
+ */
+@Data
+public abstract class CaoyxRpcPacket implements Packet {
+
+    byte serializerAlgorithm = SerializerAlgorithm.JDK.getAlgorithmId();
+
+    private String requestId;
+
+    private String accessToken;
+
+    private int version;
+}

@@ -41,7 +41,7 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                     }
                     CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(address, field.getType(), caoyxRpcReference.version(), caoyxRpcReference.remoteApplicationName(), caoyxRpcReference.client(), caoyxRpcReference.serializer());
                     referenceBean.setClient(caoyxRpcReference.client());
-                    referenceBean.setSerializer(caoyxRpcReference.serializer());
+                    referenceBean.setSerializerAlgorithm(caoyxRpcReference.serializer());
                     referenceBean.setCallType(caoyxRpcReference.callType());
                     referenceBean.setRegister(new ZookeeperRegister(caoyxRpcReference.registerAddress()));
                     referenceBean.setRebalance(new RandomRebalance());

@@ -16,7 +16,7 @@ public class ClientManager {
 
     private static volatile ConcurrentHashMap<Address, Client> clientPool = new ConcurrentHashMap<>();
 
-    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl, Class<? extends Serializer> serializerImpl, CaoyxRpcInvokerFactory invokerFactory) throws Exception {
+    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl, CaoyxRpcInvokerFactory invokerFactory) throws Exception {
         Client client = clientPool.get(address);
         if (client != null && client.isValid()) {
             return client;
@@ -35,7 +35,7 @@ public class ClientManager {
             Client clientInstance = null;
             try {
                 clientInstance = clientImpl.newInstance();
-                clientInstance.init(address, serializerImpl.newInstance(), invokerFactory);
+                clientInstance.init(address, invokerFactory);
                 clientPool.put(address, clientInstance);
             } catch (Exception e) {
                 if (clientInstance != null) {

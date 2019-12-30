@@ -5,8 +5,7 @@ import com.caoyx.rpc.core.netty.client.Client;
 import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.register.impl.ZookeeperRegister;
-import com.caoyx.rpc.core.serializer.Serializer;
-import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
+import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -27,7 +26,7 @@ public @interface CaoyxRpcReference {
 
     Class<? extends Client> client() default NettyClient.class;
 
-    Class<? extends Serializer> serializer() default JDKSerializerImpl.class;
+    SerializerAlgorithm serializer() default SerializerAlgorithm.JDK;
 
     int version() default 0;
 

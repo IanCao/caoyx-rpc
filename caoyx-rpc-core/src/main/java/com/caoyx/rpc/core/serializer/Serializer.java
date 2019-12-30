@@ -3,7 +3,7 @@ package com.caoyx.rpc.core.serializer;
 /**
  * @author caoyixiong
  */
-public interface Serializer extends SerializerAlgorithm {
+public interface Serializer {
 
     /**
      * 序列化算法 取具体的序列化算法标识

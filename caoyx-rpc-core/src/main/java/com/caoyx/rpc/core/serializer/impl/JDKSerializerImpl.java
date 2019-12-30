@@ -15,11 +15,11 @@ import java.io.ObjectOutputStream;
  */
 public class JDKSerializerImpl implements Serializer {
 
-
     public byte getSerializerAlgorithm() {
-        return SerializerAlgorithm.JDK;
+        return SerializerAlgorithm.JDK.getAlgorithmId();
     }
 
+    @Override
     public byte[] serialize(Object object) {
         ObjectOutputStream oos = null;
         ByteArrayOutputStream bos = null;
@@ -45,6 +45,7 @@ public class JDKSerializerImpl implements Serializer {
         }
     }
 
+    @Override
     public <T> T deserialize(Class<T> clazz, byte[] bytes) {
         ByteArrayInputStream bais = null;
         try {

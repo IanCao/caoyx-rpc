@@ -4,11 +4,8 @@ package com.caoyx.rpc.core.data;
  * @author caoyixiong
  */
 
-import lombok.Data;
-
 import java.io.Serializable;
 
-@Data
-public abstract class Packet implements Serializable {
-    int version = 0;
+public interface Packet extends Serializable {
+    int MAGIC_NUMBER = 0X19941220;
 }

@@ -10,7 +10,7 @@ import com.caoyx.rpc.core.serializer.Serializer;
  */
 public interface Client {
 
-    void init(Address address, Serializer serializer, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException;
+    void init(Address address, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException;
 
     void close();
 
