@@ -4,7 +4,6 @@ import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.Register;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +47,7 @@ public class ZookeeperRegister implements Register {
     @Override
     public List<Address> getAllRegister(String applicationName, int version) {
         List<String> childNodes = zkClient.getChildren(buildApplicationPath(applicationName, version));
-        if (CollectionUtils.isEmpty(childNodes)) {
+        if (childNodes == null || childNodes.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
         List<Address> result = new ArrayList<>();

@@ -4,7 +4,7 @@ package com.caoyixiong.rpc.sample.springboot.client.controller;
 import com.caoyixiong.rpc.sample.springboot.api.IUser;
 import com.caoyixiong.rpc.sample.springboot.api.UserDto;
 import com.caoyx.rpc.core.enums.CallType;
-import com.caoyx.rpc.core.spring.invoker.CaoyxRpcReference;
+import com.caoyx.rpc.spring.invoker.CaoyxRpcReference;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

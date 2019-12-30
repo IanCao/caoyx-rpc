@@ -2,7 +2,6 @@ package com.caoyx.rpc.core.rebalance.impl;
 
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.rebalance.Rebalance;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Random;
@@ -17,7 +16,7 @@ public class RandomRebalance implements Rebalance {
 
     @Override
     public Address rebalance(List<Address> addresses) {
-        if (CollectionUtils.isEmpty(addresses)) {
+        if (addresses == null || addresses.isEmpty()) {
             return null;
         }
         return addresses.get(random.nextInt(addresses.size()));

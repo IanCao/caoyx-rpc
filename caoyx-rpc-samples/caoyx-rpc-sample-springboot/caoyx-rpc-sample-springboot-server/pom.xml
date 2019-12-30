@@ -7,8 +7,6 @@
     <artifactId>caoyx-rpc-sample-springboot-server</artifactId>
     <packaging>jar</packaging>
 
-    <name>Spring Boot Blank Project (from https://github.com/making/spring-boot-blank)</name>
-
     <parent>
         <groupId>com.caoyixiong</groupId>
         <artifactId>caoyx-rpc-sample-springboot</artifactId>
@@ -45,8 +43,8 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <artifactId>caoyx-rpc-core</artifactId>
             <groupId>com.caoyixiong</groupId>
+            <artifactId>caoyx-rpc-spring-provider</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

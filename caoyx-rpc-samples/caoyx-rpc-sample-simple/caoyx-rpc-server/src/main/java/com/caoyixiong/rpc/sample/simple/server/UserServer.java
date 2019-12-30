@@ -13,7 +13,7 @@ import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 public class UserServer {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, InterruptedException {
         String applicationName = "caoyxRpc-sample-simple-server";
-        CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName, NettyServer.class, JDKSerializerImpl.class, null, 0);
+        CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName, new NettyServer(), new JDKSerializerImpl(), null, 0);
         caoyxRpcProviderFactory.addServiceBean(IUser.class.getName(), 0, new UserImpl());
         caoyxRpcProviderFactory.init();
     }

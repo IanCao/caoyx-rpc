@@ -2,7 +2,7 @@ package com.caoyixiong.rpc.sample.springboot.server.services;
 
 import com.caoyixiong.rpc.sample.springboot.api.IUser;
 import com.caoyixiong.rpc.sample.springboot.api.UserDto;
-import com.caoyx.rpc.core.spring.provider.CaoyxRpcService;
+import com.caoyx.rpc.spring.provider.CaoyxRpcService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
