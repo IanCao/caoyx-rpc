@@ -28,7 +28,7 @@ public class CaoyxRpcReferenceBean {
     private Class<? extends Client> client;
 
     private Address address;
-    private CallType callType;
+    private CallType callType = CallType.DIRECT;
 
     private String applicationName;
     private int version;

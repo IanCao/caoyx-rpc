@@ -18,7 +18,7 @@ import java.util.List;
 public class UserClient {
 
     public static void main(String[] args) throws Exception {
-        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(new Address("127.0.0.1", 1118), IUser.class, 0, "caoyixiong", NettyClient.class, SerializerAlgorithm.JDK);
+        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(new Address("127.0.0.1", 1118), IUser.class, 0, "caoyxRpc", NettyClient.class, SerializerAlgorithm.JDK);
         rpcReferenceBean.init();
 
         IUser user = (IUser) rpcReferenceBean.getObject();
