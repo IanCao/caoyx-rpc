@@ -39,4 +39,8 @@ public @interface CaoyxRpcReference {
     String address() default "";
 
     String remoteApplicationName() default "";
+
+    int retryTimes() default 0;
+
+    long timeout() default 3000L;
 }

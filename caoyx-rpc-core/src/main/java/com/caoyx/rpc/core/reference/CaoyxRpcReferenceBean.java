@@ -3,6 +3,7 @@ package com.caoyx.rpc.core.reference;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CallType;
+import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
@@ -14,6 +15,7 @@ import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author caoyixiong
  */
+@Slf4j
 @Data
 public class CaoyxRpcReferenceBean {
     private Class<? extends Client> client;
@@ -32,6 +35,9 @@ public class CaoyxRpcReferenceBean {
 
     private String applicationName;
     private String version;
+    private int retryTimes = 1;
+    private long timeout = 3 * 1000L;
+
     private Class<?> iFace;
 
     private RegisterConfig registerConfig;
@@ -106,17 +112,33 @@ public class CaoyxRpcReferenceBean {
                         rpcRequestPacket.setParameterTypes(parameterTypes);
                         rpcRequestPacket.setCreatedTimeMills(System.currentTimeMillis());
 
-                        //负载均衡
-                        Address targetAddress = rebalance.rebalance(registerConfig.getRegister().getAllRegister(applicationName, version));
-                        if (targetAddress == null) {
-                            throw new CaoyxRpcException("targetAddress is null");
+                        CaoyxRpcResponse rpcResponse = null;
+                        for (int i = 0; i <= (retryTimes < 0 ? 0 : retryTimes); i++) {
+                            if (i > 0) {
+                                log.info("applicationName:[" + applicationName + "]-className:[" + className + "]-method:[" + methodName + "]==> retry " + i);
+                            }
+                            Address targetAddress = rebalance.rebalance(registerConfig.getRegister().getAllRegister(applicationName, version));
+                            if (targetAddress == null) {
+                                throw new CaoyxRpcException("targetAddress is null");
+                            }
+                            Client clientInstance = clientManager.getOrCreateClient(targetAddress, client, invokerFactory);
+
+                            clientInstance.doSend(rpcRequestPacket);
+
+                            CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(invokerFactory, rpcRequestPacket);
+                            rpcResponse = futureResponse.get(timeout, TimeUnit.MILLISECONDS);
+
+                            if (!rpcResponse.isSuccess()) {
+                                if (i != retryTimes) {
+                                    log.error("errorMsg:[" + rpcResponse.getErrorMsg() + "]" + "caoyxRpc RetryTimes is" + i);
+                                }
+                                continue;
+                            }
+                            return rpcResponse.getResult();
                         }
-                        Client clientInstance = clientManager.getOrCreateClient(targetAddress, client, invokerFactory);
-
-                        clientInstance.doSend(rpcRequestPacket);
-
-                        CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(invokerFactory, rpcRequestPacket);
-                        CaoyxRpcResponse rpcResponse = futureResponse.get(3000L, TimeUnit.MILLISECONDS);
+                        if (!rpcResponse.isSuccess()) {
+                            throw CaoyxRpcException.buildByStatusAndMsg(rpcResponse.getStatus(), rpcResponse.getErrorMsg());
+                        }
                         return rpcResponse.getResult();
                     }
                 });

@@ -35,11 +35,6 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                         CaoyxRpcException exception = new CaoyxRpcException("remote address and register address are all null");
                         log.error(exception.getMessage(), exception);
                     }
-                    Address address = null;
-                    if (caoyxRpcReference.callType() == CallType.DIRECT) {
-                        String[] ipPort = caoyxRpcReference.address().split(";");
-                        address = new Address(ipPort[0], Integer.valueOf(ipPort[1]));
-                    }
                     CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
                             caoyxRpcReference.version(),
                             caoyxRpcReference.remoteApplicationName(),
@@ -47,6 +42,8 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                             caoyxRpcReference.client(),
                             caoyxRpcReference.serializer());
 
+                    referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
+                    referenceBean.setTimeout(caoyxRpcReference.timeout());
                     referenceBean.setClient(caoyxRpcReference.client());
                     referenceBean.setSerializerAlgorithm(caoyxRpcReference.serializer());
                     referenceBean.setCallType(caoyxRpcReference.callType());

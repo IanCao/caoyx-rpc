@@ -2,6 +2,8 @@ package com.caoyx.rpc.core.invoker;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
+import com.caoyx.rpc.core.exception.CaoyxRpcTimeoutException;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -76,11 +78,11 @@ public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
         }
         if (!done) {
             CaoyxRpcResponse response = new CaoyxRpcResponse();
+            response.setStatus(CaoyxRpcStatus.TIMEOUT);
             response.setErrorMsg("caoyx-rpc, request timeout at:" + System.currentTimeMillis() + ", request:" + request.toString());
             response.setRequestId(request.getRequestId());
             return response;
         }
         return response;
-
     }
 }
