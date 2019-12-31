@@ -5,7 +5,8 @@ import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.rebalance.impl.RandomRebalance;
 import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
-import com.caoyx.rpc.core.register.impl.ZookeeperRegister;
+import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.register.impl.zookeeper.ZookeeperRegister;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
@@ -39,12 +40,18 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                         String[] ipPort = caoyxRpcReference.address().split(";");
                         address = new Address(ipPort[0], Integer.valueOf(ipPort[1]));
                     }
-                    CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(address, field.getType(), caoyxRpcReference.version(), caoyxRpcReference.remoteApplicationName(), caoyxRpcReference.client(), caoyxRpcReference.serializer());
+                    CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
+                            caoyxRpcReference.version(),
+                            caoyxRpcReference.remoteApplicationName(),
+                            new RegisterConfig(new ZookeeperRegister(), caoyxRpcReference.registerAddress()),
+                            caoyxRpcReference.client(),
+                            caoyxRpcReference.serializer());
+
                     referenceBean.setClient(caoyxRpcReference.client());
                     referenceBean.setSerializerAlgorithm(caoyxRpcReference.serializer());
                     referenceBean.setCallType(caoyxRpcReference.callType());
-                    referenceBean.setRegister(new ZookeeperRegister(caoyxRpcReference.registerAddress()));
                     referenceBean.setRebalance(new RandomRebalance());
+
                     try {
                         referenceBean.init();
                         Object proxy = referenceBean.getObject();

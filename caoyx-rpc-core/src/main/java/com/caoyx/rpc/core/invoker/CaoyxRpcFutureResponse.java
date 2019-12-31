@@ -17,7 +17,7 @@ public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
     private CaoyxRpcResponse response;
 
     private boolean done = false;
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     public CaoyxRpcFutureResponse(final CaoyxRpcInvokerFactory invokerFactory, CaoyxRpcRequest request) {
         this.invokerFactory = invokerFactory;

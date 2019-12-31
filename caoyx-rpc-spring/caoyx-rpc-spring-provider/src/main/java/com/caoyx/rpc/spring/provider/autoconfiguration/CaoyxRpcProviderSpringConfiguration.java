@@ -1,7 +1,8 @@
 package com.caoyx.rpc.spring.provider.autoconfiguration;
 
 import com.caoyx.rpc.core.netty.server.NettyServer;
-import com.caoyx.rpc.core.register.impl.ZookeeperRegister;
+import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.register.impl.zookeeper.ZookeeperRegister;
 import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 import com.caoyx.rpc.spring.provider.CaoyxRpcSpringProviderFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +36,8 @@ public class CaoyxRpcProviderSpringConfiguration {
         CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(remoteApplicationName,
                 new NettyServer(),
                 new JDKSerializerImpl(),
-                new ZookeeperRegister(zooKeeperAddress),
-                0);
+                new RegisterConfig(new ZookeeperRegister(), zooKeeperAddress),
+                "0");
         factory.setPort(port);  // todo 服务治理
         factory.init();
         return factory;

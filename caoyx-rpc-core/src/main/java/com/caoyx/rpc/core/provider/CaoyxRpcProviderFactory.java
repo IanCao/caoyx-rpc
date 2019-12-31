@@ -4,6 +4,7 @@ import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.netty.server.Server;
 import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serializer.Serializer;
 import com.caoyx.rpc.core.utils.IpUtils;
 import lombok.Data;
@@ -20,11 +21,11 @@ public class CaoyxRpcProviderFactory {
 
     private Server server;
     private Serializer serializer;
-    private Register register;
+    private RegisterConfig registerConfig;
 
     private String applicationName;
     private int port = 1118;
-    private int version;
+    private String version;
 
     private String accessToken = null;
 
@@ -32,30 +33,33 @@ public class CaoyxRpcProviderFactory {
     public CaoyxRpcProviderFactory(String applicationName,
                                    Server server,
                                    Serializer serializer,
-                                   Register register,
-                                   int version) {
+                                   RegisterConfig registerConfig,
+                                   String version) {
         this.applicationName = applicationName;
         this.server = server;
         this.serializer = serializer;
-        this.register = register;
+        this.registerConfig = registerConfig;
         this.version = version;
     }
 
-    public void init() throws IllegalAccessException, InstantiationException, InterruptedException {
+    public void init() throws InterruptedException {
         server.start(this);
-        if (register != null) {
-            register.register(applicationName, IpUtils.getLocalIp(), port, version);
+        if (registerConfig != null) {
+            Register register = registerConfig.getRegister();
+            register.initRegister(applicationName, version);
+            register.initRegisterConnect(registerConfig.getRegisterAddress());
+            register.register(IpUtils.getLocalIp(), port);
         }
     }
 
     private Map<String, Object> serviceBeanMap = new HashMap<String, Object>();
 
-    public void addServiceBean(String className, int version, Object service) {
+    public void addServiceBean(String className, String version, Object service) {
         String key = className + "@" + version;
         serviceBeanMap.putIfAbsent(key, service);
     }
 
-    public Object getServiceBean(String className, int version) {
+    public Object getServiceBean(String className, String version) {
         String key = className + "@" + version;
         return serviceBeanMap.get(key);
     }

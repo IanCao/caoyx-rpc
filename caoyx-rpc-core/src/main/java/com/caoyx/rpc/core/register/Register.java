@@ -10,9 +10,15 @@ import java.util.List;
  */
 public interface Register {
 
-    void register(String applicationName, String ip, int port, int version);
+    void initRegister(String applicationName, String version);
 
-    List<Address> getAllRegister(String applicationName, int version);
+    void initRegisterConnect(String address);
+
+    void startRegisterLoopFetch();
+
+    void register(String ip, int port);
+
+    List<Address> getAllRegister(String applicationName, String version);
 
     void stop();
 }

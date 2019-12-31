@@ -38,14 +38,12 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>1.8.0-beta4</version>
             <scope>compile</scope>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
         <dependency>
@@ -59,8 +57,13 @@
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
             <version>0.11</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
     </dependencies>
 
     <developers>

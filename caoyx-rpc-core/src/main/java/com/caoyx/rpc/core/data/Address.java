@@ -20,6 +20,12 @@ public class Address {
         this.port = port;
     }
 
+    public Address(String ipPort) {
+        String[] strings = ipPort.split(":");
+        this.ip = strings[0];
+        this.port = Integer.valueOf(strings[1]);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -32,5 +38,13 @@ public class Address {
     @Override
     public int hashCode() {
         return Objects.hash(ip, port);
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "ip='" + ip + '\'' +
+                ", port=" + port +
+                '}';
     }
 }

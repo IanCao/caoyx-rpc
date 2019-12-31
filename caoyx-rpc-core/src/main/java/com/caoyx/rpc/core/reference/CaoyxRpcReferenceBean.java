@@ -11,6 +11,7 @@ import com.caoyx.rpc.core.netty.client.ClientManager;
 import com.caoyx.rpc.core.rebalance.Rebalance;
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
 import lombok.Data;
 
@@ -27,31 +28,30 @@ import java.util.concurrent.TimeUnit;
 public class CaoyxRpcReferenceBean {
     private Class<? extends Client> client;
 
-    private Address address;
     private CallType callType = CallType.DIRECT;
 
     private String applicationName;
-    private int version;
+    private String version;
     private Class<?> iFace;
 
-    private Register register;
+    private RegisterConfig registerConfig;
     private Rebalance rebalance;
     private SerializerAlgorithm serializerAlgorithm;
 
     private CaoyxRpcInvokerFactory invokerFactory;
 
-    public CaoyxRpcReferenceBean(Address address,
-                                 Class<?> iFace,
-                                 int version,
+    public CaoyxRpcReferenceBean(Class<?> iFace,
+                                 String version,
                                  String applicationName,
+                                 RegisterConfig registerConfig,
                                  Class<? extends Client> client,
                                  SerializerAlgorithm serializerAlgorithm) {
-        this.address = address;
         this.iFace = iFace;
         this.version = version;
         this.applicationName = applicationName;
         this.client = client;
         this.serializerAlgorithm = serializerAlgorithm;
+        this.registerConfig = registerConfig;
     }
 
     private ClientManager clientManager = null;
@@ -62,7 +62,12 @@ public class CaoyxRpcReferenceBean {
         if (invokerFactory == null) {
             invokerFactory = CaoyxRpcInvokerFactory.getInstance();
         }
-
+        if (registerConfig != null) {
+            Register register = registerConfig.getRegister();
+            register.initRegister(applicationName, version);
+            register.initRegisterConnect(registerConfig.getRegisterAddress());
+            register.startRegisterLoopFetch();
+        }
         return this;
     }
 
@@ -102,12 +107,7 @@ public class CaoyxRpcReferenceBean {
                         rpcRequestPacket.setCreatedTimeMills(System.currentTimeMillis());
 
                         //负载均衡
-                        Address targetAddress = null;
-                        if (callType == CallType.DIRECT) {
-                            targetAddress = address;
-                        } else if (callType == CallType.REGISTER) {
-                            targetAddress = rebalance.rebalance(register.getAllRegister(applicationName, version));
-                        }
+                        Address targetAddress = rebalance.rebalance(registerConfig.getRegister().getAllRegister(applicationName, version));
                         if (targetAddress == null) {
                             throw new CaoyxRpcException("targetAddress is null");
                         }

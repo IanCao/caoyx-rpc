@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface CaoyxRpcService {
-    int version() default 0;
+    String version() default "0";
 }

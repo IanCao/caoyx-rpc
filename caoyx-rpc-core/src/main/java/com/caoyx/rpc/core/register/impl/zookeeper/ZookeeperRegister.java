@@ -1,7 +1,9 @@
-package com.caoyx.rpc.core.register.impl;
+package com.caoyx.rpc.core.register.impl.zookeeper;
 
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.register.CaoyxRpcRegister;
+import lombok.extern.slf4j.Slf4j;
+import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 
@@ -13,15 +15,16 @@ import java.util.List;
  * @Author: caoyixiong
  * @Date: 2019-12-19 22:19
  */
-public class ZookeeperRegister implements Register {
+@Slf4j
+public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListener {
 
     private static final String ROOT_PATH = "/CaoyxRpc";
     private static final String SPLIT = "/";
 
-
     private ZkClient zkClient;
 
-    public ZookeeperRegister(String address) {
+    @Override
+    public void initRegisterConnect(String address) {
         zkClient = new ZkClient(address);
         if (!zkClient.exists(ROOT_PATH)) {
             zkClient.create(ROOT_PATH, null, CreateMode.PERSISTENT);
@@ -29,8 +32,8 @@ public class ZookeeperRegister implements Register {
     }
 
     @Override
-    public void register(String applicationName, String ip, int port, int version) {
-        String applicationPath = ROOT_PATH + SPLIT + applicationName;
+    public void register(String ip, int port) {
+        String applicationPath = ROOT_PATH + SPLIT + this.applicationName;
         if (!zkClient.exists(applicationPath)) {
             zkClient.create(applicationPath, null, CreateMode.PERSISTENT);
         }
@@ -45,8 +48,8 @@ public class ZookeeperRegister implements Register {
     }
 
     @Override
-    public List<Address> getAllRegister(String applicationName, int version) {
-        List<String> childNodes = zkClient.getChildren(buildApplicationPath(applicationName, version));
+    protected List<Address> fetchAllAddress(String applicationName, String version) {
+        List<String> childNodes = zkClient.getChildren(buildApplicationPath());
         if (childNodes == null || childNodes.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
@@ -55,17 +58,27 @@ public class ZookeeperRegister implements Register {
             String[] ipPort = childNode.split(":");
             result.add(new Address(ipPort[0], Integer.valueOf(ipPort[1])));
         }
+        log.info("fetchAllAddress - applicationName:[" + applicationName + "]，version:[" + version + "]: " + result.toString());
         return result;
     }
 
     @Override
-    public void stop() {
+    protected void doStop() {
         if (zkClient != null) {
             zkClient.close();
         }
     }
 
-    private String buildApplicationPath(String applicationName, int version) {
+    private String buildApplicationPath() {
         return ROOT_PATH + "/" + applicationName + "/" + version;
+    }
+
+    @Override
+    public void handleChildChange(String s, List<String> list) throws Exception {
+        if (!s.contains(buildApplicationPath())) {
+            return;
+        }
+        log.info("path:[" + s + "] child change");
+        fetch(applicationName, version);
     }
 }
