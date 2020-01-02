@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class CaoyxRpcResponse extends CaoyxRpcPacket {
 
-    private CaoyxRpcStatus status;
+    private CaoyxRpcStatus status = CaoyxRpcStatus.SUCCESS;
 
     private String errorMsg;
 

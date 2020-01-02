@@ -7,7 +7,7 @@ import com.caoyx.rpc.core.netty.server.Server;
 import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serializer.Serializer;
-import com.caoyx.rpc.core.utils.IpUtils;
+import com.caoyx.rpc.core.utils.NetUtils;
 import lombok.Data;
 
 import java.lang.reflect.InvocationTargetException;
@@ -50,7 +50,7 @@ public class CaoyxRpcProviderFactory {
             Register register = registerConfig.getRegister();
             register.initRegister(applicationName, version);
             register.initRegisterConnect(registerConfig.getRegisterAddress());
-            register.register(IpUtils.getLocalIp(), port);
+            register.register(NetUtils.getLocalAddress(), port);
         }
     }
 
