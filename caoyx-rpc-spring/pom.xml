@@ -8,9 +8,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>caoyx-rpc-spring</artifactId>
     <packaging>pom</packaging>
+    <artifactId>caoyx-rpc-spring</artifactId>
+
     <modules>
         <module>caoyx-rpc-spring-provider</module>
         <module>caoyx-rpc-spring-invoker</module>
@@ -25,10 +25,24 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.8.0-beta4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.caoyixiong</groupId>
             <artifactId>caoyx-rpc-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.caoyixiong</groupId>
+            <artifactId>caoyx-rpc-register</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.projectlombok</groupId>

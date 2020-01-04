@@ -3,6 +3,8 @@ package com.caoyx.rpc.core.register;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * @Author: caoyixiong
  * @Date: 2019-12-31 12:38
@@ -11,10 +13,12 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class RegisterConfig {
     private String registerAddress;
-    private Register register;
+    private String registerName;
+    private List<String> loadAddresses;
 
-    public RegisterConfig(Register register, String registerAddress) {
+    public RegisterConfig(String registerName, String registerAddress, List<String> loadAddresses) {
         this.registerAddress = registerAddress;
-        this.register = register;
+        this.registerName = registerName;
+        this.loadAddresses = loadAddresses;
     }
 }

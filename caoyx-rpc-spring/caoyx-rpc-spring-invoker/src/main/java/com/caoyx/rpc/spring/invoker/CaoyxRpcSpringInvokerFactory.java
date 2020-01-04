@@ -1,12 +1,10 @@
 package com.caoyx.rpc.spring.invoker;
 
-import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.rebalance.impl.RandomRebalance;
+import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.register.impl.zookeeper.ZookeeperRegister;
+import com.caoyx.rpc.register.zookeeper.ZookeeperRegister;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
@@ -15,6 +13,7 @@ import org.springframework.util.ReflectionUtils.FieldCallback;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 /**
  * @Author: caoyixiong
@@ -30,24 +29,23 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
             public void doWith(Field field) {
                 if (field.isAnnotationPresent(CaoyxRpcReference.class)) {
                     CaoyxRpcReference caoyxRpcReference = field.getAnnotation(CaoyxRpcReference.class);
-                    if (!StringUtils.hasText(caoyxRpcReference.address())
+                    if (caoyxRpcReference.loadAddress().length == 0
                             && !StringUtils.hasText(caoyxRpcReference.registerAddress())) {
-                        CaoyxRpcException exception = new CaoyxRpcException("remote address and register address are all null");
+                        CaoyxRpcException exception = new CaoyxRpcException("load address and register address are all null");
                         log.error(exception.getMessage(), exception);
                     }
                     CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
                             caoyxRpcReference.version(),
                             caoyxRpcReference.remoteApplicationName(),
-                            new RegisterConfig(new ZookeeperRegister(), caoyxRpcReference.registerAddress()),
+                            new RegisterConfig(
+                                    caoyxRpcReference.register(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
                             caoyxRpcReference.client(),
                             caoyxRpcReference.serializer());
 
                     referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
                     referenceBean.setTimeout(caoyxRpcReference.timeout());
-                    referenceBean.setClient(caoyxRpcReference.client());
-                    referenceBean.setSerializerAlgorithm(caoyxRpcReference.serializer());
                     referenceBean.setCallType(caoyxRpcReference.callType());
-                    referenceBean.setRebalance(new RandomRebalance());
+                    referenceBean.setLoadBalance(new RandomLoadBalance());
 
                     try {
                         referenceBean.init();

@@ -1,11 +1,14 @@
 package com.caoyx.rpc.spring.provider.autoconfiguration;
 
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.netty.server.NettyServer;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.register.impl.zookeeper.ZookeeperRegister;
+import com.caoyx.rpc.register.zookeeper.ZookeeperRegister;
 import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 import com.caoyx.rpc.spring.provider.CaoyxRpcSpringProviderFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -15,28 +18,29 @@ import org.springframework.context.annotation.Configuration;
  * @Author: caoyixiong
  * @Date: 2019-12-26 14:33
  */
-@Slf4j
 @Configuration
 public class CaoyxRpcProviderSpringConfiguration {
 
-    @Value("${caoyxRpc.port:1119}")
+    private static final Logger log = LoggerFactory.getLogger(CaoyxRpcProviderSpringConfiguration.class);
+
+    @Value("${caoyxRpc.port:1118}")
     private int port;
 
-    @Value("${caoyxRpc.remote.applicationName}")
-    private String remoteApplicationName;
+    @Value("${caoyxRpc.applicationName}")
+    private String applicationName;
 
-    @Value("${caoyxRpc.register.zookeeper.address}")
-    private String zooKeeperAddress;
+    @Value("${caoyxRpc.register.address}")
+    private String registerAddress;
 
 
-    @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
+//    @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
     @Bean
-    public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws IllegalAccessException, InterruptedException, InstantiationException {
+    public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws InterruptedException, CaoyxRpcException {
         log.info("caoyxRpcSpringProviderFactory init");
-        CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(remoteApplicationName,
+        CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(applicationName,
                 new NettyServer(),
                 new JDKSerializerImpl(),
-                new RegisterConfig(new ZookeeperRegister(), zooKeeperAddress),
+                new RegisterConfig("zookeeper", registerAddress, null),
                 "0");
         factory.setPort(port);  // todo 服务治理
         factory.init();

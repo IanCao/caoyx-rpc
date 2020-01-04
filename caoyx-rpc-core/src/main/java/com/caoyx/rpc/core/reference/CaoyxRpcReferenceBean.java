@@ -4,21 +4,26 @@ import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
+import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
+import com.caoyx.rpc.core.loadbalance.LoadBalance;
 import com.caoyx.rpc.core.netty.client.Client;
 import com.caoyx.rpc.core.netty.client.ClientManager;
-import com.caoyx.rpc.core.rebalance.Rebalance;
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
+import com.caoyx.rpc.core.utils.CollectionUtils;
+import com.caoyx.rpc.core.utils.StringUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -40,10 +45,12 @@ public class CaoyxRpcReferenceBean {
     private Class<?> iFace;
 
     private RegisterConfig registerConfig;
-    private Rebalance rebalance;
+    private LoadBalance loadBalance;
     private SerializerAlgorithm serializerAlgorithm;
 
     private CaoyxRpcInvokerFactory invokerFactory;
+
+    private CaoyxRpcRegister register;
 
     public CaoyxRpcReferenceBean(Class<?> iFace,
                                  String version,
@@ -68,9 +75,20 @@ public class CaoyxRpcReferenceBean {
             invokerFactory = CaoyxRpcInvokerFactory.getInstance();
         }
         if (registerConfig != null) {
-            Register register = registerConfig.getRegister();
+            register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();
             register.initRegister(applicationName, version);
             register.initRegisterConnect(registerConfig.getRegisterAddress());
+
+            List<String> loadAddresses = registerConfig.getLoadAddresses();
+            if (CollectionUtils.isNotEmpty(loadAddresses)) {
+                for (String addressString : loadAddresses) {
+                    if (StringUtils.isBlank(addressString)) {
+                        continue;
+                    }
+                    String[] address = addressString.split(":");
+                    register.loadAddress(new Address(address[0], Integer.valueOf(address[1])));
+                }
+            }
             register.startRegisterLoopFetch();
         }
         return this;
@@ -116,7 +134,7 @@ public class CaoyxRpcReferenceBean {
                             if (i > 0) {
                                 log.info("applicationName:[" + applicationName + "]-className:[" + className + "]-method:[" + methodName + "]==> retry " + i);
                             }
-                            Address targetAddress = rebalance.rebalance(registerConfig.getRegister().getAllRegister(applicationName, version));
+                            Address targetAddress = loadBalance.loadBalance(new ArrayList<>(register.getAllRegister(applicationName, version)));
                             if (targetAddress == null) {
                                 throw new CaoyxRpcException("targetAddress is null");
                             }

@@ -52,18 +52,6 @@
             <version>4.1.42.Final</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.101tec/zkclient -->
-        <dependency>
-            <groupId>com.101tec</groupId>
-            <artifactId>zkclient</artifactId>
-            <version>0.11</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <developers>

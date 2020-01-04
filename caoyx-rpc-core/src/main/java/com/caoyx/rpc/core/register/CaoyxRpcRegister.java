@@ -1,9 +1,14 @@
 package com.caoyx.rpc.core.register;
 
 import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.enums.ExtensionType;
+import com.caoyx.rpc.core.extension.annotation.SPI;
+import com.caoyx.rpc.core.utils.CollectionUtils;
+import lombok.Getter;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -12,10 +17,14 @@ import java.util.concurrent.TimeUnit;
  * @Author: caoyixiong
  * @Date: 2019-12-30 16:16
  */
+@SPI(type = ExtensionType.REGISTER)
 public abstract class CaoyxRpcRegister implements Register {
 
     private static final long FETCH_INTERVAL_IN_MILLS = 5 * 1000L;
-    private CopyOnWriteArrayList<Address> addressesCache = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArraySet<Address> addressesCache = new CopyOnWriteArraySet<>();
+
+    @Getter
+    private CopyOnWriteArraySet<Address> loadAddressCache = new CopyOnWriteArraySet<>();
 
     private volatile long lastUpdatedTimeMills;
     private final Object lock = new Object();
@@ -24,7 +33,7 @@ public abstract class CaoyxRpcRegister implements Register {
     protected String applicationName;
     protected String version;
 
-    protected abstract List<Address> fetchAllAddress(String applicationName, String version);
+    protected abstract Set<Address> fetchAllAddress(String applicationName, String version);
 
     protected abstract void doStop();
 
@@ -50,7 +59,7 @@ public abstract class CaoyxRpcRegister implements Register {
     }
 
     @Override
-    public List<Address> getAllRegister(String applicationName, String version) {
+    public Set<Address> getAllRegister(String applicationName, String version) {
         if (isValidCache()) {
             return addressesCache;
         }
@@ -58,9 +67,14 @@ public abstract class CaoyxRpcRegister implements Register {
             if (isValidCache()) {
                 return addressesCache;
             }
-            addressesCache = new CopyOnWriteArrayList<>(fetch(applicationName, version));
+            addressesCache = new CopyOnWriteArraySet<>(fetch(applicationName, version));
             return addressesCache;
         }
+    }
+
+    @Override
+    public void loadAddress(Address address) {
+        loadAddressCache.add(address);
     }
 
     @Override
@@ -71,9 +85,11 @@ public abstract class CaoyxRpcRegister implements Register {
         doStop();
     }
 
-    protected List<Address> fetch(String applicationName, String version) {
+    protected Set<Address> fetch(String applicationName, String version) {
         lastUpdatedTimeMills = System.currentTimeMillis();
-        return fetchAllAddress(applicationName, version);
+        Set<Address> addresses = (Set<Address>) CollectionUtils.defaultIfEmpty(fetchAllAddress(applicationName, version), new HashSet());
+        addresses.addAll(loadAddressCache);
+        return addresses;
     }
 
     private boolean isValidUpdated() {

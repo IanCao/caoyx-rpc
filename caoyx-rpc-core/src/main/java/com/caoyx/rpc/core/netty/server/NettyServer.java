@@ -14,14 +14,14 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+
 
 /**
  * @author caoyixiong
  */
+@Slf4j
 public class NettyServer implements Server {
-    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
     private EventLoopGroup receiveGroup;
     private EventLoopGroup workGroup;
     private ServerBootstrap serverBootstrap;

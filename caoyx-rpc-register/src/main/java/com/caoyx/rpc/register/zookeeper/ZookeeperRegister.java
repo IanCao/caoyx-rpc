@@ -1,12 +1,17 @@
-package com.caoyx.rpc.core.register.impl.zookeeper;
+package com.caoyx.rpc.register.zookeeper;
 
 import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.extension.annotation.Implement;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +21,7 @@ import java.util.List;
  * @Date: 2019-12-19 22:19
  */
 @Slf4j
+@Implement(name = "zookeeper")
 public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListener {
 
     private static final String ROOT_PATH = "/CaoyxRpc";
@@ -23,7 +29,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
 
     private ZkClient zkClient;
 
-    @Override
     public void initRegisterConnect(String address) {
         zkClient = new ZkClient(address);
         if (!zkClient.exists(ROOT_PATH)) {
@@ -31,7 +36,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
         }
     }
 
-    @Override
     public void register(String ip, int port) {
         String applicationPath = ROOT_PATH + SPLIT + this.applicationName;
         if (!zkClient.exists(applicationPath)) {
@@ -47,19 +51,18 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
         }
     }
 
-    @Override
-    protected List<Address> fetchAllAddress(String applicationName, String version) {
+    protected Set<Address> fetchAllAddress(String applicationName, String version) {
         List<String> childNodes = zkClient.getChildren(buildApplicationPath());
         if (childNodes == null || childNodes.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.EMPTY_SET;
         }
-        List<Address> result = new ArrayList<>();
+        List<Address> result = new ArrayList<Address>();
         for (String childNode : childNodes) {
             String[] ipPort = childNode.split(":");
             result.add(new Address(ipPort[0], Integer.valueOf(ipPort[1])));
         }
         log.info("fetchAllAddress - applicationName:[" + applicationName + "]，version:[" + version + "]: " + result.toString());
-        return result;
+        return new HashSet<Address>(result);
     }
 
     @Override
@@ -73,7 +76,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
         return ROOT_PATH + "/" + applicationName + "/" + version;
     }
 
-    @Override
     public void handleChildChange(String s, List<String> list) throws Exception {
         if (!s.contains(buildApplicationPath())) {
             return;

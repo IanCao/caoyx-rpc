@@ -3,8 +3,10 @@ package com.caoyx.rpc.core.provider;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
+import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.netty.server.Server;
-import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serializer.Serializer;
 import com.caoyx.rpc.core.utils.NetUtils;
@@ -12,8 +14,7 @@ import lombok.Data;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author caoyixiong
@@ -44,17 +45,17 @@ public class CaoyxRpcProviderFactory {
         this.version = version;
     }
 
-    public void init() throws InterruptedException {
+    public void init() throws InterruptedException, CaoyxRpcException {
         server.start(this);
         if (registerConfig != null) {
-            Register register = registerConfig.getRegister();
+            CaoyxRpcRegister register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();
             register.initRegister(applicationName, version);
             register.initRegisterConnect(registerConfig.getRegisterAddress());
             register.register(NetUtils.getLocalAddress(), port);
         }
     }
 
-    private Map<String, Object> serviceBeanMap = new HashMap<String, Object>();
+    private ConcurrentHashMap<String, Object> serviceBeanMap = new ConcurrentHashMap<String, Object>();
 
     public void addServiceBean(String className, String version, Object service) {
         String key = className + "@" + version;

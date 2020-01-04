@@ -4,7 +4,7 @@ import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.netty.client.Client;
 import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.register.Register;
-import com.caoyx.rpc.core.register.impl.zookeeper.ZookeeperRegister;
+import com.caoyx.rpc.register.zookeeper.ZookeeperRegister;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
 
 import java.lang.annotation.Documented;
@@ -30,13 +30,13 @@ public @interface CaoyxRpcReference {
 
     String version() default "0";
 
-    Class<? extends Register> register() default ZookeeperRegister.class;
+    String register() default "noRegister";
+
+    String[] loadAddress() default {};
 
     CallType callType() default CallType.DIRECT;
 
     String registerAddress() default "";
-
-    String address() default "";
 
     String remoteApplicationName() default "";
 

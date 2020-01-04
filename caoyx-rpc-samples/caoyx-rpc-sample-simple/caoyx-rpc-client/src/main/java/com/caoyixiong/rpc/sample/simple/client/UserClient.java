@@ -4,13 +4,10 @@ import com.caoyixiong.rpc.sample.simple.api.IUser;
 import com.caoyixiong.rpc.sample.simple.api.UserCatDto;
 import com.caoyixiong.rpc.sample.simple.api.UserDto;
 import com.caoyx.rpc.core.netty.client.NettyClient;
-import com.caoyx.rpc.core.rebalance.impl.RandomRebalance;
+import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
-import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.register.impl.noregister.NoRegister;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
-import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,16 +18,18 @@ import java.util.List;
 public class UserClient {
 
     public static void main(String[] args) throws Exception {
+        List<String> loadAddresses = new ArrayList<String>();
+        loadAddresses.add("127.0.0.1:1118");
         CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(IUser.class,
                 "0",
                 "caoyxRpc",
                 new RegisterConfig(
-                        new NoRegister("127.0.0.1", 1118),
-                        ""
-                ),
+                        "noRegister",
+                        "",
+                        loadAddresses),
                 NettyClient.class,
                 SerializerAlgorithm.JDK);
-        rpcReferenceBean.setRebalance(new RandomRebalance());
+        rpcReferenceBean.setLoadBalance(new RandomLoadBalance());
         rpcReferenceBean.init();
 
         IUser user = (IUser) rpcReferenceBean.getObject();
@@ -50,11 +49,10 @@ public class UserClient {
         userCatDtos.add(new UserCatDto().setName("test1-cat-name-2"));
         userCatDtos.add(new UserCatDto().setName("test1-cat-name-3"));
         userDto.setUserCatDtos(userCatDtos);
-
         userDto.setAddress("BeiJing");
 
         user.addUser(userDto);
-        List<UserDto> userDtos = user.getUsers();
-        System.out.println(userDtos.toString());
+
+        System.out.println(user.getUsers().toString());
     }
 }

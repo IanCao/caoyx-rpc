@@ -16,6 +16,7 @@ public class IndexController {
     @CaoyxRpcReference(callType = CallType.REGISTER,
             registerAddress = "127.0.0.1:2181",
             remoteApplicationName = "caoyxRpc-sample-springboot-server",
+            register = "zookeeper",
             retryTimes = 2)
     private IUser user;
 

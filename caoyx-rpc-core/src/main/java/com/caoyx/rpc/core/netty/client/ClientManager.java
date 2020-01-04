@@ -21,7 +21,7 @@ public class ClientManager {
         if (client != null && client.isValid()) {
             return client;
         }
-        synchronized (address) {  //TODO 加锁问题 可能会有并发问题
+        synchronized (address.toString()) {
             //double check
             client = clientPool.get(address);
             if (client != null && client.isValid()) {
@@ -49,7 +49,7 @@ public class ClientManager {
     }
 
     public void removeClient(Address address) {
-        synchronized (address) {
+        synchronized (address.toString()) {
             clientPool.remove(address);
         }
     }

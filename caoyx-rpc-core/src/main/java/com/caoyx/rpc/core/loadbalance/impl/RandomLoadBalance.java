@@ -1,7 +1,7 @@
-package com.caoyx.rpc.core.rebalance.impl;
+package com.caoyx.rpc.core.loadbalance.impl;
 
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.rebalance.Rebalance;
+import com.caoyx.rpc.core.loadbalance.LoadBalance;
 
 import java.util.List;
 import java.util.Random;
@@ -10,12 +10,12 @@ import java.util.Random;
  * @Author: caoyixiong
  * @Date: 2019-12-27 14:47
  */
-public class RandomRebalance implements Rebalance {
+public class RandomLoadBalance implements LoadBalance {
 
     private Random random = new Random(System.currentTimeMillis());
 
     @Override
-    public Address rebalance(List<Address> addresses) {
+    public Address loadBalance(List<Address> addresses) {
         if (addresses == null || addresses.isEmpty()) {
             return null;
         }

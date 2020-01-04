@@ -12,5 +12,15 @@
         <module>caoyx-rpc-core</module>
         <module>caoyx-rpc-spring</module>
         <module>caoyx-rpc-samples</module>
+        <module>caoyx-rpc-register</module>
     </modules>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+    </build>
 </project>

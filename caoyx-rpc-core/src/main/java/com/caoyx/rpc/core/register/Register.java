@@ -1,8 +1,7 @@
 package com.caoyx.rpc.core.register;
 
 import com.caoyx.rpc.core.data.Address;
-
-import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: caoyixiong
@@ -18,7 +17,9 @@ public interface Register {
 
     void register(String ip, int port);
 
-    List<Address> getAllRegister(String applicationName, String version);
+    Set<Address> getAllRegister(String applicationName, String version);
+
+    void loadAddress(Address address);
 
     void stop();
 }

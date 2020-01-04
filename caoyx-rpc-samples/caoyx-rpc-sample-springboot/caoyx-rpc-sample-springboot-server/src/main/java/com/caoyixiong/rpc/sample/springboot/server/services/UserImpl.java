@@ -20,9 +20,6 @@ public class UserImpl implements IUser {
     private List<UserDto> userDtos = new ArrayList<UserDto>();
 
     public boolean addUser(UserDto userDto)  {
-        if (userDto.getName().equals("aaaa")) {
-            throw new CaoyxRpcProviderException("name is valid");
-        }
         return userDtos.add(userDto);
     }
 
