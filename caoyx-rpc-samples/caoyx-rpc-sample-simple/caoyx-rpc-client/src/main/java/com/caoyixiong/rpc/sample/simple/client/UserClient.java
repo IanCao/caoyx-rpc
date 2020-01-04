@@ -7,6 +7,7 @@ import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.register.RegisterType;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class UserClient {
                 "0",
                 "caoyxRpc",
                 new RegisterConfig(
-                        "noRegister",
+                        RegisterType.NO_REGISTER.getValue(),
                         "",
                         loadAddresses),
                 NettyClient.class,
