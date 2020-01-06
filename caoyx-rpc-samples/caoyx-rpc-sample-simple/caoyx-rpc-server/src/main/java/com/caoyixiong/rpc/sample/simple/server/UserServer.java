@@ -16,13 +16,13 @@ public class UserServer {
         String applicationName = "caoyxRpc-sample-simple-server";
         CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName,
                 new NettyServer(),
-                new JDKSerializerImpl(),
                 new RegisterConfig(
                         "noRegister",
                         "",
                         null
                 ),
-                "0");
+                "0"
+                , null);
         caoyxRpcProviderFactory.setPort(1118);
         caoyxRpcProviderFactory.addServiceBean(IUser.class.getName(), "0", new UserImpl());
         caoyxRpcProviderFactory.init();

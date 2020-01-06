@@ -2,47 +2,60 @@ package com.caoyx.rpc.core.provider;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
-import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
+import com.caoyx.rpc.core.filter.RpcFilter;
+import com.caoyx.rpc.core.filter.RpcFilterManager;
+import com.caoyx.rpc.core.filter.providerFilter.ProviderContenxtFilter;
 import com.caoyx.rpc.core.netty.server.Server;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.serializer.Serializer;
 import com.caoyx.rpc.core.utils.NetUtils;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 /**
  * @author caoyixiong
  */
-@Data
 public class CaoyxRpcProviderFactory {
 
+    @Setter
     private Server server;
-    private Serializer serializer;
+    @Setter
     private RegisterConfig registerConfig;
-
+    @Setter
     private String applicationName;
+    @Setter
+    @Getter
     private int port = 1118;
+    @Setter
     private String version;
-
+    @Setter
+    private CaoyxRpcProviderHandler rpcProviderHandler;
+    @Setter
     private String accessToken = null;
 
+    private RpcFilterManager rpcFilterManager;
 
     public CaoyxRpcProviderFactory(String applicationName,
                                    Server server,
-                                   Serializer serializer,
                                    RegisterConfig registerConfig,
-                                   String version) {
+                                   String version,
+                                   List<RpcFilter> rpcFilters) {
         this.applicationName = applicationName;
         this.server = server;
-        this.serializer = serializer;
         this.registerConfig = registerConfig;
         this.version = version;
+        this.rpcFilterManager = new RpcFilterManager();
+        this.rpcFilterManager.addAll(rpcFilters);
+
+        this.rpcProviderHandler = new CaoyxRpcProviderHandler();
+        ProviderContenxtFilter contenxtFilter = new ProviderContenxtFilter();
+
+        rpcFilterManager.addLast(rpcProviderHandler);
+        rpcFilterManager.addFirst(contenxtFilter);
     }
 
     public void init() throws InterruptedException, CaoyxRpcException {
@@ -55,41 +68,13 @@ public class CaoyxRpcProviderFactory {
         }
     }
 
-    private ConcurrentHashMap<String, Object> serviceBeanMap = new ConcurrentHashMap<String, Object>();
-
     public void addServiceBean(String className, String version, Object service) {
-        String key = className + "@" + version;
-        serviceBeanMap.putIfAbsent(key, service);
+        rpcProviderHandler.addServiceBean(className, version, service);
     }
 
-    public Object getServiceBean(String className, String version) {
-        String key = className + "@" + version;
-        return serviceBeanMap.get(key);
-    }
-
-    public CaoyxRpcResponse invokeService(CaoyxRpcRequest requestPacket) {
-        System.out.println("invokeService CaoyxRpcRequest: " + requestPacket.getClassName());
-        CaoyxRpcResponse responsePacket = new CaoyxRpcResponse();
-        responsePacket.setRequestId(requestPacket.getRequestId());
-
-        Object serviceBean = getServiceBean(requestPacket.getClassName(), requestPacket.getVersion());
-
-        Class clazz = serviceBean.getClass();
-        String methodName = requestPacket.getMethodName();
-        Class<?>[] parameterTypes = requestPacket.getParameterTypes();
-        Object[] parameters = requestPacket.getParameters();
-
-        try {
-            Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
-            Object result = method.invoke(serviceBean, parameters);
-            responsePacket.setResult(result);
-        } catch (InvocationTargetException e) {
-            responsePacket.setStatus(CaoyxRpcStatus.FAIL);
-            responsePacket.setErrorMsg(e.getTargetException().getMessage());
-        } catch (Throwable e) {
-            responsePacket.setStatus(CaoyxRpcStatus.FAIL);
-            responsePacket.setErrorMsg(e.getMessage());
-        }
-        return responsePacket;
+    public CaoyxRpcResponse invoke(CaoyxRpcRequest requestPacket) throws Exception {
+        CaoyxRpcResponse caoyxRpcResponse = new CaoyxRpcResponse();
+        rpcFilterManager.invoke(requestPacket, caoyxRpcResponse);
+        return caoyxRpcResponse;
     }
 }

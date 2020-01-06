@@ -5,7 +5,7 @@ import com.caoyixiong.rpc.sample.simple.api.UserCatDto;
 import com.caoyixiong.rpc.sample.simple.api.UserDto;
 import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
-import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
+import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.register.RegisterType;
 import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
@@ -29,7 +29,8 @@ public class UserClient {
                         "",
                         loadAddresses),
                 NettyClient.class,
-                SerializerAlgorithm.JDK);
+                SerializerAlgorithm.JDK
+                , null);
         rpcReferenceBean.setLoadBalance(new RandomLoadBalance());
         rpcReferenceBean.init();
 

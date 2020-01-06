@@ -30,4 +30,8 @@ public class CaoyxRpcException extends Exception {
                 return new CaoyxRpcException(msg);
         }
     }
+
+    public static CaoyxRpcException buildByMsg(String msg) {
+        return new CaoyxRpcException(msg);
+    }
 }

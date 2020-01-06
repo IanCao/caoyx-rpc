@@ -28,5 +28,4 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<CaoyxRpcResp
         System.out.println("NettyClientHandler: " + caoyxRpcResponse.getRequestId());
         caoyxRpcInvokerFactory.setResponse(caoyxRpcResponse);
     }
-
 }

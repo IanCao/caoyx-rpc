@@ -33,15 +33,15 @@ public class CaoyxRpcProviderSpringConfiguration {
     private String registerAddress;
 
 
-//    @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
+    @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
     @Bean
     public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws InterruptedException, CaoyxRpcException {
         log.info("caoyxRpcSpringProviderFactory init");
         CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(applicationName,
                 new NettyServer(),
-                new JDKSerializerImpl(),
                 new RegisterConfig("zookeeper", registerAddress, null),
-                "0");
+                "0",
+                null);
         factory.setPort(port);  // todo 服务治理
         factory.init();
         return factory;

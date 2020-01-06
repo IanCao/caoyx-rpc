@@ -1,13 +1,18 @@
 package com.caoyx.rpc.core.netty.client;
 
+import com.caoyx.rpc.core.data.CaoyxRpcPacket;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.netty.codec.CaoyxRpcEncoder;
 import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.serializer.CaoyxRpcSerializer;
 import com.caoyx.rpc.core.serializer.Serializer;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
@@ -45,9 +50,13 @@ public class NettyClient implements Client {
 
 
     @Override
-    public void doSend(CaoyxRpcRequest requestPacket) throws InterruptedException {
+    public void doSend(CaoyxRpcRequest requestPacket) {
         if (channel != null) {
-            channel.writeAndFlush(requestPacket).sync();
+            try {
+                channel.writeAndFlush(requestPacket).sync();
+            } catch (InterruptedException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -64,5 +73,26 @@ public class NettyClient implements Client {
     @Override
     public boolean isValid() {
         return channel != null && channel.isActive();
+    }
+
+    private ByteBuf request2ByteBuf(CaoyxRpcRequest rpcRequest) {
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
+        //magic num
+        byteBuf.writeInt(CaoyxRpcPacket.MAGIC_NUMBER);
+        //serializer Algorithm
+        byte serializerAlgorithm = rpcRequest.getSerializerAlgorithm();
+        byteBuf.writeByte(serializerAlgorithm);
+
+        byte[] data = new byte[0];
+        try {
+            data = CaoyxRpcSerializer.INSTANCE.serialize(rpcRequest, serializerAlgorithm);
+        } catch (CaoyxRpcException e) {
+            e.printStackTrace();
+        }
+        // data length
+        byteBuf.writeInt(data.length);
+        // data
+        byteBuf.writeBytes(data);
+        return byteBuf;
     }
 }

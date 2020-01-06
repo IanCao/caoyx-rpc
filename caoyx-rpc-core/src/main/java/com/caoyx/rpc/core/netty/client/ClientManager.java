@@ -1,8 +1,8 @@
 package com.caoyx.rpc.core.netty.client;
 
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.serializer.Serializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +16,7 @@ public class ClientManager {
 
     private static volatile ConcurrentHashMap<Address, Client> clientPool = new ConcurrentHashMap<>();
 
-    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl, CaoyxRpcInvokerFactory invokerFactory) throws Exception {
+    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl, CaoyxRpcInvokerFactory invokerFactory) throws CaoyxRpcException {
         Client client = clientPool.get(address);
         if (client != null && client.isValid()) {
             return client;
@@ -42,7 +42,7 @@ public class ClientManager {
                     clientInstance.close();
                 }
                 log.info(e.getMessage(), e);
-                throw e;
+                throw new CaoyxRpcException(e);
             }
             return clientInstance;
         }

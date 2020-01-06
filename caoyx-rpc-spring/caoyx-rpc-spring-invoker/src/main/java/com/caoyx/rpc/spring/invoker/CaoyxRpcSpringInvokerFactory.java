@@ -2,9 +2,8 @@ package com.caoyx.rpc.spring.invoker;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
-import com.caoyx.rpc.core.reference.CaoyxRpcReferenceBean;
+import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.register.zookeeper.ZookeeperRegister;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
@@ -40,7 +39,8 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                             new RegisterConfig(
                                     caoyxRpcReference.register(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
                             caoyxRpcReference.client(),
-                            caoyxRpcReference.serializer());
+                            caoyxRpcReference.serializer()
+                            , null);
 
                     referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
                     referenceBean.setTimeout(caoyxRpcReference.timeout());

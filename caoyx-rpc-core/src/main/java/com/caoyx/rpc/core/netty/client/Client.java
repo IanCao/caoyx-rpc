@@ -14,7 +14,7 @@ public interface Client {
 
     void close();
 
-    void doSend(CaoyxRpcRequest requestPacket) throws InterruptedException;
+    void doSend(CaoyxRpcRequest requestPacket);
 
     boolean isValid();
 }
