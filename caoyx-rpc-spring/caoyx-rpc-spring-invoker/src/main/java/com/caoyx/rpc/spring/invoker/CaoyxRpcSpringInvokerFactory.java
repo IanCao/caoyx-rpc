@@ -22,7 +22,7 @@ import java.util.Arrays;
 public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProcessorAdapter {
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
         ReflectionUtils.doWithFields(bean.getClass(), new FieldCallback() {
             @Override
             public void doWith(Field field) {

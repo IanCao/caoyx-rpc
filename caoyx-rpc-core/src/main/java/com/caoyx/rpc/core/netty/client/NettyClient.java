@@ -32,7 +32,7 @@ public class NettyClient implements Client {
     private Channel channel;
 
     @Override
-    public void init(Address address, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException {
+    public void init(Address address, final CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException {
         group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)

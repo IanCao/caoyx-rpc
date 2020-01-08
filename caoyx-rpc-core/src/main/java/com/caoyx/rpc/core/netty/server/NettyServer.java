@@ -26,7 +26,7 @@ public class NettyServer implements Server {
     private EventLoopGroup workGroup;
     private ServerBootstrap serverBootstrap;
 
-    public void start(CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws InterruptedException {
+    public void start(final CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws InterruptedException {
         receiveGroup = new NioEventLoopGroup();
         workGroup = new NioEventLoopGroup();
 

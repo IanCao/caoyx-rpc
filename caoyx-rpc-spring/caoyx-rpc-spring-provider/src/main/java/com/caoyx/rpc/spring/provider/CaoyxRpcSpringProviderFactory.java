@@ -28,12 +28,12 @@ public class CaoyxRpcSpringProviderFactory extends CaoyxRpcProviderFactory imple
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(CaoyxRpcService.class);
         if (serviceBeanMap != null && !serviceBeanMap.isEmpty()) {
-            serviceBeanMap.values().forEach(serviceBean -> {
+            for (Object serviceBean : serviceBeanMap.values()) {
                 CaoyxRpcService caoyxRpcService = serviceBean.getClass().getAnnotation(CaoyxRpcService.class);
                 String clazzName = serviceBean.getClass().getInterfaces()[0].getName();
                 String version = caoyxRpcService.version();
                 addServiceBean(clazzName, version, serviceBean);
-            });
+            }
         }
     }
 }
