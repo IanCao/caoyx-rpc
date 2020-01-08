@@ -5,7 +5,7 @@ import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.filter.RpcFilter;
+import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.netty.client.Client;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2020-01-06 16:56
  */
 @Slf4j
-public class RemoteInvokerFilter implements RpcFilter {
+public class RemoteInvokerFilter implements CaoyxRpcFilter {
 
     private ClientManager clientManager;
     private Class<? extends Client> client;

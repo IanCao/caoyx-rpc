@@ -3,7 +3,7 @@ package com.caoyx.rpc.core.provider;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
-import com.caoyx.rpc.core.filter.RpcFilter;
+import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author: caoyixiong
  * @Date: 2020-01-06 18:36
  */
-public class CaoyxRpcProviderHandler implements RpcFilter {
+public class CaoyxRpcProviderHandler implements CaoyxRpcFilter {
 
     private ConcurrentHashMap<String, Object> serviceBeanMap = new ConcurrentHashMap<String, Object>();
 

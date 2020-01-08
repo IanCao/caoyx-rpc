@@ -1,11 +1,9 @@
 package com.caoyx.rpc.spring.provider;
 
-import com.caoyx.rpc.core.filter.RpcFilter;
+import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 import com.caoyx.rpc.core.netty.server.Server;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
-import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.serializer.Serializer;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -20,7 +18,7 @@ import java.util.Map;
 
 public class CaoyxRpcSpringProviderFactory extends CaoyxRpcProviderFactory implements ApplicationContextAware {
 
-    public CaoyxRpcSpringProviderFactory(String applicationName, Server server, RegisterConfig registerConfig, String version, List<RpcFilter> rpcFilters) {
+    public CaoyxRpcSpringProviderFactory(String applicationName, Server server, RegisterConfig registerConfig, String version, List<CaoyxRpcFilter> rpcFilters) {
         super(applicationName, server, registerConfig, version, rpcFilters);
     }
 

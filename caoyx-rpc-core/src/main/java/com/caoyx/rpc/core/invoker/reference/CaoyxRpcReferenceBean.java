@@ -5,8 +5,8 @@ import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
-import com.caoyx.rpc.core.filter.RpcFilter;
-import com.caoyx.rpc.core.filter.RpcFilterManager;
+import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
+import com.caoyx.rpc.core.filter.CaoyxRpcFilterManager;
 import com.caoyx.rpc.core.filter.invokerFilter.InvokerContextFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.InvokerRetryFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.LoadBalanceInvokerFilter;
@@ -60,7 +60,7 @@ public class CaoyxRpcReferenceBean {
     @Setter
     private CaoyxRpcRegister register;
 
-    private RpcFilterManager rpcFilterManager;
+    private CaoyxRpcFilterManager rpcFilterManager;
 
     public CaoyxRpcReferenceBean(Class<?> iFace,
                                  String version,
@@ -68,7 +68,7 @@ public class CaoyxRpcReferenceBean {
                                  RegisterConfig registerConfig,
                                  Class<? extends Client> client,
                                  SerializerAlgorithm serializerAlgorithm,
-                                 List<RpcFilter> rpcFilters) {
+                                 List<CaoyxRpcFilter> rpcFilters) {
         this.iFace = iFace;
         this.version = version;
         this.applicationName = applicationName;
@@ -76,7 +76,7 @@ public class CaoyxRpcReferenceBean {
         this.serializerAlgorithm = serializerAlgorithm;
         this.registerConfig = registerConfig;
 
-        this.rpcFilterManager = new RpcFilterManager();
+        this.rpcFilterManager = new CaoyxRpcFilterManager();
         rpcFilterManager.addAll(rpcFilters);
     }
 

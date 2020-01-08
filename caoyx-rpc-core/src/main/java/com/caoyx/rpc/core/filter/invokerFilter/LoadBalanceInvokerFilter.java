@@ -5,7 +5,7 @@ import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.filter.RpcFilter;
+import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * @Date: 2020-01-06 17:18
  */
 @Slf4j
-public class LoadBalanceInvokerFilter implements RpcFilter {
+public class LoadBalanceInvokerFilter implements CaoyxRpcFilter {
 
     private LoadBalance loadBalance;
     private CaoyxRpcRegister register;

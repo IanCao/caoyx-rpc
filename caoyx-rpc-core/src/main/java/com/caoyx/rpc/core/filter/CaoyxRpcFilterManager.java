@@ -11,9 +11,9 @@ import java.util.List;
  * @Author: caoyixiong
  * @Date: 2020-01-06 18:40
  */
-public class RpcFilterManager {
+public class CaoyxRpcFilterManager {
 
-    private LinkedList<RpcFilter> rpcFilters = new LinkedList<RpcFilter>();
+    private LinkedList<CaoyxRpcFilter> rpcFilters = new LinkedList<CaoyxRpcFilter>();
 
     public void invoke(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception {
         if (CollectionUtils.isNotEmpty(rpcFilters)) {
@@ -21,28 +21,28 @@ public class RpcFilterManager {
                 rpcFilters.get(i).invokeRequestHandler(rpcRequest);
             }
             for (int i = rpcFilters.size() - 1; i >= 0; i--) {
-                RpcFilter rpcFilter = rpcFilters.get(i);
+                CaoyxRpcFilter rpcFilter = rpcFilters.get(i);
                 rpcFilter.doProcess(rpcRequest, rpcResponse);
                 rpcFilter.invokeResponseHandler(rpcResponse);
             }
         }
     }
 
-    public void addFirst(RpcFilter filter) {
+    public void addFirst(CaoyxRpcFilter filter) {
         if (filter == null) {
             return;
         }
         rpcFilters.addFirst(filter);
     }
 
-    public void addLast(RpcFilter filter) {
+    public void addLast(CaoyxRpcFilter filter) {
         if (filter == null) {
             return;
         }
         rpcFilters.addLast(filter);
     }
 
-    public void addAll(List<RpcFilter> rpcFilters) {
+    public void addAll(List<CaoyxRpcFilter> rpcFilters) {
         if (CollectionUtils.isEmpty(rpcFilters)) {
             return;
         }

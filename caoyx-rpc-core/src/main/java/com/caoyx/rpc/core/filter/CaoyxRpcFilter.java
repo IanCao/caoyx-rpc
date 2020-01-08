@@ -9,7 +9,7 @@ import com.caoyx.rpc.core.exception.CaoyxRpcException;
  * @Author: caoyixiong
  * @Date: 2020-01-06 16:32
  */
-public interface RpcFilter {
+public interface CaoyxRpcFilter {
     void invokeRequestHandler(CaoyxRpcRequest rpcRequest);
 
     void invokeResponseHandler(CaoyxRpcResponse rpcResponse);

@@ -12,4 +12,11 @@
 
     <artifactId>caoyx-rpc-spring-provider</artifactId>
 
+    <dependencies>
+        <dependency>
+            <artifactId>caoyx-rpc-spring-core</artifactId>
+            <groupId>com.caoyixiong</groupId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>
