@@ -1,7 +1,10 @@
-package com.caoyx.rpc.core.serializer.impl;
+package com.caoyx.rpc.serialization.jdk;
 
-import com.caoyx.rpc.core.serializer.Serializer;
-import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
+
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
+import com.caoyx.rpc.core.extension.annotation.Implement;
+import com.caoyx.rpc.core.serialization.api.Serialization;
+import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,14 +16,16 @@ import java.io.ObjectOutputStream;
 /**
  * @author caoyixiong
  */
-public class JDKSerializerImpl implements Serializer {
+@Implement(name = "jdk")
+public class JDKSerialization implements Serialization {
 
+    @Override
     public byte getSerializerAlgorithm() {
         return SerializerAlgorithm.JDK.getAlgorithmId();
     }
 
     @Override
-    public byte[] serialize(Object object) {
+    public byte[] serialize(Object object) throws CaoyxRpcException {
         ObjectOutputStream oos = null;
         ByteArrayOutputStream bos = null;
         try {
@@ -28,9 +33,8 @@ public class JDKSerializerImpl implements Serializer {
             oos = new ObjectOutputStream(bos);
             oos.writeObject(object);
             return bos.toByteArray();
-        } catch (IOException e) {
-            System.out.println("序列化失败 Exception:" + e.toString());
-            return null;
+        } catch (Exception e) {
+            throw new CaoyxRpcException(e);
         } finally {
             try {
                 if (oos != null) {
@@ -39,30 +43,29 @@ public class JDKSerializerImpl implements Serializer {
                 if (bos != null) {
                     bos.close();
                 }
-            } catch (IOException ex) {
-                System.out.println("io could not close:" + ex.toString());
+            } catch (Exception e) {
+                throw new CaoyxRpcException(e);
             }
         }
     }
 
     @Override
-    public <T> T deserialize(Class<T> clazz, byte[] bytes) {
+    public <T> T deserialize(Class<T> clazz, byte[] bytes) throws CaoyxRpcException, CaoyxRpcException {
         ByteArrayInputStream bais = null;
         try {
             // 反序列化
             bais = new ByteArrayInputStream(bytes);
             ObjectInputStream ois = new ObjectInputStream(bais);
             return (T) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("bytes Could not deserialize:" + e.toString());
-            return null;
+        } catch (Exception e) {
+            throw new CaoyxRpcException(e);
         } finally {
-            try {
-                if (bais != null) {
+            if (bais != null) {
+                try {
                     bais.close();
+                } catch (IOException e) {
+                    throw new CaoyxRpcException(e);
                 }
-            } catch (IOException ex) {
-                System.out.println("LogManage Could not serialize:" + ex.toString());
             }
         }
     }

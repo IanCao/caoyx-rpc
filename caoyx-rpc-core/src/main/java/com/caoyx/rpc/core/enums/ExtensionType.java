@@ -8,4 +8,5 @@ public enum ExtensionType {
     UNKNOW,
     REGISTER,
     LOADBALANCE,
+    SERIALIZATION,
 }

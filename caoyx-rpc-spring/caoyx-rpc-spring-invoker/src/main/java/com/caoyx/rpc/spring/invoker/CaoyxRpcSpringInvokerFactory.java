@@ -40,6 +40,7 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                         CaoyxRpcException exception = new CaoyxRpcException("load address and register address are all null");
                         log.error(exception.getMessage(), exception);
                     }
+
                     String[] filterBeanNames = caoyxRpcReference.filters();
                     List<CaoyxRpcFilter> caoyxRpcFilters = new ArrayList<>();
                     if (filterBeanNames.length > 0) {
@@ -56,10 +57,10 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                             caoyxRpcReference.version(),
                             caoyxRpcReference.remoteApplicationName(),
                             new RegisterConfig(
-                                    caoyxRpcReference.register(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
+                                    caoyxRpcReference.register().getValue(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
                             caoyxRpcReference.client(),
-                            caoyxRpcReference.serializer()
-                            , caoyxRpcFilters);
+                            caoyxRpcReference.serializer(),
+                            caoyxRpcFilters);
 
                     referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
                     referenceBean.setTimeout(caoyxRpcReference.timeout());

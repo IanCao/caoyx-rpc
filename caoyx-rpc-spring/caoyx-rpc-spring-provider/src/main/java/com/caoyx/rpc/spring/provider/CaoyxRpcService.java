@@ -17,4 +17,6 @@ import java.lang.annotation.Target;
 @Documented
 public @interface CaoyxRpcService {
     String version() default "0";
+
+    String[] filter() default {};
 }

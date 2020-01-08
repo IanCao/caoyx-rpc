@@ -18,7 +18,7 @@ import com.caoyx.rpc.core.netty.client.ClientManager;
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
+import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 import com.caoyx.rpc.core.utils.CollectionUtils;
 import com.caoyx.rpc.core.utils.StringUtils;
 import lombok.Setter;

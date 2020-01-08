@@ -3,9 +3,8 @@ package com.caoyx.rpc.spring.invoker;
 import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.netty.client.Client;
 import com.caoyx.rpc.core.netty.client.NettyClient;
-import com.caoyx.rpc.core.register.Register;
-import com.caoyx.rpc.register.zookeeper.ZookeeperRegister;
-import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
+import com.caoyx.rpc.core.register.RegisterType;
+import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -30,7 +29,7 @@ public @interface CaoyxRpcReference {
 
     String version() default "0";
 
-    String register() default "noRegister";
+    RegisterType register() default RegisterType.NO_REGISTER;
 
     String[] loadAddress() default {};
 

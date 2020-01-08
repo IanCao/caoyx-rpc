@@ -1,0 +1,2 @@
+com.caoyx.rpc.serialization.jdk.JDKSerialization
+com.caoyx.rpc.serialization.hessian2.Hessian2Serialization

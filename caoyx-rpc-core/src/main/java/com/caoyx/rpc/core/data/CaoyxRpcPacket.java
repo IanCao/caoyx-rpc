@@ -1,6 +1,7 @@
 package com.caoyx.rpc.core.data;
 
-import com.caoyx.rpc.core.serializer.SerializerAlgorithm;
+
+import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 import lombok.Data;
 
 /**

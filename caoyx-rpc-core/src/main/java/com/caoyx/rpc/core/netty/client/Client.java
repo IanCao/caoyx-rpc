@@ -3,7 +3,6 @@ package com.caoyx.rpc.core.netty.client;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.serializer.Serializer;
 
 /**
  * @author caoyixiong

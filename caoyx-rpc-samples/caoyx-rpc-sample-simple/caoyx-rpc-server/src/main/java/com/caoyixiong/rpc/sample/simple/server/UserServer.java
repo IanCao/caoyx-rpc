@@ -6,7 +6,6 @@ import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.netty.server.NettyServer;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.serializer.impl.JDKSerializerImpl;
 
 /**
  * @author caoyixiong

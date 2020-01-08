@@ -1,10 +1,8 @@
 package com.caoyx.rpc.core.netty.codec;
 
 import com.caoyx.rpc.core.data.CaoyxRpcPacket;
-import com.caoyx.rpc.core.data.Packet;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.serializer.CaoyxRpcSerializer;
-import com.caoyx.rpc.core.serializer.Serializer;
+import com.caoyx.rpc.core.serialization.CaoyxRpcSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -22,7 +20,7 @@ public class CaoyxRpcEncoder extends MessageToByteEncoder {
         CaoyxRpcPacket caoyxRpcPacket = (CaoyxRpcPacket) object;
         //magic num
         byteBuf.writeInt(CaoyxRpcPacket.MAGIC_NUMBER);
-        //serializer Algorithm
+        //serialization Algorithm
         byte serializerAlgorithm = caoyxRpcPacket.getSerializerAlgorithm();
         byteBuf.writeByte(serializerAlgorithm);
 
