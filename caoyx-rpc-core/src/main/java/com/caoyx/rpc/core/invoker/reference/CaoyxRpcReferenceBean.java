@@ -77,7 +77,7 @@ public class CaoyxRpcReferenceBean {
         this.registerConfig = registerConfig;
 
         this.rpcFilterManager = new CaoyxRpcFilterManager();
-        rpcFilterManager.addAll(rpcFilters);
+        rpcFilterManager.addAllUserFilters(rpcFilters);
     }
 
 
@@ -111,9 +111,9 @@ public class CaoyxRpcReferenceBean {
         //CaoyxRpc Context
         InvokerContextFilter invokerContextFilter = new InvokerContextFilter();
 
-        rpcFilterManager.addFirst(invokerContextFilter);
-        rpcFilterManager.addLast(retryFilter);
-        rpcFilterManager.addLast(loadBalanceInvokerFilter);
+        rpcFilterManager.addSystemFilterFirst(invokerContextFilter);
+        rpcFilterManager.addSystemFilterLast(retryFilter);
+        rpcFilterManager.addSystemFilterLast(loadBalanceInvokerFilter);
 
         return this;
     }

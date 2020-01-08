@@ -49,13 +49,9 @@ public class CaoyxRpcProviderFactory {
         this.registerConfig = registerConfig;
         this.version = version;
         this.rpcFilterManager = new CaoyxRpcFilterManager();
-        this.rpcFilterManager.addAll(rpcFilters);
+        this.rpcFilterManager.addAllUserFilters(rpcFilters);
 
         this.rpcProviderHandler = new CaoyxRpcProviderHandler();
-        ProviderContenxtFilter contenxtFilter = new ProviderContenxtFilter();
-
-        rpcFilterManager.addLast(rpcProviderHandler);
-        rpcFilterManager.addFirst(contenxtFilter);
     }
 
     public void init() throws InterruptedException, CaoyxRpcException {
@@ -66,6 +62,10 @@ public class CaoyxRpcProviderFactory {
             register.initRegisterConnect(registerConfig.getRegisterAddress());
             register.register(NetUtils.getLocalAddress(), port);
         }
+
+        rpcFilterManager.addSystemFilterLast(rpcProviderHandler);
+        ProviderContenxtFilter contenxtFilter = new ProviderContenxtFilter();
+        rpcFilterManager.addSystemFilterFirst(contenxtFilter);
     }
 
     public void addServiceBean(String className, String version, Object service) {

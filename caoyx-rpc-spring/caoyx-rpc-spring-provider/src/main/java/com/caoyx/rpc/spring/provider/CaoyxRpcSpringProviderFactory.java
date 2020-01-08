@@ -28,9 +28,9 @@ public class CaoyxRpcSpringProviderFactory extends CaoyxRpcProviderFactory imple
         if (serviceBeanMap != null && !serviceBeanMap.isEmpty()) {
             for (Object serviceBean : serviceBeanMap.values()) {
                 CaoyxRpcService caoyxRpcService = serviceBean.getClass().getAnnotation(CaoyxRpcService.class);
-                String clazzName = serviceBean.getClass().getInterfaces()[0].getName();
+                String iFace = serviceBean.getClass().getInterfaces()[0].getName();
                 String version = caoyxRpcService.version();
-                addServiceBean(clazzName, version, serviceBean);
+                addServiceBean(iFace, version, serviceBean);
             }
         }
     }

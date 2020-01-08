@@ -43,4 +43,6 @@ public @interface CaoyxRpcReference {
     int retryTimes() default 0;
 
     long timeout() default 3000L;
+
+    String[] filters() default {};
 }

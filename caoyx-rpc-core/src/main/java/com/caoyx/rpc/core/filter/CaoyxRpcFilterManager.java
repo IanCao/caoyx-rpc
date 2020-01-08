@@ -4,6 +4,7 @@ import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.utils.CollectionUtils;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,40 +14,62 @@ import java.util.List;
  */
 public class CaoyxRpcFilterManager {
 
-    private LinkedList<CaoyxRpcFilter> rpcFilters = new LinkedList<CaoyxRpcFilter>();
+    private LinkedList<CaoyxRpcFilter> systemFirstRpcFilters = new LinkedList<CaoyxRpcFilter>();
+    private LinkedList<CaoyxRpcFilter> systemLastRpcFilters = new LinkedList<CaoyxRpcFilter>();
+    private LinkedList<CaoyxRpcFilter> userRpcFilters = new LinkedList<CaoyxRpcFilter>();
 
     public void invoke(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception {
-        if (CollectionUtils.isNotEmpty(rpcFilters)) {
-            for (int i = 0; i < rpcFilters.size(); i++) {
-                rpcFilters.get(i).invokeRequestHandler(rpcRequest);
+
+        LinkedList<CaoyxRpcFilter> filters = new LinkedList();
+        filters.addAll(systemFirstRpcFilters);
+        filters.addAll(userRpcFilters);
+        filters.addAll(systemLastRpcFilters);
+
+        if (CollectionUtils.isNotEmpty(filters)) {
+            for (int i = 0; i < filters.size(); i++) {
+                filters.get(i).invokeRequestHandler(rpcRequest);
             }
-            for (int i = rpcFilters.size() - 1; i >= 0; i--) {
-                CaoyxRpcFilter rpcFilter = rpcFilters.get(i);
+
+            for (int i = filters.size() - 1; i >= 0; i--) {
+                CaoyxRpcFilter rpcFilter = filters.get(i);
                 rpcFilter.doProcess(rpcRequest, rpcResponse);
                 rpcFilter.invokeResponseHandler(rpcResponse);
             }
         }
     }
 
-    public void addFirst(CaoyxRpcFilter filter) {
+    public void addSystemFilterFirst(CaoyxRpcFilter filter) {
         if (filter == null) {
             return;
         }
-        rpcFilters.addFirst(filter);
+        systemFirstRpcFilters.addFirst(filter);
     }
 
-    public void addLast(CaoyxRpcFilter filter) {
+    public void addSystemFilterLast(CaoyxRpcFilter filter) {
         if (filter == null) {
             return;
         }
-        rpcFilters.addLast(filter);
+        systemLastRpcFilters.addLast(filter);
     }
 
-    public void addAll(List<CaoyxRpcFilter> rpcFilters) {
-        if (CollectionUtils.isEmpty(rpcFilters)) {
+    public void addUserFilterFirst(CaoyxRpcFilter filter) {
+        if (filter == null) {
             return;
         }
-        rpcFilters.addAll(rpcFilters);
+        userRpcFilters.addFirst(filter);
     }
 
+    public void addUserFilterLast(CaoyxRpcFilter filter) {
+        if (filter == null) {
+            return;
+        }
+        userRpcFilters.addLast(filter);
+    }
+
+    public void addAllUserFilters(List<CaoyxRpcFilter> caoyxRpcFilters) {
+        if (CollectionUtils.isEmpty(caoyxRpcFilters)) {
+            return;
+        }
+        userRpcFilters.addAll(caoyxRpcFilters);
+    }
 }
