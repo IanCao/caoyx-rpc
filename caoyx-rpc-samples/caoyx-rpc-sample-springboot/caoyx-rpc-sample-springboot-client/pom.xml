@@ -8,14 +8,14 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>com.caoyixiong</groupId>
+        <groupId>com.github.iancao</groupId>
         <artifactId>caoyx-rpc-sample-springboot</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <start-class>com.caoyixiong.CaoyxRpcSpringBootClient</start-class>
+        <start-class>com.caoyx.rpc.sample.springboot.client.CaoyxRpcSpringBootClientApplication</start-class>
     </properties>
 
     <dependencies>
@@ -38,11 +38,11 @@
         </dependency>
         <dependency>
             <artifactId>caoyx-rpc-sample-springboot-api</artifactId>
-            <groupId>com.caoyixiong</groupId>
+            <groupId>com.github.iancao</groupId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.caoyixiong</groupId>
+            <groupId>com.github.iancao</groupId>
             <artifactId>caoyx-rpc-spring-invoker</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
