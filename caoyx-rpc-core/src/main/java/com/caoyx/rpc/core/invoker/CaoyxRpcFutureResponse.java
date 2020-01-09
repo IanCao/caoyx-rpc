@@ -3,6 +3,8 @@ package com.caoyx.rpc.core.invoker;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Future;
@@ -14,27 +16,18 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
 
-    private CaoyxRpcInvokerFactory invokerFactory;
-
     private CaoyxRpcRequest request;
     private CaoyxRpcResponse response;
+
+    @Setter
+    @Getter
+    private CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;
 
     private boolean done = false;
     private final Object lock = new Object();
 
-    public CaoyxRpcFutureResponse(final CaoyxRpcInvokerFactory invokerFactory, CaoyxRpcRequest request) {
-        this.invokerFactory = invokerFactory;
+    public CaoyxRpcFutureResponse(CaoyxRpcRequest request) {
         this.request = request;
-
-        setInvokerFuture();
-    }
-
-    private void setInvokerFuture() {
-        invokerFactory.setInvokerFuture(request.getRequestId(), this);
-    }
-
-    public void removeInvokerFuture() {
-        this.invokerFactory.removeInvokerFuture(request.getRequestId());
     }
 
     @Override
@@ -42,11 +35,18 @@ public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
         return false;
     }
 
-    public void setResponse(CaoyxRpcResponse response) {
+    public void notifyResponse(CaoyxRpcResponse response) {
         this.response = response;
         synchronized (lock) {
             done = true;
             lock.notifyAll();
+        }
+        if (caoyxRpcInvokerCallBack != null) {
+            if (response.getStatus() == CaoyxRpcStatus.SUCCESS) {
+                caoyxRpcInvokerCallBack.onSuccess(response.getResult());
+            } else if (response.getStatus() == CaoyxRpcStatus.FAIL) {
+                caoyxRpcInvokerCallBack.onFail(response.getErrorMsg());
+            }
         }
     }
 

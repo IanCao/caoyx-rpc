@@ -12,6 +12,7 @@ import com.caoyx.rpc.core.filter.CaoyxRpcFilterManager;
 import com.caoyx.rpc.core.filter.invokerFilter.InvokerRetryFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.LoadBalanceInvokerFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.RemoteInvokerFilter;
+import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
 import com.caoyx.rpc.core.netty.client.Client;
@@ -72,6 +73,8 @@ public class CaoyxRpcReferenceBean {
     private SerializerAlgorithm serializerAlgorithm;
     @Setter
     private CaoyxRpcRegister register;
+    @Setter
+    private CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;
 
     private CaoyxRpcFilterManager rpcFilterManager;
 
@@ -156,6 +159,7 @@ public class CaoyxRpcReferenceBean {
                         CaoyxRpcResponse rpcResponse = new CaoyxRpcResponse();
 
                         CaoyxRpcContext.getContext().setCallType(callType);
+                        CaoyxRpcContext.getContext().setCallBack(caoyxRpcInvokerCallBack);
                         try {
                             rpcRequest.setRequestId(UUID.randomUUID().toString());
                             rpcRequest.setApplicationName(applicationName);
@@ -172,7 +176,7 @@ public class CaoyxRpcReferenceBean {
                             CaoyxRpcContext.removeContext();
                         }
 
-                        if (rpcResponse.getStatus() == CaoyxRpcStatus.FUTURE) {
+                        if (rpcResponse.getStatus() == CaoyxRpcStatus.ASYNC) {
                             Class<?> returnType = method.getReturnType();
                             if (BASIC_DATA_TYPE_2_DEFAULT_VALUE.containsKey(returnType.getName())) {
                                 return BASIC_DATA_TYPE_2_DEFAULT_VALUE.get(returnType.getName());

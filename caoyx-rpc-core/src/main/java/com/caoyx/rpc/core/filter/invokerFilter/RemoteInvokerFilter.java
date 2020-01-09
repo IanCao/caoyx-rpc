@@ -55,7 +55,8 @@ public class RemoteInvokerFilter implements CaoyxRpcFilter {
 
 
         clientInstance.doSend(rpcRequest);
-        CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(invokerFactory, rpcRequest);
+        CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(rpcRequest);
+        invokerFactory.setInvokerFuture(rpcRequest.getRequestId(), futureResponse);
 
         switch (CaoyxRpcContext.getContext().getCallType()) {
             case SYNC:
@@ -71,9 +72,11 @@ public class RemoteInvokerFilter implements CaoyxRpcFilter {
                 caoyxRpcFuture.setUnit(TimeUnit.MILLISECONDS);
                 CaoyxRpcFuture.setFuture(caoyxRpcFuture);
 
-                rpcResponse.setStatus(CaoyxRpcStatus.FUTURE);
+                rpcResponse.setStatus(CaoyxRpcStatus.ASYNC);
                 return;
             case CALLBACK:
+                rpcResponse.setStatus(CaoyxRpcStatus.ASYNC);
+                futureResponse.setCaoyxRpcInvokerCallBack(CaoyxRpcContext.getContext().getCallBack());
         }
     }
 }

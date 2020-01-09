@@ -13,6 +13,7 @@ import java.util.List;
  * @Author: caoyixiong
  * @Date: 2020-01-06 18:40
  */
+//TODO 重构
 public class CaoyxRpcFilterManager {
 
     private LinkedList<CaoyxRpcFilter> systemFirstRpcFilters = new LinkedList<CaoyxRpcFilter>();
@@ -34,7 +35,7 @@ public class CaoyxRpcFilterManager {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 CaoyxRpcFilter rpcFilter = filters.get(i);
                 rpcFilter.doProcess(rpcRequest, rpcResponse);
-                if (rpcResponse.getStatus() == CaoyxRpcStatus.FUTURE) {
+                if (rpcResponse.getStatus() == CaoyxRpcStatus.ASYNC) {
                     continue;
                 }
                 rpcFilter.invokeResponseHandler(rpcResponse);

@@ -33,9 +33,12 @@ public class CaoyxRpcInvokerFactory {
         pendingRpc.remove(requestId);
     }
 
-    public void setResponse(CaoyxRpcResponse caoyxRpcResponse) {
+    public void notifyResponse(CaoyxRpcResponse caoyxRpcResponse) {
         CaoyxRpcFutureResponse futureResponse = pendingRpc.get(caoyxRpcResponse.getRequestId());
-        futureResponse.setResponse(caoyxRpcResponse);
+        if (futureResponse == null) {
+            return;
+        }
+        futureResponse.notifyResponse(caoyxRpcResponse);
         removeInvokerFuture(caoyxRpcResponse.getRequestId());
     }
 }

@@ -1,10 +1,10 @@
 package com.caoyixiong.rpc.sample.simple.client;
 
 import com.caoyixiong.rpc.sample.simple.api.IUser;
-import com.caoyixiong.rpc.sample.simple.api.UserCatDto;
 import com.caoyixiong.rpc.sample.simple.api.UserDto;
 import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
+import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
@@ -21,6 +21,41 @@ import java.util.List;
 public class UserClient {
 
     public static void main(String[] args) throws Exception {
+        testSync();
+        testFuture();
+        testCallBack();
+    }
+
+    private static void testSync() throws Exception {
+        UserDto userDto = new UserDto("UserDto==> testSync");
+        IUser user = init(CallType.SYNC, null);
+        System.out.println(user.addUser(userDto));
+    }
+
+    private static void testFuture() throws Exception {
+        IUser user = init(CallType.FUTURE, null);
+        user.getUsers();
+        System.out.println(CaoyxRpcFuture.getFuture().get().toString());
+        UserDto userDto = new UserDto("UserDto==> testFuture");
+        user.addUserVoid(userDto);
+    }
+
+    private static void testCallBack() throws Exception {
+        IUser user = init(CallType.CALLBACK, new CaoyxRpcInvokerCallBack() {
+            @Override
+            public void onSuccess(Object result) {
+                System.out.println("testCallBack: " + result);
+            }
+
+            @Override
+            public void onFail(String errorMsg) {
+                System.out.println("testCallBack: " + errorMsg);
+            }
+        });
+        user.getUsers();
+    }
+
+    private static IUser init(CallType callType, CaoyxRpcInvokerCallBack callBack) throws Exception {
         List<String> loadAddresses = new ArrayList<String>();
         loadAddresses.add("127.0.0.1:1118");
         CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(IUser.class,
@@ -33,31 +68,11 @@ public class UserClient {
                 NettyClient.class,
                 SerializerAlgorithm.HESSIAN2
                 , null);
-        rpcReferenceBean.setCallType(CallType.FUTURE);
+        rpcReferenceBean.setCallType(callType);
         rpcReferenceBean.setLoadBalance(new RandomLoadBalance());
+        rpcReferenceBean.setCaoyxRpcInvokerCallBack(callBack);
         rpcReferenceBean.init();
 
-        IUser user = (IUser) rpcReferenceBean.getObject();
-
-        UserDto userDto = new UserDto("test1-1");
-        userDto.setAge(1);
-        List<String> hobbies = new ArrayList<String>();
-        hobbies.add("test1-hobby-1");
-        hobbies.add("test1-hobby-2");
-        hobbies.add("test1-hobby-3");
-        hobbies.add("test1-hobby-4");
-        userDto.setHobbies(hobbies);
-
-        List<UserCatDto> userCatDtos = new ArrayList<UserCatDto>();
-        userCatDtos.add(new UserCatDto().setName("test1-cat-name-1"));
-        userCatDtos.add(new UserCatDto().setName("test1-cat-name-2"));
-        userCatDtos.add(new UserCatDto().setName("test1-cat-name-3"));
-        userDto.setUserCatDtos(userCatDtos);
-        userDto.setAddress("BeiJing");
-
-        user.addUser(userDto);
-        user.addUserVoid(new UserDto("aaa"));
-        user.getUsers();
-        System.out.println(CaoyxRpcFuture.getFuture().get().toString());
+        return (IUser) rpcReferenceBean.getObject();
     }
 }
