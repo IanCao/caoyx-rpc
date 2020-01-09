@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 public class IndexController {
 
-    @CaoyxRpcReference(callType = CallType.REGISTER,
+    @CaoyxRpcReference(callType = CallType.SYNC,
             registerAddress = "127.0.0.1:2181",
             remoteApplicationName = "caoyxRpc-sample-springboot-server",
             register = RegisterType.ZOOKEEPER,
@@ -23,7 +23,7 @@ public class IndexController {
             retryTimes = 2)
     private IUser user;
 
-    @CaoyxRpcReference(callType = CallType.REGISTER,
+    @CaoyxRpcReference(callType = CallType.SYNC,
             registerAddress = "127.0.0.1:2181",
             remoteApplicationName = "caoyxRpc-sample-springboot-server",
             register = RegisterType.ZOOKEEPER,

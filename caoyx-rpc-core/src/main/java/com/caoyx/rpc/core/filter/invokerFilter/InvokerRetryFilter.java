@@ -36,7 +36,13 @@ public class InvokerRetryFilter implements CaoyxRpcFilter {
 
     @Override
     public void doProcess(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception {
-        if (rpcResponse != null && rpcResponse.getStatus() == CaoyxRpcStatus.SUCCESS) {
+        if (rpcResponse == null) {
+            return;
+        }
+        if (rpcResponse.getStatus() == CaoyxRpcStatus.FUTURE) {
+            return;
+        }
+        if (rpcResponse.getStatus() == CaoyxRpcStatus.SUCCESS) {
             return;
         }
         for (int i = 0; i < retryTimes; i++) {

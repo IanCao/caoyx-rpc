@@ -33,7 +33,7 @@ public @interface CaoyxRpcReference {
 
     String[] loadAddress() default {};
 
-    CallType callType() default CallType.DIRECT;
+    CallType callType() default CallType.SYNC;
 
     String registerAddress() default "";
 

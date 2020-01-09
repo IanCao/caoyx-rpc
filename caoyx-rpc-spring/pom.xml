@@ -29,7 +29,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>1.8.0-beta4</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>

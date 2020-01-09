@@ -3,6 +3,8 @@ package com.caoyixiong.rpc.sample.simple.client;
 import com.caoyixiong.rpc.sample.simple.api.IUser;
 import com.caoyixiong.rpc.sample.simple.api.UserCatDto;
 import com.caoyixiong.rpc.sample.simple.api.UserDto;
+import com.caoyx.rpc.core.enums.CallType;
+import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
 import com.caoyx.rpc.core.netty.client.NettyClient;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
@@ -31,13 +33,13 @@ public class UserClient {
                 NettyClient.class,
                 SerializerAlgorithm.HESSIAN2
                 , null);
+        rpcReferenceBean.setCallType(CallType.FUTURE);
         rpcReferenceBean.setLoadBalance(new RandomLoadBalance());
         rpcReferenceBean.init();
 
         IUser user = (IUser) rpcReferenceBean.getObject();
 
-        UserDto userDto = new UserDto();
-        userDto.setName("test1-1");
+        UserDto userDto = new UserDto("test1-1");
         userDto.setAge(1);
         List<String> hobbies = new ArrayList<String>();
         hobbies.add("test1-hobby-1");
@@ -54,7 +56,8 @@ public class UserClient {
         userDto.setAddress("BeiJing");
 
         user.addUser(userDto);
-
-        System.out.println(user.getUsers().toString());
+        user.addUserVoid(new UserDto("aaa"));
+        user.getUsers();
+        System.out.println(CaoyxRpcFuture.getFuture().get().toString());
     }
 }

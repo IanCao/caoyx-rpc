@@ -1,13 +1,14 @@
 package com.caoyx.rpc.core.invoker.reference;
 
+import com.caoyx.rpc.core.context.CaoyxRpcContext;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CallType;
+import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilterManager;
-import com.caoyx.rpc.core.filter.invokerFilter.InvokerContextFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.InvokerRetryFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.LoadBalanceInvokerFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.RemoteInvokerFilter;
@@ -27,7 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -36,11 +39,21 @@ import java.util.UUID;
 @Slf4j
 public class CaoyxRpcReferenceBean {
 
+    private static final Map<String, Object> BASIC_DATA_TYPE_2_DEFAULT_VALUE = new HashMap<String, Object>() {{
+        put("boolean", Boolean.FALSE);
+        put("int", Integer.MIN_VALUE);
+        put("float", Float.MIN_VALUE);
+        put("double", Double.MIN_VALUE);
+        put("long", Long.MIN_VALUE);
+        put("short", Short.MIN_VALUE);
+        put("byte", Byte.MIN_VALUE);
+        put("char", Character.MIN_VALUE);
+    }};
+
     @Setter
     private Class<? extends Client> client;
     @Setter
-    private CallType callType = CallType.DIRECT;
-
+    private CallType callType = CallType.SYNC;
     @Setter
     private String applicationName;
     @Setter
@@ -108,10 +121,7 @@ public class CaoyxRpcReferenceBean {
 
         //失败重试
         InvokerRetryFilter retryFilter = new InvokerRetryFilter(loadBalanceInvokerFilter, retryTimes);
-        //CaoyxRpc Context
-        InvokerContextFilter invokerContextFilter = new InvokerContextFilter();
 
-        rpcFilterManager.addSystemFilterFirst(invokerContextFilter);
         rpcFilterManager.addSystemFilterLast(retryFilter);
         rpcFilterManager.addSystemFilterLast(loadBalanceInvokerFilter);
 
@@ -143,27 +153,41 @@ public class CaoyxRpcReferenceBean {
                         }
 
                         CaoyxRpcRequest rpcRequest = new CaoyxRpcRequest();
-                        rpcRequest.setRequestId(UUID.randomUUID().toString());
-                        rpcRequest.setApplicationName(applicationName);
-                        rpcRequest.setVersion(version);
-                        rpcRequest.setSerializerAlgorithm(serializerAlgorithm.getAlgorithmId());
-                        rpcRequest.setClassName(className);
-                        rpcRequest.setMethodName(methodName);
-                        rpcRequest.setParameters(args);
-                        rpcRequest.setParameterTypes(parameterTypes);
-                        rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
-                        rpcRequest.setTimeout(timeout);
-
                         CaoyxRpcResponse rpcResponse = new CaoyxRpcResponse();
 
-                        rpcFilterManager.invoke(rpcRequest, rpcResponse);
+                        CaoyxRpcContext.getContext().setCallType(callType);
+                        try {
+                            rpcRequest.setRequestId(UUID.randomUUID().toString());
+                            rpcRequest.setApplicationName(applicationName);
+                            rpcRequest.setVersion(version);
+                            rpcRequest.setSerializerAlgorithm(serializerAlgorithm.getAlgorithmId());
+                            rpcRequest.setClassName(className);
+                            rpcRequest.setMethodName(methodName);
+                            rpcRequest.setParameters(args);
+                            rpcRequest.setParameterTypes(parameterTypes);
+                            rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
+                            rpcRequest.setTimeout(timeout);
+                            rpcFilterManager.invoke(rpcRequest, rpcResponse);
+                        } finally {
+                            CaoyxRpcContext.removeContext();
+                        }
+
+                        if (rpcResponse.getStatus() == CaoyxRpcStatus.FUTURE) {
+                            Class<?> returnType = method.getReturnType();
+                            if (BASIC_DATA_TYPE_2_DEFAULT_VALUE.containsKey(returnType.getName())) {
+                                return BASIC_DATA_TYPE_2_DEFAULT_VALUE.get(returnType.getName());
+                            }
+                            return null;
+                        }
 
                         if (rpcResponse.getStatus() == null) {
                             throw CaoyxRpcException.buildByMsg("rpcResponse is not exist, please check remote invoker");
                         }
+
                         if (!rpcResponse.isSuccess()) {
                             throw CaoyxRpcException.buildByStatusAndMsg(rpcResponse.getStatus(), rpcResponse.getErrorMsg());
                         }
+
                         return rpcResponse.getResult();
                     }
                 });

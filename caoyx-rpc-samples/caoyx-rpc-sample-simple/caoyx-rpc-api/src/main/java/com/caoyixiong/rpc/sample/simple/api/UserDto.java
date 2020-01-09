@@ -15,6 +15,10 @@ public class UserDto implements Serializable {
     private String address;
     private List<String> hobbies;
     private List<UserCatDto> userCatDtos;
+
+    public UserDto(String name) {
+        this.name = name;
+    }
 }
 
 

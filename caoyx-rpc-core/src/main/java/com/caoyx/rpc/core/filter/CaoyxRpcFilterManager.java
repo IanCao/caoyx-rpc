@@ -2,6 +2,7 @@ package com.caoyx.rpc.core.filter;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.utils.CollectionUtils;
 
 import java.util.Collection;
@@ -20,7 +21,7 @@ public class CaoyxRpcFilterManager {
 
     public void invoke(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception {
 
-        LinkedList<CaoyxRpcFilter> filters = new LinkedList();
+        LinkedList<CaoyxRpcFilter> filters = new LinkedList<CaoyxRpcFilter>();
         filters.addAll(systemFirstRpcFilters);
         filters.addAll(userRpcFilters);
         filters.addAll(systemLastRpcFilters);
@@ -33,6 +34,9 @@ public class CaoyxRpcFilterManager {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 CaoyxRpcFilter rpcFilter = filters.get(i);
                 rpcFilter.doProcess(rpcRequest, rpcResponse);
+                if (rpcResponse.getStatus() == CaoyxRpcStatus.FUTURE) {
+                    continue;
+                }
                 rpcFilter.invokeResponseHandler(rpcResponse);
             }
         }

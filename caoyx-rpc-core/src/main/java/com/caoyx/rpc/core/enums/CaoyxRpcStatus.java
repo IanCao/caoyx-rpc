@@ -7,5 +7,6 @@ package com.caoyx.rpc.core.enums;
 public enum CaoyxRpcStatus {
     SUCCESS,
     FAIL,
-    TIMEOUT
+    TIMEOUT,
+    FUTURE,
 }

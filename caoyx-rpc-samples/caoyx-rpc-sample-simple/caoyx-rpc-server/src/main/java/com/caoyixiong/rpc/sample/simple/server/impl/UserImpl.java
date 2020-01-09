@@ -20,4 +20,9 @@ public class UserImpl implements IUser {
     public List<UserDto> getUsers() {
         return userDtos;
     }
+
+    @Override
+    public void addUserVoid(UserDto userDto) {
+        userDtos.add(userDto);
+    }
 }

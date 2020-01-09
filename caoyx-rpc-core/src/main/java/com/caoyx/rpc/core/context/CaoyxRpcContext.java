@@ -1,6 +1,8 @@
 package com.caoyx.rpc.core.context;
 
 import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.enums.CallType;
+import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
 import io.netty.util.concurrent.FastThreadLocal;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +22,13 @@ public class CaoyxRpcContext {
     };
 
     public static CaoyxRpcContext getContext() {
-        return CURRENT_RPC_CONTEXT.get();
+        CaoyxRpcContext context = CURRENT_RPC_CONTEXT.get();
+        if (context != null) {
+            return context;
+        }
+        context = new CaoyxRpcContext();
+        CURRENT_RPC_CONTEXT.set(context);
+        return context;
     }
 
     public static void removeContext() {
@@ -36,6 +44,8 @@ public class CaoyxRpcContext {
     private Map<String, Object> metaData;
 
 
-
+    @Getter
+    @Setter
+    private CallType callType;
 
 }

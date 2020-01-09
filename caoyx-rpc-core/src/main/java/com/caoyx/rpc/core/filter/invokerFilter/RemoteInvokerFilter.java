@@ -4,8 +4,10 @@ import com.caoyx.rpc.core.context.CaoyxRpcContext;
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
+import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.netty.client.Client;
@@ -49,17 +51,29 @@ public class RemoteInvokerFilter implements CaoyxRpcFilter {
             throw new CaoyxRpcException("RemoteInvokerFilter - targetAddress is not set");
         }
         Client clientInstance = clientManager.getOrCreateClient(remoteAddress, client, invokerFactory);
+        rpcRequest.setMetaData(CaoyxRpcContext.getContext().getMetaData());
+
+
         clientInstance.doSend(rpcRequest);
-
         CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(invokerFactory, rpcRequest);
-        CaoyxRpcResponse caoyxRpcResponse = futureResponse.get(rpcRequest.getTimeout(), TimeUnit.MILLISECONDS);
 
-        rpcResponse.setStatus(caoyxRpcResponse.getStatus());
-        rpcResponse.setErrorMsg(caoyxRpcResponse.getErrorMsg());
-        rpcResponse.setResult(caoyxRpcResponse.getResult());
+        switch (CaoyxRpcContext.getContext().getCallType()) {
+            case SYNC:
+                CaoyxRpcResponse caoyxRpcResponse = futureResponse.get(rpcRequest.getTimeout(), TimeUnit.MILLISECONDS);
+                rpcResponse.setStatus(caoyxRpcResponse.getStatus());
+                rpcResponse.setErrorMsg(caoyxRpcResponse.getErrorMsg());
+                rpcResponse.setResult(caoyxRpcResponse.getResult());
+                break;
+            case FUTURE:
+                CaoyxRpcFuture caoyxRpcFuture = new CaoyxRpcFuture();
+                caoyxRpcFuture.setFutureResponse(futureResponse);
+                caoyxRpcFuture.setTimeout(rpcRequest.getTimeout());
+                caoyxRpcFuture.setUnit(TimeUnit.MILLISECONDS);
+                CaoyxRpcFuture.setFuture(caoyxRpcFuture);
 
-        if (!rpcResponse.isSuccess()) {
-            log.error(rpcResponse.getErrorMsg());
+                rpcResponse.setStatus(CaoyxRpcStatus.FUTURE);
+                return;
+            case CALLBACK:
         }
     }
 }

@@ -9,4 +9,6 @@ public interface IUser {
     boolean addUser(UserDto userDto);
 
     List<UserDto> getUsers();
+
+    void addUserVoid(UserDto userDto);
 }
