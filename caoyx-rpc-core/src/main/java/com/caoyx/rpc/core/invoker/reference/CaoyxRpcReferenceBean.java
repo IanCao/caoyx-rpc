@@ -14,6 +14,7 @@ import com.caoyx.rpc.core.filter.invokerFilter.LoadBalanceInvokerFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.RemoteInvokerFilter;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
+import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
 import com.caoyx.rpc.core.netty.client.Client;
 import com.caoyx.rpc.core.netty.client.ClientManager;
@@ -116,9 +117,12 @@ public class CaoyxRpcReferenceBean {
             register.startRegisterLoopFetch();
         }
 
+        ClientManager clientManager = new ClientManager();
+        register.addOnChangeCallBack(clientManager);
+
         //负载均衡 远程调用
         LoadBalanceInvokerFilter loadBalanceInvokerFilter = new LoadBalanceInvokerFilter(
-                new RemoteInvokerFilter(new ClientManager(), client, CaoyxRpcInvokerFactory.getInstance()),
+                new RemoteInvokerFilter(clientManager, client, CaoyxRpcInvokerFactory.getInstance()),
                 loadBalance,
                 register);
 
@@ -136,10 +140,6 @@ public class CaoyxRpcReferenceBean {
                 , new Class[]{iFace}, new InvocationHandler() {
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        String className = method.getDeclaringClass().getName();
-                        String methodName = method.getName();
-                        Class<?>[] parameterTypes = method.getParameterTypes();
-
                         if (Object.class == method.getDeclaringClass()) {
                             String name = method.getName();
                             if ("equals".equals(name)) {
@@ -154,6 +154,30 @@ public class CaoyxRpcReferenceBean {
                                 throw new IllegalStateException(String.valueOf(method));
                             }
                         }
+                        String className = method.getDeclaringClass().getName();
+                        String methodName = method.getName();
+                        String version = CaoyxRpcReferenceBean.this.version;
+                        String[] parameterTypes;
+                        Object[] arguments = args;
+                        long timeout = CaoyxRpcReferenceBean.this.timeout;
+                        if (className.equals(CaoyxRpcGenericInvoker.class.getName())) {
+                            if (method.getName().equals("invoke")) {
+                                className = (String) args[0];
+                                version = (String) args[1];
+                                methodName = (String) args[2];
+                                parameterTypes = (String[]) args[3];
+                                arguments = (Object[]) args[4];
+                            } else {
+                                throw new IllegalStateException(String.valueOf(method));
+                            }
+                        } else {
+                            Class<?>[] parameterClassTypes = method.getParameterTypes();
+                            parameterTypes = new String[parameterClassTypes.length];
+                            for (int i = 0; i < parameterClassTypes.length; i++) {
+                                parameterTypes[i] = parameterClassTypes[i].getName();
+                            }
+
+                        }
 
                         CaoyxRpcRequest rpcRequest = new CaoyxRpcRequest();
                         CaoyxRpcResponse rpcResponse = new CaoyxRpcResponse();
@@ -167,7 +191,7 @@ public class CaoyxRpcReferenceBean {
                             rpcRequest.setSerializerAlgorithm(serializerAlgorithm.getAlgorithmId());
                             rpcRequest.setClassName(className);
                             rpcRequest.setMethodName(methodName);
-                            rpcRequest.setParameters(args);
+                            rpcRequest.setParameters(arguments);
                             rpcRequest.setParameterTypes(parameterTypes);
                             rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
                             rpcRequest.setTimeout(timeout);

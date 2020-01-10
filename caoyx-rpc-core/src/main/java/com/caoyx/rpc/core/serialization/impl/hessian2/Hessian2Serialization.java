@@ -1,4 +1,4 @@
-package com.caoyx.rpc.serialization.hessian2;
+package com.caoyx.rpc.core.serialization.impl.hessian2;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.annotation.Implement;

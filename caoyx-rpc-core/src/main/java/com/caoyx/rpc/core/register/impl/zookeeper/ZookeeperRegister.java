@@ -1,4 +1,4 @@
-package com.caoyx.rpc.register.zookeeper;
+package com.caoyx.rpc.core.register.impl.zookeeper;
 
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.extension.annotation.Implement;
@@ -8,8 +8,6 @@ import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
@@ -81,6 +79,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
             return;
         }
         log.info("path:[" + s + "] child change");
-        fetch(applicationName, version);
+        fetchAll(applicationName, version);
     }
 }

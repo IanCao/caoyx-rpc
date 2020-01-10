@@ -1,5 +1,6 @@
 package com.caoyx.rpc.sample.simple.client;
 
+import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
 import com.caoyx.rpc.sample.simple.api.IUser;
 import com.caoyx.rpc.sample.simple.api.UserDto;
 import com.caoyx.rpc.core.enums.CallType;
@@ -24,16 +25,17 @@ public class UserClient {
         testSync();
         testFuture();
         testCallBack();
+        testGenericCall();
     }
 
     private static void testSync() throws Exception {
         UserDto userDto = new UserDto("UserDto==> testSync");
-        IUser user = init(CallType.SYNC, null);
+        IUser user = (IUser) init(IUser.class, CallType.SYNC, null);
         System.out.println(user.addUser(userDto));
     }
 
     private static void testFuture() throws Exception {
-        IUser user = init(CallType.FUTURE, null);
+        IUser user = (IUser) init(IUser.class, CallType.FUTURE, null);
         user.getUsers();
         System.out.println(CaoyxRpcFuture.getFuture().get().toString());
         UserDto userDto = new UserDto("UserDto==> testFuture");
@@ -41,7 +43,7 @@ public class UserClient {
     }
 
     private static void testCallBack() throws Exception {
-        IUser user = init(CallType.CALLBACK, new CaoyxRpcInvokerCallBack() {
+        IUser user = (IUser) init(IUser.class, CallType.CALLBACK, new CaoyxRpcInvokerCallBack() {
             @Override
             public void onSuccess(Object result) {
                 System.out.println("testCallBack: " + result);
@@ -55,12 +57,18 @@ public class UserClient {
         user.getUsers();
     }
 
-    private static IUser init(CallType callType, CaoyxRpcInvokerCallBack callBack) throws Exception {
+    private static void testGenericCall() throws Exception {
+        CaoyxRpcGenericInvoker invoker = (CaoyxRpcGenericInvoker) init(CaoyxRpcGenericInvoker.class, CallType.SYNC, null);
+        Object object = invoker.invoke("com.caoyx.rpc.sample.simple.api.IUser", "0", "getUsers", null, null);
+        System.out.println("testGenericCall : " + object.toString());
+    }
+
+    private static Object init(Class clazz, CallType callType, CaoyxRpcInvokerCallBack callBack) throws Exception {
         List<String> loadAddresses = new ArrayList<String>();
         loadAddresses.add("127.0.0.1:1118");
-        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(IUser.class,
+        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(clazz,
                 "0",
-                "caoyxRpc",
+                "META-INF/caoyxRpc",
                 new RegisterConfig(
                         RegisterType.NO_REGISTER.getValue(),
                         "",
@@ -73,6 +81,6 @@ public class UserClient {
         rpcReferenceBean.setCaoyxRpcInvokerCallBack(callBack);
         rpcReferenceBean.init();
 
-        return (IUser) rpcReferenceBean.getObject();
+        return rpcReferenceBean.getObject();
     }
 }

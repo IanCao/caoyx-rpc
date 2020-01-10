@@ -16,6 +16,4 @@
         <module>caoyx-rpc-sample-springboot-client</module>
         <module>caoyx-rpc-sample-springboot-server</module>
     </modules>
-
-
 </project>

@@ -3,16 +3,21 @@ package com.caoyx.rpc.core.netty.client;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.register.RegisterOnChangeCallBack;
+import com.caoyx.rpc.core.utils.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Author: caoyixiong
  * @Date: 2019-12-27 15:55
  */
 @Slf4j
-public class ClientManager {
+public class ClientManager implements RegisterOnChangeCallBack {
 
     private static volatile ConcurrentHashMap<Address, Client> clientPool = new ConcurrentHashMap<>();
 
@@ -48,9 +53,19 @@ public class ClientManager {
         }
     }
 
-    public void removeClient(Address address) {
+    private void removeClient(Address address) {
         synchronized (address.toString()) {
             clientPool.remove(address);
+        }
+    }
+
+    @Override
+    public void onAddressesDeleted(Set<Address> addresses) {
+        if (CollectionUtils.isEmpty(addresses)) {
+            return;
+        }
+        for (Address address : addresses) {
+            removeClient(address);
         }
     }
 }

@@ -13,8 +13,6 @@
         <module>caoyx-rpc-core</module>
         <module>caoyx-rpc-spring</module>
         <module>caoyx-rpc-samples</module>
-        <module>caoyx-rpc-register</module>
-        <module>caoyx-rpc-serialization</module>
     </modules>
 
     <properties>

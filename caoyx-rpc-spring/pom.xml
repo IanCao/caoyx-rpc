@@ -38,18 +38,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.iancao</groupId>
-            <artifactId>caoyx-rpc-register</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <artifactId>caoyx-rpc-serialization</artifactId>
-            <groupId>com.github.iancao</groupId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>

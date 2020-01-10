@@ -4,7 +4,6 @@ import com.caoyx.rpc.core.enums.ExtensionType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.annotation.SPI;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
