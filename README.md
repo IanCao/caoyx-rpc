@@ -3,6 +3,117 @@
 ![maven](https://img.shields.io/nexus/s/com.github.iancao/caoyx-rpc?server=https%3A%2F%2Foss.sonatype.org)
 
 # caoyx-rpc
-接入简单，支持高并发，负载均衡，熔断，流量染色的RPC框架
+caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可用，高可用的远程调用能力。
 
-目前还在持续开发
+### Features特性：
+1. 面向接口代理：调用方和提供方通过一个接口jar包进行耦合，系统封装了远程通讯的实现，用户在使用时就跟调用本地实现一样。
+2. 支持多种调用方式：目前支持 **同步调用**, **Future异步调用**, **CallBack**
+3. 支持隐式参数：用户可以在 CaoyxRpcContext 上下文中放入自定义信息，这些信息也会随着调用发送到服务提供方
+4. 支持泛化调用：调用放可以不依赖于服务提供方的接口jar包而进行调用服务提供方的服务
+5. 负载均衡：提供丰富的负载均衡策略，目前包括：**随机**
+6. 服务注册与发现：支持服务自动注册和手动注册
+   - 自动注册：目前支持Zookeeper
+   - 手动注册：用户在配置中增加具体的服务提供方的ip+port,可以是多个服务提供方
+   - caoyx-rpc会收集自动注册组件中的服务提供方地址 + 手动注册的服务提供方地址进行负载均衡
+7. 高度扩展能力：通过自定义SPI进行高度扩展
+8. 多版本能力：服务提供方提供同一接口多版本实现，调用方选择某个版本进行使用
+9. 多种序列化选择方式：目前支持JDK,Hessian2序列话方式
+10. 支持用户自定义调用链中的filter：用户可以自定义filter并加入到调用链之中
+11. 与SpringBoot高度集成
+12. 支持调用方设置超时时间和失败重试次数
+
+
+### 如何使用
+#### 1. SpringBoot接入
+
+[Caoyx-Rpc SpringBoot Demo](https://github.com/IanCao/caoyx-rpc/tree/master/caoyx-rpc-samples/caoyx-rpc-sample-springboot)
+##### a.服务调用方
+**Maven dependency**
+```xml
+ <dependency>
+   <artifactId>caoyx-rpc-spring-invoker</artifactId>
+   <groupId>com.github.iancao</groupId>
+   <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+在期望使用远程调用的地方，使用 `@CaoyxRpcReference` 进行注解服务提供方提供的接口Bean
+并增加`@CaoyxRpcReference`注解参数
+
+```
+ // 控制序列话方式，默认使用Jdk，选填
+ SerializerAlgorithm serializer() default SerializerAlgorithm.JDK;
+ // 控制调用的服务提供方的版本号，选填
+ String version() default "0";
+ // 手动注册需要传入的调用方的地址，选填
+ String[] loadAddress() default {};
+ // 控制调用方式，默认使用同步调用方式，选填
+ CallType callType() default CallType.SYNC;
+ // 控制自动注册的使用情况，默认不使用注册中心，选填
+ RegisterType register() default RegisterType.NO_REGISTER;
+ // 如果上面使用了注册方式，填写注册中心地址
+ String registerAddress() default "";
+ // 服务提供方的服务名，必填
+ String remoteApplicationName() default "";
+ // 失败重试次数，选填
+ int retryTimes() default 0;
+ // 超时时间，选填
+ long timeout() default 3000L;
+ // 用户自定义的filter的BeanName，选填
+ String[] filters() default {};
+```
+
+##### a.服务提供方
+**Maven dependency**
+```xml
+ <dependency>
+   <artifactId>caoyx-rpc-spring-provider</artifactId>
+   <groupId>com.github.iancao</groupId>
+   <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+在实现远程调用接口的类上添加 `@CaoyxRpcService`注解
+
+并在 application.properties 或者 application.yml 中增加
+
+```
+ // 服务提供方的名称
+ caoyxRpc.applicationName=caoyxRpc-sample-springboot-client，必填
+ // 服务提供方暴露的端口，默认1118，必填
+ caoyxRpc.port=1118 
+ // 服务提供方自动注册的方式，默认为不使用自动注册，可以选择noRegister不使用自动注册方式，选填
+ caoyxRpc.register.type=zookeeper
+ // 自动注册的组件的地址 ，选填
+ caoyxRpc.register.address=127.0.0.1:2181
+
+```
+
+用户具体可以查阅下
+
+#### 2. 原生接入
+[Caoyx-Rpc Simple Demo](https://github.com/IanCao/caoyx-rpc/tree/master/caoyx-rpc-samples/caoyx-rpc-sample-simple)
+**Maven dependency**
+
+```xml
+<dependency>
+    <groupId>com.github.iancao</groupId>
+    <artifactId>caoyx-rpc-core</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+##### a.服务提供方
+TODO
+##### b.服务提供方
+TODO
+
+
+### 如何联系
+- 在github提Issue
+- 发送邮件至caoyixiong@apache.org
+
+### 贡献
+欢迎参与项目贡献！比如提交PR修复一个bug，或者新建 Issue 讨论新特性或者变更。
+
+### License
+caoyx-rpc is under the Apache 2.0 license. See the LICENSE file for details.
+
+产品开源免费，并且将持续提供免费的社区技术支持。

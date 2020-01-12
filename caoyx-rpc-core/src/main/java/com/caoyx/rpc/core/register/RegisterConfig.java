@@ -16,6 +16,12 @@ public class RegisterConfig {
     private String registerName;
     private List<String> loadAddresses;
 
+
+    public RegisterConfig(String registerAddress, String registerName) {
+        this.registerAddress = registerAddress;
+        this.registerName = registerName;
+    }
+
     public RegisterConfig(String registerName, String registerAddress, List<String> loadAddresses) {
         this.registerAddress = registerAddress;
         this.registerName = registerName;

@@ -26,7 +26,10 @@ public class CaoyxRpcProviderSpringConfiguration {
     @Value("${caoyxRpc.applicationName}")
     private String applicationName;
 
-    @Value("${caoyxRpc.register.address}")
+    @Value("${caoyxRpc.register.type:noRegister}")
+    private String registerType;
+
+    @Value("${caoyxRpc.register.address:}")
     private String registerAddress;
 
 
@@ -36,10 +39,10 @@ public class CaoyxRpcProviderSpringConfiguration {
         log.info("caoyxRpcSpringProviderFactory init");
         CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(applicationName,
                 new NettyServer(),
-                new RegisterConfig("zookeeper", registerAddress, null),
+                new RegisterConfig(registerType, registerAddress),
                 "0",
                 null);
-        factory.setPort(port);  // todo 服务治理
+        factory.setPort(port);
         factory.init();
         return factory;
     }

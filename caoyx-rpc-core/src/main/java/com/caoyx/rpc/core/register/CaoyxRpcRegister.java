@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class CaoyxRpcRegister implements Register {
 
     private static final long FETCH_INTERVAL_IN_MILLS = 5 * 1000L;
+
     private volatile CopyOnWriteArraySet<Address> remoteAddressesCache = new CopyOnWriteArraySet<>();
     @Getter
     private volatile CopyOnWriteArraySet<Address> loadAddressCache = new CopyOnWriteArraySet<>();

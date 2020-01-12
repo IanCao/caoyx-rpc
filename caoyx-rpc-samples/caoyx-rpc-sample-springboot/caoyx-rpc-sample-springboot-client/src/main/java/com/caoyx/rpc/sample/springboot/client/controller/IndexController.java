@@ -1,9 +1,6 @@
 package com.caoyx.rpc.sample.springboot.client.controller;
 
 
-
-import com.caoyx.rpc.core.enums.CallType;
-import com.caoyx.rpc.core.register.RegisterType;
 import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 import com.caoyx.rpc.sample.springboot.api.IUser;
 import com.caoyx.rpc.sample.springboot.api.UserDto;
@@ -16,18 +13,14 @@ import java.util.List;
 @RestController
 public class IndexController {
 
-    @CaoyxRpcReference(callType = CallType.SYNC,
-            registerAddress = "127.0.0.1:2181",
+    @CaoyxRpcReference(loadAddress = {"127.0.0.1:1118"},
             remoteApplicationName = "caoyxRpc-sample-springboot-server",
-            register = RegisterType.ZOOKEEPER,
             serializer = SerializerAlgorithm.JDK,
             retryTimes = 2)
     private IUser user;
 
-    @CaoyxRpcReference(callType = CallType.SYNC,
-            registerAddress = "127.0.0.1:2181",
+    @CaoyxRpcReference(loadAddress = {"127.0.0.1:1118"},
             remoteApplicationName = "caoyxRpc-sample-springboot-server",
-            register = RegisterType.ZOOKEEPER,
             serializer = SerializerAlgorithm.HESSIAN2,
             retryTimes = 2)
     private IUser user1;
