@@ -1,4 +1,4 @@
-package com.caoyx.rpc.core.netty.client;
+package com.caoyx.rpc.core.net.netty.client;
 
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;

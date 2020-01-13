@@ -1,8 +1,10 @@
 package com.caoyx.rpc.spring.invoker;
 
 import com.caoyx.rpc.core.enums.CallType;
-import com.caoyx.rpc.core.netty.client.Client;
-import com.caoyx.rpc.core.netty.client.NettyClient;
+import com.caoyx.rpc.core.loadbalance.LoadBalance;
+import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
+import com.caoyx.rpc.core.net.api.Client;
+import com.caoyx.rpc.core.net.netty.client.NettyClient;
 import com.caoyx.rpc.core.register.RegisterType;
 import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 
@@ -30,6 +32,8 @@ public @interface CaoyxRpcReference {
     String version() default "0";
 
     RegisterType register() default RegisterType.NO_REGISTER;
+
+    LoadBalanceType loadBalance() default LoadBalanceType.RANDOM;
 
     String[] loadAddress() default {};
 

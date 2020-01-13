@@ -1,4 +1,4 @@
-package com.caoyx.rpc.core.netty.codec;
+package com.caoyx.rpc.core.net.netty.codec;
 
 import com.caoyx.rpc.core.data.CaoyxRpcPacket;
 import com.caoyx.rpc.core.serialization.CaoyxRpcSerializer;

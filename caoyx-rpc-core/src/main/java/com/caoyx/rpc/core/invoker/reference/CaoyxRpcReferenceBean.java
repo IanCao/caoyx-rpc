@@ -16,8 +16,9 @@ import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
-import com.caoyx.rpc.core.netty.client.Client;
-import com.caoyx.rpc.core.netty.client.ClientManager;
+import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
+import com.caoyx.rpc.core.net.api.Client;
+import com.caoyx.rpc.core.net.api.ClientManager;
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
@@ -68,7 +69,7 @@ public class CaoyxRpcReferenceBean {
     private Class<?> iFace;
     @Setter
     private RegisterConfig registerConfig;
-    @Setter
+
     private LoadBalance loadBalance;
     @Setter
     private SerializerAlgorithm serializerAlgorithm;
@@ -85,7 +86,8 @@ public class CaoyxRpcReferenceBean {
                                  RegisterConfig registerConfig,
                                  Class<? extends Client> client,
                                  SerializerAlgorithm serializerAlgorithm,
-                                 List<CaoyxRpcFilter> rpcFilters) {
+                                 LoadBalanceType loadBalanceType,
+                                 List<CaoyxRpcFilter> rpcFilters) throws CaoyxRpcException {
         this.iFace = iFace;
         this.version = version;
         this.applicationName = applicationName;
@@ -95,10 +97,13 @@ public class CaoyxRpcReferenceBean {
 
         this.rpcFilterManager = new CaoyxRpcFilterManager();
         rpcFilterManager.addAllUserFilters(rpcFilters);
+
+        this.loadBalance = (LoadBalance) ExtensionLoader.getExtension(LoadBalance.class, loadBalanceType.getValue()).getValidExtensionInstance();
+        init();
     }
 
 
-    public CaoyxRpcReferenceBean init() throws Exception {
+    public CaoyxRpcReferenceBean init() throws CaoyxRpcException {
         if (registerConfig != null) {
             register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();
             register.initRegister(applicationName, version);

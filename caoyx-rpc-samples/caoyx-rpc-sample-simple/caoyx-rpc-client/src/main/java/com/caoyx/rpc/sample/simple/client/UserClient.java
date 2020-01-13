@@ -1,12 +1,13 @@
 package com.caoyx.rpc.sample.simple.client;
 
 import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
+import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
 import com.caoyx.rpc.sample.simple.api.IUser;
 import com.caoyx.rpc.sample.simple.api.UserDto;
 import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
-import com.caoyx.rpc.core.netty.client.NettyClient;
+import com.caoyx.rpc.core.net.netty.client.NettyClient;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
@@ -74,10 +75,9 @@ public class UserClient {
                         "",
                         loadAddresses),
                 NettyClient.class,
-                SerializerAlgorithm.HESSIAN2
-                , null);
-        rpcReferenceBean.setCallType(callType);
-        rpcReferenceBean.setLoadBalance(new RandomLoadBalance());
+                SerializerAlgorithm.HESSIAN2,
+                LoadBalanceType.RANDOM,
+                null);
         rpcReferenceBean.setCaoyxRpcInvokerCallBack(callBack);
         rpcReferenceBean.init();
 

@@ -1,7 +1,7 @@
 package com.caoyx.rpc.spring.provider.autoconfiguration;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.netty.server.NettyServer;
+import com.caoyx.rpc.core.net.netty.server.NettyServer;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.spring.provider.CaoyxRpcSpringProviderFactory;
 import org.slf4j.Logger;

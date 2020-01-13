@@ -53,19 +53,24 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                             caoyxRpcFilters.add((CaoyxRpcFilter) filterBean);
                         }
                     }
-                    CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
-                            caoyxRpcReference.version(),
-                            caoyxRpcReference.remoteApplicationName(),
-                            new RegisterConfig(
-                                    caoyxRpcReference.register().getValue(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
-                            caoyxRpcReference.client(),
-                            caoyxRpcReference.serializer(),
-                            caoyxRpcFilters);
+                    CaoyxRpcReferenceBean referenceBean = null;
+                    try {
+                        referenceBean = new CaoyxRpcReferenceBean(field.getType(),
+                                caoyxRpcReference.version(),
+                                caoyxRpcReference.remoteApplicationName(),
+                                new RegisterConfig(
+                                        caoyxRpcReference.register().getValue(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
+                                caoyxRpcReference.client(),
+                                caoyxRpcReference.serializer(),
+                                caoyxRpcReference.loadBalance(),
+                                caoyxRpcFilters);
+                    } catch (CaoyxRpcException e) {
+                        log.error(field.getType() + " init fail");
+                    }
 
                     referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
                     referenceBean.setTimeout(caoyxRpcReference.timeout());
                     referenceBean.setCallType(caoyxRpcReference.callType());
-                    referenceBean.setLoadBalance(new RandomLoadBalance());
 
                     try {
                         referenceBean.init();

@@ -1,7 +1,7 @@
 package com.caoyx.rpc.spring.provider;
 
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
-import com.caoyx.rpc.core.netty.server.Server;
+import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import org.springframework.beans.BeansException;
