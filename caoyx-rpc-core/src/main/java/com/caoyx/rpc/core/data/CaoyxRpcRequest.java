@@ -14,6 +14,8 @@ public class CaoyxRpcRequest extends CaoyxRpcPacket {
 
     private String applicationName;
 
+    private String applicationVersion;
+
     private String className;
 
     private String methodName;
@@ -26,7 +28,9 @@ public class CaoyxRpcRequest extends CaoyxRpcPacket {
 
     private long timeout;
 
-    private Address address;
+    private String invokerAddress;
+
+    private String accessToken;
 
     private Map<String, Object> metaData = new HashMap<>();
 

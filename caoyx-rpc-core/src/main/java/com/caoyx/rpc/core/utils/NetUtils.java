@@ -1,5 +1,6 @@
 package com.caoyx.rpc.core.utils;
 
+import com.caoyx.rpc.core.data.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,5 +92,15 @@ public class NetUtils {
                 && !LOCAL_HOST.equals(name)
                 && !ANY_HOST.equals(name)
                 && !IP_PATTERN.matcher(name).matches());
+    }
+
+    public static Address format(String address) {
+        try {
+            String[] ipPort = address.split(":");
+            return new Address(ipPort[0], Integer.valueOf(ipPort[1]));
+        } catch (Throwable t) {
+            logger.error(t.getMessage(), t);
+        }
+        return null;
     }
 }

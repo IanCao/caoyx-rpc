@@ -6,7 +6,7 @@ import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
  * @Author: caoyixiong
  * @Date: 2019-12-16 20:21
  */
-public class CaoyxRpcException extends Exception {
+public class CaoyxRpcException extends RuntimeException {
 
     public CaoyxRpcException(String msg) {
         super(msg);

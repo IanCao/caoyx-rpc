@@ -18,13 +18,13 @@ public class CaoyxRpcProviderHandler implements CaoyxRpcFilter {
 
     private ConcurrentHashMap<String, Object> serviceBeanMap = new ConcurrentHashMap<String, Object>();
 
-    public void addServiceBean(String className, String version, Object service) {
-        String key = className + "@" + version;
+    public void addServiceBean(String className, String implVersion, Object service) {
+        String key = className + "@" + implVersion;
         serviceBeanMap.putIfAbsent(key, service);
     }
 
-    public Object getServiceBean(String className, String version) {
-        String key = className + "@" + version;
+    public Object getServiceBean(String className, String implVersion) {
+        String key = className + "@" + implVersion;
         return serviceBeanMap.get(key);
     }
 
@@ -45,7 +45,7 @@ public class CaoyxRpcProviderHandler implements CaoyxRpcFilter {
         }
         responsePacket.setRequestId(requestPacket.getRequestId());
 
-        Object serviceBean = getServiceBean(requestPacket.getClassName(), requestPacket.getVersion());
+        Object serviceBean = getServiceBean(requestPacket.getClassName(), requestPacket.getImplVersion());
 
         Class clazz = serviceBean.getClass();
         String methodName = requestPacket.getMethodName();

@@ -29,7 +29,9 @@ public @interface CaoyxRpcReference {
 
     SerializerAlgorithm serializer() default SerializerAlgorithm.JDK;
 
-    String version() default "0";
+    String implVersion() default "0";
+
+    String applicationVersion() default "0";
 
     RegisterType register() default RegisterType.NO_REGISTER;
 

@@ -13,9 +13,12 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -41,12 +44,14 @@ public class NettyServer implements Server {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     protected void initChannel(NioSocketChannel channel) throws Exception {
                         channel.pipeline()
+                                .addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS))
                                 .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class))
                                 .addLast(new CaoyxRpcEncoder())
                                 .addLast(new NettyServerHandler(caoyxRpcProviderFactory));
                     }
                 });
-        ChannelFuture channelFuture = serverBootstrap.bind(caoyxRpcProviderFactory.getPort()).sync().addListener(new GenericFutureListener<Future<? super Void>>() {
+        ChannelFuture channelFuture = serverBootstrap.bind(caoyxRpcProviderFactory.getPort()).sync();
+        channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
                 if (future.isSuccess()) {

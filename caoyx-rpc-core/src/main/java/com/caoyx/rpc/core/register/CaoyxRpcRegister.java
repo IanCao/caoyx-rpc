@@ -36,16 +36,17 @@ public abstract class CaoyxRpcRegister implements Register {
     private volatile ScheduledFuture<?> addressFetchFuture;
 
     protected String applicationName;
-    protected String version;
 
-    protected abstract Set<Address> fetchAllAddress(String applicationName, String version);
+    protected String applicationVersion;
+
+    protected abstract Set<Address> fetchAllAddress(String applicationName, String applicationVersion);
 
     protected abstract void doStop();
 
     @Override
-    public final void initRegister(String applicationName, String version) {
+    public final void initRegister(String applicationName, String applicationVersion) {
         this.applicationName = applicationName;
-        this.version = version;
+        this.applicationVersion = applicationVersion;
     }
 
     @Override
@@ -58,14 +59,14 @@ public abstract class CaoyxRpcRegister implements Register {
                         if (isValidUpdated()) {
                             return;
                         }
-                        fetchAll(applicationName, version);
+                        fetchAll(applicationName, applicationVersion);
 
                     }
                 }, 0, FETCH_INTERVAL_IN_MILLS, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public final Set<Address> getAllRegister(String applicationName, String version) {
+    public final Set<Address> getAllRegister(String applicationName, String applicationVersion) {
         if (isValidCache()) {
             return allAddressesCache;
         }
@@ -73,7 +74,7 @@ public abstract class CaoyxRpcRegister implements Register {
             if (isValidCache()) {
                 return allAddressesCache;
             }
-            fetchAll(applicationName, version);
+            fetchAll(applicationName, applicationVersion);
             return allAddressesCache;
         }
     }

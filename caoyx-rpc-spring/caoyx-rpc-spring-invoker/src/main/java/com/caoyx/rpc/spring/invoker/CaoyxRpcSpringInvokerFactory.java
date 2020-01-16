@@ -53,10 +53,10 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                             caoyxRpcFilters.add((CaoyxRpcFilter) filterBean);
                         }
                     }
-                    CaoyxRpcReferenceBean referenceBean = null;
                     try {
-                        referenceBean = new CaoyxRpcReferenceBean(field.getType(),
-                                caoyxRpcReference.version(),
+                        CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
+                                caoyxRpcReference.implVersion(),
+                                caoyxRpcReference.applicationVersion(),
                                 caoyxRpcReference.remoteApplicationName(),
                                 new RegisterConfig(
                                         caoyxRpcReference.register().getValue(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
@@ -64,21 +64,15 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                                 caoyxRpcReference.serializer(),
                                 caoyxRpcReference.loadBalance(),
                                 caoyxRpcFilters);
-                    } catch (CaoyxRpcException e) {
-                        log.error(field.getType() + " init fail");
-                    }
-
-                    referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
-                    referenceBean.setTimeout(caoyxRpcReference.timeout());
-                    referenceBean.setCallType(caoyxRpcReference.callType());
-
-                    try {
+                        referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
+                        referenceBean.setTimeout(caoyxRpcReference.timeout());
+                        referenceBean.setCallType(caoyxRpcReference.callType());
                         referenceBean.init();
                         Object proxy = referenceBean.getObject();
                         field.setAccessible(true);
                         field.set(bean, proxy);
                     } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        log.error(field.getType() + " init fail", e);
                     }
                 }
             }

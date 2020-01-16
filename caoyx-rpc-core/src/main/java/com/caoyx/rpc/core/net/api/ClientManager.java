@@ -3,7 +3,6 @@ package com.caoyx.rpc.core.net.api;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.net.api.Client;
 import com.caoyx.rpc.core.register.RegisterOnChangeCallBack;
 import com.caoyx.rpc.core.utils.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,7 @@ public class ClientManager implements RegisterOnChangeCallBack {
         if (client != null && client.isValid()) {
             return client;
         }
-        synchronized (address.toString()) {
+        synchronized (address.toString().intern()) {
             //double check
             client = clientPool.get(address);
             if (client != null && client.isValid()) {
@@ -53,8 +52,12 @@ public class ClientManager implements RegisterOnChangeCallBack {
     }
 
     private void removeClient(Address address) {
-        synchronized (address.toString()) {
-            clientPool.remove(address);
+        synchronized (address.toString().intern()) {
+            Client client = clientPool.get(address);
+            if (client != null) {
+                client.close();
+                clientPool.remove(address);
+            }
         }
     }
 

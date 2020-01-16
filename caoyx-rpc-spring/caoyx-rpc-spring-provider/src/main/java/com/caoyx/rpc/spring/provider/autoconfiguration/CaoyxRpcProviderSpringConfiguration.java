@@ -32,6 +32,8 @@ public class CaoyxRpcProviderSpringConfiguration {
     @Value("${caoyxRpc.register.address:}")
     private String registerAddress;
 
+    @Value("${caoyxRpc.applicationVersion:0}")
+    private String applicationVersion;
 
     @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
     @Bean
@@ -40,7 +42,7 @@ public class CaoyxRpcProviderSpringConfiguration {
         CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(applicationName,
                 new NettyServer(),
                 new RegisterConfig(registerType, registerAddress),
-                "0",
+                applicationVersion,
                 null);
         factory.setPort(port);
         factory.init();

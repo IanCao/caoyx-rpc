@@ -17,10 +17,11 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
    - caoyx-rpc会收集自动注册组件中的服务提供方地址 + 手动注册的服务提供方地址进行负载均衡
 7. 高度扩展能力：通过自定义SPI进行高度扩展
 8. 多版本能力：服务提供方提供同一接口多版本实现，调用方选择某个版本进行使用
-9. 多种序列化选择方式：目前支持JDK,Hessian2序列话方式
+9. 多种序列化选择方式：目前支持**JDK**，**Hessian2**序列化方式
 10. 支持用户自定义调用链中的filter：用户可以自定义filter并加入到调用链之中
 11. 与SpringBoot高度集成
 12. 支持调用方设置超时时间和失败重试次数
+13. 支持服务版本与实现版本调用：服务提供方可以设置其服务版本和其实现实现版本，调用方同时设置提供方的服务版本和实现版本进行调用
 
 
 ### 如何使用
@@ -42,8 +43,10 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 ```
  // 控制序列话方式，默认使用Jdk，选填
  SerializerAlgorithm serializer() default SerializerAlgorithm.JDK;
- // 控制调用的服务提供方的版本号，选填
- String version() default "0";
+ // 控制调用的服务提供方的实现版本号，选填
+ String implVersion() default "0";
+ // 控制调用的服务提供方的版本号（会在注册中心使用此服务版本号进行选择），选填
+ String applicationVersion() default "0";
  // 手动注册需要传入的调用方的地址，选填
  String[] loadAddress() default {};
  // 控制调用方式，默认使用同步调用方式，选填
@@ -52,6 +55,8 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
  RegisterType register() default RegisterType.NO_REGISTER;
  // 如果上面使用了注册方式，填写注册中心地址
  String registerAddress() default "";
+ // 控制负载均衡算法，默认随机，选填
+ LoadBalanceType loadBalance() default LoadBalanceType.RANDOM;
  // 服务提供方的服务名，必填
  String remoteApplicationName() default "";
  // 失败重试次数，选填
@@ -64,6 +69,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 
 ##### a.服务提供方
 **Maven dependency**
+
 ```xml
  <dependency>
    <artifactId>caoyx-rpc-spring-provider</artifactId>
@@ -80,17 +86,19 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
  caoyxRpc.applicationName=caoyxRpc-sample-springboot-client，必填
  // 服务提供方暴露的端口，默认1118，必填
  caoyxRpc.port=1118 
- // 服务提供方自动注册的方式，默认为不使用自动注册，可以选择noRegister不使用自动注册方式，选填
+ // 服务提供方自动注册的方式，默认为noRegister，可以选择noRegister不使用自动注册方式，选填
  caoyxRpc.register.type=zookeeper
  // 自动注册的组件的地址 ，选填
  caoyxRpc.register.address=127.0.0.1:2181
+ // 服务提供方的版本，默认为0， 选填
+ caoyxRpc.applicationVersion;
 
 ```
 
-用户具体可以查阅下
-
 #### 2. 原生接入
+
 [Caoyx-Rpc Simple Demo](https://github.com/IanCao/caoyx-rpc/tree/master/caoyx-rpc-samples/caoyx-rpc-sample-simple)
+
 **Maven dependency**
 
 ```xml
@@ -100,10 +108,63 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
-##### a.服务提供方
-TODO
+
+服务提供方定义的接口如下：
+```java
+public interface IUser {
+    
+    boolean addUser(UserDto userDto);
+
+    List<UserDto> getUsers();
+}
+```
+
+##### a.服务调用方
+
+
+```
+    public static void main(String[] args) {
+        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(IUser.class,
+                "0",
+                "0",
+                "caoyxRpc-sample-simple-server",
+                new RegisterConfig(
+                        RegisterType.NO_REGISTER.getValue(),
+                        "",
+                        Arrays.asList("127.0.0.1:1118")),
+                NettyClient.class,
+                SerializerAlgorithm.HESSIAN2,
+                LoadBalanceType.RANDOM,
+                null);
+        rpcReferenceBean.setCallType(callType);
+        rpcReferenceBean.setCaoyxRpcInvokerCallBack(callBack);
+        rpcReferenceBean.init();
+
+        IUser user = (IUser) rpcReferenceBean.getObject();  // 获取代理的IUser对象，进行使用即可。
+        user.getUsers();
+    }
+```
+
 ##### b.服务提供方
-TODO
+```
+   public static void main(String[] args) throws InstantiationException, IllegalAccessException, InterruptedException, CaoyxRpcException {
+         String applicationName = "caoyxRpc-sample-simple-server";
+         String applicationVersion = "0";
+         String implVersion = "0";
+         CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName,
+                 new NettyServer(),
+                 new RegisterConfig(
+                         "noRegister",
+                         "",
+                         null
+                 ),
+                 applicationVersion
+                 , null);
+         caoyxRpcProviderFactory.setPort(1118);
+         caoyxRpcProviderFactory.addServiceBean(IUser.class.getName(), implVersion, new UserImpl()); // 将实现类与接口声名和版本添加入Provider中
+         caoyxRpcProviderFactory.init();
+     }
+```
 
 
 ### 如何联系

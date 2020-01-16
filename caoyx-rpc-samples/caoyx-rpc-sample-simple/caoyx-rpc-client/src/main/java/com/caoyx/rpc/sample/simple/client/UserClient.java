@@ -8,7 +8,6 @@ import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.net.netty.client.NettyClient;
-import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.register.RegisterType;
@@ -30,7 +29,7 @@ public class UserClient {
     }
 
     private static void testSync() throws Exception {
-        UserDto userDto = new UserDto("UserDto==> testSync");
+        UserDto userDto = new UserDto("testSync : UserDto==> testSync");
         IUser user = (IUser) init(IUser.class, CallType.SYNC, null);
         System.out.println(user.addUser(userDto));
     }
@@ -39,7 +38,7 @@ public class UserClient {
         IUser user = (IUser) init(IUser.class, CallType.FUTURE, null);
         user.getUsers();
         System.out.println(CaoyxRpcFuture.getFuture().get().toString());
-        UserDto userDto = new UserDto("UserDto==> testFuture");
+        UserDto userDto = new UserDto("testFuture : UserDto==> testFuture");
         user.addUserVoid(userDto);
     }
 
@@ -69,7 +68,8 @@ public class UserClient {
         loadAddresses.add("127.0.0.1:1118");
         CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(clazz,
                 "0",
-                "META-INF/caoyxRpc",
+                "0",
+                "caoyxRpc-sample-simple-server",
                 new RegisterConfig(
                         RegisterType.NO_REGISTER.getValue(),
                         "",
@@ -78,6 +78,7 @@ public class UserClient {
                 SerializerAlgorithm.HESSIAN2,
                 LoadBalanceType.RANDOM,
                 null);
+        rpcReferenceBean.setCallType(callType);
         rpcReferenceBean.setCaoyxRpcInvokerCallBack(callBack);
         rpcReferenceBean.init();
 

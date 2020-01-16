@@ -24,6 +24,7 @@ import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 import com.caoyx.rpc.core.utils.CollectionUtils;
+import com.caoyx.rpc.core.utils.NetUtils;
 import com.caoyx.rpc.core.utils.StringUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,9 @@ public class CaoyxRpcReferenceBean {
     @Setter
     private String applicationName;
     @Setter
-    private String version;
+    private String applicationVersion;
+    @Setter
+    private String implVersion;
     @Setter
     private int retryTimes = 1;
     @Setter
@@ -77,11 +80,14 @@ public class CaoyxRpcReferenceBean {
     private CaoyxRpcRegister register;
     @Setter
     private CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;
+    @Setter
+    private String accessToken;
 
     private CaoyxRpcFilterManager rpcFilterManager;
 
     public CaoyxRpcReferenceBean(Class<?> iFace,
-                                 String version,
+                                 String implVersion,
+                                 String applicationVersion,
                                  String applicationName,
                                  RegisterConfig registerConfig,
                                  Class<? extends Client> client,
@@ -89,7 +95,8 @@ public class CaoyxRpcReferenceBean {
                                  LoadBalanceType loadBalanceType,
                                  List<CaoyxRpcFilter> rpcFilters) throws CaoyxRpcException {
         this.iFace = iFace;
-        this.version = version;
+        this.implVersion = implVersion;
+        this.applicationVersion = applicationVersion;
         this.applicationName = applicationName;
         this.client = client;
         this.serializerAlgorithm = serializerAlgorithm;
@@ -106,7 +113,7 @@ public class CaoyxRpcReferenceBean {
     public CaoyxRpcReferenceBean init() throws CaoyxRpcException {
         if (registerConfig != null) {
             register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();
-            register.initRegister(applicationName, version);
+            register.initRegister(applicationName, applicationVersion);
             register.initRegisterConnect(registerConfig.getRegisterAddress());
 
             List<String> loadAddresses = registerConfig.getLoadAddresses();
@@ -161,14 +168,14 @@ public class CaoyxRpcReferenceBean {
                         }
                         String className = method.getDeclaringClass().getName();
                         String methodName = method.getName();
-                        String version = CaoyxRpcReferenceBean.this.version;
+                        String implVersion = CaoyxRpcReferenceBean.this.implVersion;
                         String[] parameterTypes;
                         Object[] arguments = args;
                         long timeout = CaoyxRpcReferenceBean.this.timeout;
                         if (className.equals(CaoyxRpcGenericInvoker.class.getName())) {
                             if (method.getName().equals("invoke")) {
                                 className = (String) args[0];
-                                version = (String) args[1];
+                                implVersion = (String) args[1];
                                 methodName = (String) args[2];
                                 parameterTypes = (String[]) args[3];
                                 arguments = (Object[]) args[4];
@@ -192,7 +199,8 @@ public class CaoyxRpcReferenceBean {
                         try {
                             rpcRequest.setRequestId(UUID.randomUUID().toString());
                             rpcRequest.setApplicationName(applicationName);
-                            rpcRequest.setVersion(version);
+                            rpcRequest.setApplicationVersion(applicationVersion);
+                            rpcRequest.setImplVersion(implVersion);
                             rpcRequest.setSerializerAlgorithm(serializerAlgorithm.getAlgorithmId());
                             rpcRequest.setClassName(className);
                             rpcRequest.setMethodName(methodName);
@@ -200,6 +208,8 @@ public class CaoyxRpcReferenceBean {
                             rpcRequest.setParameterTypes(parameterTypes);
                             rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
                             rpcRequest.setTimeout(timeout);
+                            rpcRequest.setAccessToken(accessToken);
+                            rpcRequest.setInvokerAddress(NetUtils.getLocalAddress());
                             rpcFilterManager.invoke(rpcRequest, rpcResponse);
                         } finally {
                             CaoyxRpcContext.removeContext();

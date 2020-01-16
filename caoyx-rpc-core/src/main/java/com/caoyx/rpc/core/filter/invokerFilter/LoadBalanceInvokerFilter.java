@@ -41,7 +41,7 @@ public class LoadBalanceInvokerFilter implements CaoyxRpcFilter {
 
     @Override
     public void doProcess(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception {
-        Address targetAddress = loadBalance.loadBalance(new ArrayList<>(register.getAllRegister(rpcRequest.getApplicationName(), rpcRequest.getVersion())));
+        Address targetAddress = loadBalance.loadBalance(new ArrayList<>(register.getAllRegister(rpcRequest.getApplicationName(), rpcRequest.getApplicationVersion())));
         if (targetAddress == null) {
             throw new CaoyxRpcException("LoadBalanceFilter - targetAddress is null");
         }

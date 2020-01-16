@@ -39,7 +39,7 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
         if (!zkClient.exists(applicationPath)) {
             zkClient.create(applicationPath, null, CreateMode.PERSISTENT);
         }
-        String applicationVersionPath = applicationPath + SPLIT + version;
+        String applicationVersionPath = applicationPath + SPLIT + applicationVersion;
         if (!zkClient.exists(applicationVersionPath)) {
             zkClient.create(applicationVersionPath, null, CreateMode.PERSISTENT);
         }
@@ -71,7 +71,7 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
     }
 
     private String buildApplicationPath() {
-        return ROOT_PATH + "/" + applicationName + "/" + version;
+        return ROOT_PATH + "/" + applicationName + "/" + applicationVersion;
     }
 
     public void handleChildChange(String s, List<String> list) throws Exception {
@@ -79,6 +79,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister implements IZkChildListe
             return;
         }
         log.info("path:[" + s + "] child change");
-        fetchAll(applicationName, version);
+        fetchAll(applicationName, applicationVersion);
     }
 }
