@@ -7,7 +7,7 @@ public enum SerializerAlgorithm {
 
     JDK("jdk", (byte) 1),
     HESSIAN2("hessian2", (byte) 2),
-    ;
+    PROTOSTUFF("protostuff", (byte) 3);
 
     private String label;
     private byte algorithmId;

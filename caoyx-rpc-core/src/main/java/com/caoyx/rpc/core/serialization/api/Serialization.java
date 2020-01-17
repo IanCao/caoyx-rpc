@@ -18,7 +18,7 @@ public interface Serialization {
     /**
      * java 对象转换成二进制
      */
-    byte[] serialize(Object object) throws CaoyxRpcException;
+    <T> byte[] serialize(T object) throws CaoyxRpcException;
 
     /**
      * 二进制转换成Java对象

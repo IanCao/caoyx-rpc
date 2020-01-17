@@ -25,7 +25,7 @@ public class JDKSerialization implements Serialization {
     }
 
     @Override
-    public byte[] serialize(Object object) throws CaoyxRpcException {
+    public <T> byte[] serialize(T object) throws CaoyxRpcException {
         ObjectOutputStream oos = null;
         ByteArrayOutputStream bos = null;
         try {

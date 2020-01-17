@@ -1,1 +1,2 @@
 com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance
+com.caoyx.rpc.core.loadbalance.impl.ConsistentHashLoadBalance

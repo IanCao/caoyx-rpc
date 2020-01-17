@@ -26,7 +26,7 @@ public class Hessian2Serialization implements Serialization {
     }
 
     @Override
-    public byte[] serialize(Object object) throws CaoyxRpcException {
+    public <T> byte[] serialize(T object) throws CaoyxRpcException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Hessian2Output ho = new Hessian2Output(os);
         try {

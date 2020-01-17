@@ -1,2 +1,3 @@
 com.caoyx.rpc.core.serialization.impl.jdk.JDKSerialization
 com.caoyx.rpc.core.serialization.impl.hessian2.Hessian2Serialization
+com.caoyx.rpc.core.serialization.impl.protostuff.ProtostuffSerialization

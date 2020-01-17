@@ -15,7 +15,7 @@ public class IndexController {
 
     @CaoyxRpcReference(loadAddress = {"127.0.0.1:1118"},
             remoteApplicationName = "caoyxRpc-sample-springboot-server",
-            serializer = SerializerAlgorithm.JDK,
+            serializer = SerializerAlgorithm.PROTOSTUFF,
             retryTimes = 2)
     private IUser user;
 

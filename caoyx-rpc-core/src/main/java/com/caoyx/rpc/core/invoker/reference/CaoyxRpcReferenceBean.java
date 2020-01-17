@@ -109,7 +109,6 @@ public class CaoyxRpcReferenceBean {
         rpcFilterManager.addAllUserFilters(rpcFilters);
 
         this.loadBalance = (LoadBalance) ExtensionLoader.getExtension(LoadBalance.class, loadBalanceType.getValue()).getValidExtensionInstance();
-        init();
     }
 
 
