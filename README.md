@@ -97,7 +97,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
  // 自动注册的组件的地址 ，选填
  caoyxRpc.register.address=127.0.0.1:2181
  // 服务提供方的版本，默认为0， 选填
- caoyxRpc.applicationVersion;
+ caoyxRpc.applicationVersion=0
 
 ```
 
