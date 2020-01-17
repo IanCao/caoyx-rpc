@@ -22,21 +22,37 @@ public class CaoyxRpcFilterManager {
 
     public void invoke(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception {
 
-        LinkedList<CaoyxRpcFilter> filters = new LinkedList<CaoyxRpcFilter>();
+        LinkedList<CaoyxRpcFilter> filters = new LinkedList<>();
         filters.addAll(systemFirstRpcFilters);
         filters.addAll(userRpcFilters);
         filters.addAll(systemLastRpcFilters);
 
-        if (CollectionUtils.isNotEmpty(filters)) {
-            for (int i = 0; i < filters.size(); i++) {
-                filters.get(i).invokeRequestHandler(rpcRequest);
-            }
+        for (int i = 0; i < systemFirstRpcFilters.size(); i++) {
+            filters.get(i).invokeRequestHandler(rpcRequest);
+        }
+        for (int i = 0; i < userRpcFilters.size(); i++) {
+            filters.get(i).invokeRequestHandler(rpcRequest);
+        }
+        for (int i = 0; i < systemLastRpcFilters.size(); i++) {
+            filters.get(i).invokeRequestHandler(rpcRequest);
+        }
 
-            for (int i = filters.size() - 1; i >= 0; i--) {
-                CaoyxRpcFilter rpcFilter = filters.get(i);
-                rpcFilter.doProcess(rpcRequest, rpcResponse);
-                rpcFilter.invokeResponseHandler(rpcResponse);
-            }
+        for (int i = systemLastRpcFilters.size() - 1; i >= 0; i--) {
+            CaoyxRpcFilter rpcFilter = systemLastRpcFilters.get(i);
+            rpcFilter.doProcess(rpcRequest, rpcResponse);
+            rpcFilter.invokeResponseHandler(rpcResponse);
+        }
+
+        for (int i = userRpcFilters.size() - 1; i >= 0; i--) {
+            CaoyxRpcFilter rpcFilter = userRpcFilters.get(i);
+            rpcFilter.doProcess(rpcRequest, rpcResponse);
+            rpcFilter.invokeResponseHandler(rpcResponse);
+        }
+
+        for (int i = systemFirstRpcFilters.size() - 1; i >= 0; i--) {
+            CaoyxRpcFilter rpcFilter = systemFirstRpcFilters.get(i);
+            rpcFilter.doProcess(rpcRequest, rpcResponse);
+            rpcFilter.invokeResponseHandler(rpcResponse);
         }
     }
 
