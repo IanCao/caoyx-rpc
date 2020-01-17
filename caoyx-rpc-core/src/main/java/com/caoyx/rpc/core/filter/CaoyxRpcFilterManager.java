@@ -35,9 +35,6 @@ public class CaoyxRpcFilterManager {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 CaoyxRpcFilter rpcFilter = filters.get(i);
                 rpcFilter.doProcess(rpcRequest, rpcResponse);
-                if (rpcResponse.getStatus() == CaoyxRpcStatus.ASYNC) {
-                    continue;
-                }
                 rpcFilter.invokeResponseHandler(rpcResponse);
             }
         }

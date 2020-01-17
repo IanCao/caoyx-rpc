@@ -2,6 +2,7 @@ package com.caoyx.rpc.spring.invoker;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
+import com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack;
 import com.caoyx.rpc.core.loadbalance.impl.RandomLoadBalance;
 import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
@@ -53,6 +54,7 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                             caoyxRpcFilters.add((CaoyxRpcFilter) filterBean);
                         }
                     }
+
                     try {
                         CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
                                 caoyxRpcReference.implVersion(),
@@ -67,6 +69,18 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                         referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
                         referenceBean.setTimeout(caoyxRpcReference.timeout());
                         referenceBean.setCallType(caoyxRpcReference.callType());
+                        if (StringUtils.hasText(caoyxRpcReference.failBack())) {
+                            Object failBack = applicationContext.getBean(caoyxRpcReference.failBack());
+                            if (failBack == null) {
+                                log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not exist");
+                            } else {
+                                if (failBack instanceof CaoyxRpcInvokerFailBack) {
+                                    referenceBean.setCaoyxRpcInvokerFailBack((CaoyxRpcInvokerFailBack) failBack);
+                                } else {
+                                    log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not an instance of CaoyxRpcInvokerFailBack");
+                                }
+                            }
+                        }
                         referenceBean.init();
                         Object proxy = referenceBean.getObject();
                         field.setAccessible(true);

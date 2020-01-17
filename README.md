@@ -10,7 +10,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 2. 支持多种调用方式：目前支持 **同步调用**, **Future异步调用**, **CallBack**
 3. 支持隐式参数：用户可以在 CaoyxRpcContext 上下文中放入自定义信息，这些信息也会随着调用发送到服务提供方
 4. 支持泛化调用：调用放可以不依赖于服务提供方的接口jar包而进行调用服务提供方的服务
-5. 负载均衡：提供丰富的负载均衡策略，目前包括：**随机**
+5. 负载均衡：提供丰富的负载均衡策略，目前包括：**随机**，**一致性Hash**
 6. 服务注册与发现：支持服务自动注册和手动注册
    - 自动注册：目前支持Zookeeper
    - 手动注册：用户在配置中增加具体的服务提供方的ip+port,可以是多个服务提供方
@@ -20,11 +20,15 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 9. 多种序列化选择方式：目前支持**JDK**，**Hessian2**序列化方式
 10. 支持用户自定义调用链中的filter：用户可以自定义filter并加入到调用链之中
 11. 与SpringBoot高度集成
-12. 支持调用方设置超时时间和失败重试次数
+12. 支持调用方设置**超时时间**和**失败重试次数**
 13. 支持服务版本与实现版本调用：服务提供方可以设置其服务版本和其实现实现版本，调用方同时设置提供方的服务版本和实现版本进行调用
+14. 支持调用方的FailFast
 
 
-### 如何使用
+### 高级使用
+[高级使用](doc/Advanced_Use.md)
+
+### 如何接入
 #### 1. SpringBoot接入
 
 [Caoyx-Rpc SpringBoot Demo](https://github.com/IanCao/caoyx-rpc/tree/master/caoyx-rpc-samples/caoyx-rpc-sample-springboot)
@@ -65,6 +69,8 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
  long timeout() default 3000L;
  // 用户自定义的filter的BeanName，选填
  String[] filters() default {};
+ // 用户自定义的快速失败，填写用户实现`com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack`的Bean的beanName
+ String failBack() default "";
 ```
 
 ##### a.服务提供方

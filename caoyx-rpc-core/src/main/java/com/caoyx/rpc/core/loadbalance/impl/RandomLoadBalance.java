@@ -6,6 +6,7 @@ import com.caoyx.rpc.core.loadbalance.LoadBalance;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * @Author: caoyixiong
@@ -17,10 +18,10 @@ public class RandomLoadBalance implements LoadBalance {
     private Random random = new Random(System.currentTimeMillis());
 
     @Override
-    public Address loadBalance(List<Address> addresses) {
+    public Address loadBalance(String invokerInfo, Set<Address> addresses) {
         if (addresses == null || addresses.isEmpty()) {
             return null;
         }
-        return addresses.get(random.nextInt(addresses.size()));
+        return (Address) addresses.toArray()[random.nextInt(addresses.size())];
     }
 }

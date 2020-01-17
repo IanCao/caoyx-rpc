@@ -39,9 +39,6 @@ public class InvokerRetryFilter implements CaoyxRpcFilter {
         if (rpcResponse == null) {
             return;
         }
-        if (rpcResponse.getStatus() == CaoyxRpcStatus.ASYNC) {
-            return;
-        }
         if (rpcResponse.getStatus() == CaoyxRpcStatus.SUCCESS) {
             return;
         }

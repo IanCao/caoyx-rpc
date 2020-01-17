@@ -50,4 +50,6 @@ public @interface CaoyxRpcReference {
     long timeout() default 3000L;
 
     String[] filters() default {};
+
+    String failBack() default "";
 }

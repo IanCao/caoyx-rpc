@@ -5,6 +5,7 @@ import com.caoyx.rpc.core.enums.ExtensionType;
 import com.caoyx.rpc.core.extension.annotation.SPI;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: caoyixiong
@@ -12,5 +13,5 @@ import java.util.List;
  */
 @SPI(type = ExtensionType.LOADBALANCE)
 public interface LoadBalance {
-    Address loadBalance(List<Address> addresses);
+    Address loadBalance(String invokerInfo, Set<Address> addresses);
 }

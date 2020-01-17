@@ -14,6 +14,7 @@ import com.caoyx.rpc.core.filter.invokerFilter.LoadBalanceInvokerFilter;
 import com.caoyx.rpc.core.filter.invokerFilter.RemoteInvokerFilter;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
+import com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack;
 import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
 import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
@@ -82,6 +83,8 @@ public class CaoyxRpcReferenceBean {
     private CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;
     @Setter
     private String accessToken;
+    @Setter
+    private CaoyxRpcInvokerFailBack caoyxRpcInvokerFailBack;
 
     private CaoyxRpcFilterManager rpcFilterManager;
 
@@ -215,7 +218,7 @@ public class CaoyxRpcReferenceBean {
                             CaoyxRpcContext.removeContext();
                         }
 
-                        if (rpcResponse.getStatus() == CaoyxRpcStatus.ASYNC) {
+                        if (callType == CallType.FUTURE || callType == CallType.CALLBACK) {
                             Class<?> returnType = method.getReturnType();
                             if (BASIC_DATA_TYPE_2_DEFAULT_VALUE.containsKey(returnType.getName())) {
                                 return BASIC_DATA_TYPE_2_DEFAULT_VALUE.get(returnType.getName());
@@ -227,11 +230,19 @@ public class CaoyxRpcReferenceBean {
                             throw CaoyxRpcException.buildByMsg("rpcResponse is not exist, please check remote invoker");
                         }
 
-                        if (!rpcResponse.isSuccess()) {
-                            throw CaoyxRpcException.buildByStatusAndMsg(rpcResponse.getStatus(), rpcResponse.getErrorMsg());
+                        if (rpcResponse.isSuccess()) {
+                            return rpcResponse.getResult();
                         }
 
-                        return rpcResponse.getResult();
+                        if (caoyxRpcInvokerFailBack != null) {
+                            if (rpcResponse.getStatus() == CaoyxRpcStatus.FAIL) {
+                                return caoyxRpcInvokerFailBack.onFail(rpcResponse.getErrorMsg());
+                            }
+                            if (rpcResponse.getStatus() == CaoyxRpcStatus.TIMEOUT) {
+                                return caoyxRpcInvokerFailBack.onTimeout();
+                            }
+                        }
+                        throw CaoyxRpcException.buildByStatusAndMsg(rpcResponse.getStatus(), rpcResponse.getErrorMsg());
                     }
                 });
     }

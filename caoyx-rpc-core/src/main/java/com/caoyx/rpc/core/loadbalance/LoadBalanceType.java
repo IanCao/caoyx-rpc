@@ -6,7 +6,7 @@ package com.caoyx.rpc.core.loadbalance;
  */
 public enum LoadBalanceType {
     RANDOM("random"),
-    ;
+    CONSISTENT_HASH("consistentHash");
 
     private String value;
 
