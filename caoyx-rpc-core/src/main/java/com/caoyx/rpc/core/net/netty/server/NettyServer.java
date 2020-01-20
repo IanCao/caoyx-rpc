@@ -53,17 +53,22 @@ public class NettyServer implements Server {
                                 .addLast(new NettyServerHandler(caoyxRpcProviderFactory));
                     }
                 });
-        ChannelFuture channelFuture = serverBootstrap.bind(caoyxRpcProviderFactory.getPort()).sync();
-        channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
-            @Override
-            public void operationComplete(Future<? super Void> future) throws Exception {
-                if (future.isSuccess()) {
-                    System.out.println("server bind success");
-                } else {
-                    System.out.println("server bind failure");
+        try {
+            ChannelFuture channelFuture = serverBootstrap.bind(caoyxRpcProviderFactory.getPort()).sync();
+            channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
+                @Override
+                public void operationComplete(Future<? super Void> future) throws Exception {
+                    if (future.isSuccess()) {
+                        System.out.println("server bind success");
+                    } else {
+                        System.out.println("server bind failure");
+                    }
                 }
-            }
-        });
+            });
+        } catch (InterruptedException e) {
+            stop();
+            throw new CaoyxRpcException(e);
+        }
     }
 
     public void stop() {
