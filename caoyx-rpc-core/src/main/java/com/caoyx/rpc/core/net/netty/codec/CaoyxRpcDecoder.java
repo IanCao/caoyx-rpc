@@ -35,15 +35,11 @@ public class CaoyxRpcDecoder extends ByteToMessageDecoder {
         if (dataLength < 0) {
             channelHandlerContext.close();
         }
-        if (byteBuf.readableBytes() < dataLength) {
-            byteBuf.resetReaderIndex();
-            return;
-        }
+
         byte[] data = new byte[dataLength];
         byteBuf.readBytes(data);
 
         Object obj = CaoyxRpcSerializer.INSTANCE.deserialize(genericClass, data, serializerAlgorithm);
-
         list.add(obj);
     }
 }

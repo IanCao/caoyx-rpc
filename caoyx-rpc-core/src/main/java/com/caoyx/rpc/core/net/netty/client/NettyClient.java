@@ -1,23 +1,20 @@
 package com.caoyx.rpc.core.net.netty.client;
 
-import com.caoyx.rpc.core.data.CaoyxRpcPacket;
+
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
-import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.net.api.Client;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcEncoder;
 import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.serialization.CaoyxRpcSerializer;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +40,7 @@ public class NettyClient implements Client {
                 .handler(new ChannelInitializer<Channel>() {
                     protected void initChannel(Channel channel) throws Exception {
                         channel.pipeline()
+                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 5, 4))
                                 .addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS))
                                 .addLast(new CaoyxRpcEncoder())
                                 .addLast(new CaoyxRpcDecoder(CaoyxRpcResponse.class))

@@ -11,4 +11,6 @@ public class Constants {
     public static final String ANY_HOST = "0.0.0.0";
 
     public static final int PROCESS_NUM = Runtime.getRuntime().availableProcessors();
+
+    public static final int MSG_MAX_SIZE_IN_BYTE = 3 * 1024 * 1024;
 }

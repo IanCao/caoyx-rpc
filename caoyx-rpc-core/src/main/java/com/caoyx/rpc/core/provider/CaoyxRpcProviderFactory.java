@@ -56,7 +56,7 @@ public class CaoyxRpcProviderFactory {
         this.rpcProviderHandler = new CaoyxRpcProviderHandler();
     }
 
-    public void init() throws InterruptedException, CaoyxRpcException {
+    public void init() throws CaoyxRpcException {
         server.start(this);
         if (registerConfig != null) {
             CaoyxRpcRegister register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();

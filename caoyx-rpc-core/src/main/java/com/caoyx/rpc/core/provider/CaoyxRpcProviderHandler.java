@@ -44,9 +44,12 @@ public class CaoyxRpcProviderHandler implements CaoyxRpcFilter {
             responsePacket = new CaoyxRpcResponse();
         }
         responsePacket.setRequestId(requestPacket.getRequestId());
-
         Object serviceBean = getServiceBean(requestPacket.getClassName(), requestPacket.getImplVersion());
-
+        if (serviceBean == null) {
+            responsePacket.setStatus(CaoyxRpcStatus.FAIL);
+            responsePacket.setErrorMsg(requestPacket.getClassName() + ":" + requestPacket.getImplVersion() + " has no valid bean");
+            return;
+        }
         Class clazz = serviceBean.getClass();
         String methodName = requestPacket.getMethodName();
         String[] parameterTypes = requestPacket.getParameterTypes();

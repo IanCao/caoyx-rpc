@@ -16,6 +16,4 @@ public abstract class CaoyxRpcPacket implements Packet {
     private String requestId;
 
     private String accessToken;
-
-    private String implVersion;
 }

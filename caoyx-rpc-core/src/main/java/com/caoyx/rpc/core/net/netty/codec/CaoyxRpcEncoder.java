@@ -7,10 +7,14 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
+import static com.caoyx.rpc.core.constant.Constants.MSG_MAX_SIZE_IN_BYTE;
+
 /**
  * @author caoyixiong
  */
 public class CaoyxRpcEncoder extends MessageToByteEncoder {
+
+    private static final int MAX_SIZE = MSG_MAX_SIZE_IN_BYTE - 9;
 
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Object object, ByteBuf byteBuf) throws Exception {
@@ -26,8 +30,10 @@ public class CaoyxRpcEncoder extends MessageToByteEncoder {
 
         byte[] data = CaoyxRpcSerializer.INSTANCE.serialize(object, serializerAlgorithm);
         // data length
+        if (data.length > MAX_SIZE) {
+            throw new CaoyxRpcException("message length is too large, it's limited " + data.length);
+        }
         byteBuf.writeInt(data.length);
-        // data
         byteBuf.writeBytes(data);
     }
 }

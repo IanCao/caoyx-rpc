@@ -8,6 +8,7 @@ import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
 import com.caoyx.rpc.core.utils.ThreadPoolUtils;
 import com.caoyx.rpc.core.utils.ThrowableUtils;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
@@ -15,13 +16,13 @@ import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author caoyixiong
  */
 @Slf4j
+@Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<CaoyxRpcRequest> {
 
     private CaoyxRpcProviderFactory caoyxRpcProviderFactory;
@@ -29,12 +30,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<CaoyxRpcRequ
 
     public NettyServerHandler(CaoyxRpcProviderFactory caoyxRpcProviderFactory) {
         this.caoyxRpcProviderFactory = caoyxRpcProviderFactory;
-        executor = ThreadPoolUtils.createThreadPool("netty-server-handler");
+        executor = ThreadPoolUtils.createThreadPool("caoyx-rpc-server-handler");
     }
 
 
     protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final CaoyxRpcRequest requestPacket) throws Exception {
-        System.out.println("NettyServerHandler channelRead0 requestPacket:" + requestPacket.getRequestId());
         executor.execute(new Runnable() {
             @Override
             public void run() {
