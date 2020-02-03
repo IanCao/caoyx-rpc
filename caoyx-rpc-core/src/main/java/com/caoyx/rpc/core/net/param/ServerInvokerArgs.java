@@ -11,6 +11,6 @@ import lombok.Data;
 @Data
 public class ServerInvokerArgs {
     private CaoyxRpcRequest requestPacket;
-    private Address remoteAddress;
+    private Address invokerAddress;
 
 }

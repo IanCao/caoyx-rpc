@@ -1,12 +1,12 @@
 package com.caoyx.rpc.spring.invoker;
 
+import com.caoyx.rpc.core.compress.CompressType;
 import com.caoyx.rpc.core.enums.CallType;
-import com.caoyx.rpc.core.loadbalance.LoadBalance;
 import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
 import com.caoyx.rpc.core.net.api.Client;
 import com.caoyx.rpc.core.net.netty.client.NettyClient;
 import com.caoyx.rpc.core.register.RegisterType;
-import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
+import com.caoyx.rpc.core.serialization.SerializerType;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -25,13 +25,13 @@ import java.lang.annotation.Target;
 @Documented
 public @interface CaoyxRpcReference {
 
-    Class<? extends Client> client() default NettyClient.class;
+    SerializerType serializer() default SerializerType.PROTOSTUFF;
 
-    SerializerAlgorithm serializer() default SerializerAlgorithm.JDK;
+    String remoteImplVersion() default "0";
 
-    String implVersion() default "0";
+    String remoteApplicationName() default "";
 
-    String applicationVersion() default "0";
+    String remoteapplicationVersion() default "0";
 
     RegisterType register() default RegisterType.NO_REGISTER;
 
@@ -42,8 +42,6 @@ public @interface CaoyxRpcReference {
     CallType callType() default CallType.SYNC;
 
     String registerAddress() default "";
-
-    String remoteApplicationName() default "";
 
     int retryTimes() default 0;
 

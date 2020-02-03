@@ -9,4 +9,5 @@ public enum ExtensionType {
     REGISTER,
     LOADBALANCE,
     SERIALIZATION,
+    COMPRESS,
 }

@@ -1,9 +1,6 @@
 package com.caoyx.rpc.core.context;
 
-import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.enums.CallType;
-import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
-import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import io.netty.util.concurrent.FastThreadLocal;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,20 +35,5 @@ public class CaoyxRpcContext {
 
     @Getter
     @Setter
-    private Address remoteAddress;
-
-    @Getter
-    @Setter
     private Map<String, Object> metaData;
-
-
-    @Getter
-    @Setter
-    private CallType callType;
-
-
-    @Getter
-    @Setter
-    private CaoyxRpcInvokerCallBack callBack;
-
 }

@@ -1,5 +1,6 @@
 package com.caoyx.rpc.core.net.netty.codec;
 
+import com.caoyx.rpc.core.compress.CaoyxRpcCompress;
 import com.caoyx.rpc.core.data.CaoyxRpcPacket;
 import com.caoyx.rpc.core.serialization.CaoyxRpcSerializer;
 import io.netty.buffer.ByteBuf;
@@ -31,6 +32,10 @@ public class CaoyxRpcDecoder extends ByteToMessageDecoder {
 
         byte serializerAlgorithm = byteBuf.readByte();
 
+        byte compressType = byteBuf.readByte();
+
+        int decompressedLength = byteBuf.readInt();
+
         int dataLength = byteBuf.readInt();
         if (dataLength < 0) {
             channelHandlerContext.close();
@@ -39,7 +44,10 @@ public class CaoyxRpcDecoder extends ByteToMessageDecoder {
         byte[] data = new byte[dataLength];
         byteBuf.readBytes(data);
 
-        Object obj = CaoyxRpcSerializer.INSTANCE.deserialize(genericClass, data, serializerAlgorithm);
+        byte[] decompressData = CaoyxRpcCompress.INSTANCE.decompress(data, decompressedLength, compressType);
+
+        Object obj = CaoyxRpcSerializer.INSTANCE.deserialize(genericClass, decompressData, serializerAlgorithm);
+
         list.add(obj);
     }
 }

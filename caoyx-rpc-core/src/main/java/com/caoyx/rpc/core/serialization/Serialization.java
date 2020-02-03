@@ -1,4 +1,4 @@
-package com.caoyx.rpc.core.serialization.api;
+package com.caoyx.rpc.core.serialization;
 
 import com.caoyx.rpc.core.enums.ExtensionType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
@@ -13,7 +13,7 @@ public interface Serialization {
     /**
      * 序列化算法 取具体的序列化算法标识
      */
-    byte getSerializerAlgorithm();
+    byte getSerializerType();
 
     /**
      * java 对象转换成二进制

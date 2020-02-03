@@ -3,7 +3,6 @@ package com.caoyx.rpc.core.net.netty.client;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
-import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.net.api.Client;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcEncoder;
@@ -16,8 +15,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,14 +23,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author caoyixiong
  */
+@Slf4j
 public class NettyClient implements Client {
-    private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
 
     private EventLoopGroup group;
     private Channel channel;
 
     @Override
-    public void init(Address address, final CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException {
+    public void init(Address address) throws InterruptedException {
         group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
@@ -40,11 +38,11 @@ public class NettyClient implements Client {
                 .handler(new ChannelInitializer<Channel>() {
                     protected void initChannel(Channel channel) throws Exception {
                         channel.pipeline()
-                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 5, 4))
+                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 10, 4))
                                 .addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS))
                                 .addLast(new CaoyxRpcEncoder())
                                 .addLast(new CaoyxRpcDecoder(CaoyxRpcResponse.class))
-                                .addLast(new NettyClientHandler(invokerFactory));
+                                .addLast(new NettyClientHandler());
                     }
                 });
         channel = bootstrap.connect(address.getIp(), address.getPort()).sync().channel();
@@ -57,7 +55,7 @@ public class NettyClient implements Client {
             try {
                 channel.writeAndFlush(requestPacket).sync();
             } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
     }

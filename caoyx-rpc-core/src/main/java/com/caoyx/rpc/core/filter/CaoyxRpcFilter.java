@@ -13,6 +13,4 @@ public interface CaoyxRpcFilter {
     void invokeRequestHandler(CaoyxRpcRequest rpcRequest);
 
     void invokeResponseHandler(CaoyxRpcResponse rpcResponse);
-
-    void doProcess(CaoyxRpcRequest rpcRequest, CaoyxRpcResponse rpcResponse) throws Exception;
 }

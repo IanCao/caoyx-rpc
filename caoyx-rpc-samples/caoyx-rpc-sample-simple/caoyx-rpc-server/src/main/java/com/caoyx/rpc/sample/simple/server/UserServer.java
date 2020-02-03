@@ -11,7 +11,7 @@ import com.caoyx.rpc.core.register.RegisterConfig;
  * @author caoyixiong
  */
 public class UserServer {
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException, InterruptedException, CaoyxRpcException {
+    public static void main(String[] args) throws CaoyxRpcException {
         String applicationName = "caoyxRpc-sample-simple-server";
         String applicationVersion = "0";
         String implVersion = "0";
@@ -25,7 +25,7 @@ public class UserServer {
                 applicationVersion
                 , null);
         caoyxRpcProviderFactory.setPort(1118);
-        caoyxRpcProviderFactory.addServiceBean(IUser.class.getName(), implVersion, new UserImpl());
+        caoyxRpcProviderFactory.addServiceProvider(IUser.class.getName(), implVersion, new UserImpl());
         caoyxRpcProviderFactory.init();
     }
 }

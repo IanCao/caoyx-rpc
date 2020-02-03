@@ -23,6 +23,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 12. 支持调用方设置**超时时间**和**失败重试次数**
 13. 支持服务版本与实现版本调用：服务提供方可以设置其服务版本和其实现实现版本，调用方同时设置提供方的服务版本和实现版本进行调用
 14. 支持调用方的FailFast
+15. 支持LZ4压缩
 
 
 ### 高级使用
@@ -45,8 +46,8 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 并增加`@CaoyxRpcReference`注解参数
 
 ```
- // 控制序列话方式，默认使用Jdk，选填
- SerializerAlgorithm serializer() default SerializerAlgorithm.JDK;
+ // 控制序列话方式，默认使用PROTOSTUFF，选填
+ SerializerType serializer() default SerializerType.PROTOSTUFF;
  // 控制调用的服务提供方的实现版本号，选填
  String implVersion() default "0";
  // 控制调用的服务提供方的版本号（会在注册中心使用此服务版本号进行选择），选填
@@ -130,20 +131,15 @@ public interface IUser {
 
 ```
     public static void main(String[] args) {
-        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(IUser.class,
-                "0",
-                "0",
-                "caoyxRpc-sample-simple-server",
-                new RegisterConfig(
-                        RegisterType.NO_REGISTER.getValue(),
-                        "",
-                        Arrays.asList("127.0.0.1:1118")),
-                NettyClient.class,
-                SerializerAlgorithm.HESSIAN2,
-                LoadBalanceType.RANDOM,
-                null);
-        rpcReferenceBean.setCallType(callType);
-        rpcReferenceBean.setCaoyxRpcInvokerCallBack(callBack);
+        CaoyxRpcInvokerConfig config = new CaoyxRpcInvokerConfig();
+        config.setIFace(IUser.class);
+        config.setRemoteApplicationName("caoyxRpc-sample-simple-server");
+        config.setRegisterConfig(new RegisterConfig(
+                RegisterType.NO_REGISTER.getValue(),
+                "",
+                Arrays.asList("127.0.0.1:1118")));
+
+        CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(config);
         rpcReferenceBean.init();
 
         IUser user = (IUser) rpcReferenceBean.getObject();  // 获取代理的IUser对象，进行使用即可。
@@ -153,23 +149,23 @@ public interface IUser {
 
 ##### b.服务提供方
 ```
-   public static void main(String[] args) throws InstantiationException, IllegalAccessException, InterruptedException, CaoyxRpcException {
-         String applicationName = "caoyxRpc-sample-simple-server";
-         String applicationVersion = "0";
-         String implVersion = "0";
-         CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName,
-                 new NettyServer(),
-                 new RegisterConfig(
-                         "noRegister",
-                         "",
-                         null
-                 ),
-                 applicationVersion
-                 , null);
-         caoyxRpcProviderFactory.setPort(1118);
-         caoyxRpcProviderFactory.addServiceBean(IUser.class.getName(), implVersion, new UserImpl()); // 将实现类与接口声名和版本添加入Provider中
-         caoyxRpcProviderFactory.init();
-     }
+  public static void main(String[] args) {
+        String applicationName = "caoyxRpc-sample-simple-server";
+        String applicationVersion = "0";
+        String implVersion = "0";
+        CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName,
+                new NettyServer(),
+                new RegisterConfig(
+                        "noRegister",
+                        "",
+                        null
+                ),
+                applicationVersion
+                , null);
+        caoyxRpcProviderFactory.setPort(1118);
+        caoyxRpcProviderFactory.addServiceProvider(IUser.class.getName(), implVersion, new IUserImpl());
+        caoyxRpcProviderFactory.init();
+    }
 ```
 
 

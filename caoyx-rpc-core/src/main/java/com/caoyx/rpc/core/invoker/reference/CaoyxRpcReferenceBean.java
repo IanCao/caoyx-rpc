@@ -1,5 +1,7 @@
 package com.caoyx.rpc.core.invoker.reference;
 
+import com.caoyx.rpc.core.compress.CompressType;
+import com.caoyx.rpc.core.config.CaoyxRpcInvokerConfig;
 import com.caoyx.rpc.core.context.CaoyxRpcContext;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
@@ -8,12 +10,10 @@ import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
-import com.caoyx.rpc.core.filter.CaoyxRpcFilterManager;
-import com.caoyx.rpc.core.filter.invokerFilter.InvokerRetryFilter;
-import com.caoyx.rpc.core.filter.invokerFilter.LoadBalanceInvokerFilter;
-import com.caoyx.rpc.core.filter.invokerFilter.RemoteInvokerFilter;
+import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
+import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
-import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
+import com.caoyx.rpc.core.invoker.CaoyxRpcPendingInvokerPool;
 import com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack;
 import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
@@ -21,22 +21,24 @@ import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
 import com.caoyx.rpc.core.net.api.Client;
 import com.caoyx.rpc.core.net.api.ClientManager;
 import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.net.netty.client.NettyClient;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
-import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
+import com.caoyx.rpc.core.serialization.SerializerType;
 import com.caoyx.rpc.core.utils.CollectionUtils;
-import com.caoyx.rpc.core.utils.NetUtils;
+import com.caoyx.rpc.core.utils.MethodUtils;
 import com.caoyx.rpc.core.utils.StringUtils;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author caoyixiong
@@ -55,67 +57,65 @@ public class CaoyxRpcReferenceBean {
         put("char", Character.MIN_VALUE);
     }};
 
-    @Setter
-    private Class<? extends Client> client;
-    @Setter
-    private CallType callType = CallType.SYNC;
-    @Setter
-    private String applicationName;
-    @Setter
-    private String applicationVersion;
-    @Setter
-    private String implVersion;
-    @Setter
-    private int retryTimes = 1;
-    @Setter
-    private long timeout = 3 * 1000L;
-    @Setter
+
     private Class<?> iFace;
-    @Setter
+    private String remoteApplicationName;
     private RegisterConfig registerConfig;
 
+    private CallType callType;
+    private Class<? extends Client> client = NettyClient.class;
+    private String remoteApplicationVersion;
+    private String remoteImplVersion;
+    private int retryTimes;
+    private long timeout;
     private LoadBalance loadBalance;
-    @Setter
-    private SerializerAlgorithm serializerAlgorithm;
-    @Setter
-    private CaoyxRpcRegister register;
-    @Setter
+    private SerializerType serializerType;
+    private CompressType compressType;
     private CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;
-    @Setter
     private String accessToken;
-    @Setter
     private CaoyxRpcInvokerFailBack caoyxRpcInvokerFailBack;
+    private List<CaoyxRpcFilter> rpcFilters = new ArrayList<>();
 
-    private CaoyxRpcFilterManager rpcFilterManager;
+    private ClientManager clientManager;
+    private CaoyxRpcRegister register;
 
-    public CaoyxRpcReferenceBean(Class<?> iFace,
-                                 String implVersion,
-                                 String applicationVersion,
-                                 String applicationName,
-                                 RegisterConfig registerConfig,
-                                 Class<? extends Client> client,
-                                 SerializerAlgorithm serializerAlgorithm,
-                                 LoadBalanceType loadBalanceType,
-                                 List<CaoyxRpcFilter> rpcFilters) throws CaoyxRpcException {
-        this.iFace = iFace;
-        this.implVersion = implVersion;
-        this.applicationVersion = applicationVersion;
-        this.applicationName = applicationName;
-        this.client = client;
-        this.serializerAlgorithm = serializerAlgorithm;
-        this.registerConfig = registerConfig;
+    public CaoyxRpcReferenceBean(CaoyxRpcInvokerConfig config) throws CaoyxRpcException {
+        if (config.getIFace() == null) {
+            throw new CaoyxRpcException("iFace cant be null");
+        }
+        if (StringUtils.isBlank(config.getRemoteApplicationName())) {
+            throw new CaoyxRpcException("remoteApplicationName cant be null");
+        }
+        if (config.getRegisterConfig() == null) {
+            throw new CaoyxRpcException("registerConfig cant be null");
 
-        this.rpcFilterManager = new CaoyxRpcFilterManager();
-        rpcFilterManager.addAllUserFilters(rpcFilters);
+        }
+        this.iFace = config.getIFace();
+        this.remoteApplicationName = config.getRemoteApplicationName();
+        this.registerConfig = config.getRegisterConfig();
+        this.callType = config.getCallType() == null ? CallType.SYNC : config.getCallType();
+        this.remoteApplicationVersion = StringUtils.isBlank(config.getRemoteApplicationVersion()) ? "0" : config.getRemoteApplicationVersion();
+        this.remoteImplVersion = StringUtils.isBlank(config.getRemoteImplVersion()) ? "0" : config.getRemoteImplVersion();
+        this.retryTimes = config.getRetryTimes();
+        this.serializerType = config.getSerializerType() == null ? SerializerType.PROTOSTUFF : config.getSerializerType();
+        this.compressType = config.getCompressType() == null ? CompressType.LZ4 : config.getCompressType();
+        this.timeout = config.getTimeout() == 0 ? 3 * 1000L : config.getTimeout();
+        this.accessToken = config.getAccessToken();
+        this.caoyxRpcInvokerCallBack = config.getCaoyxRpcInvokerCallBack();
+        this.caoyxRpcInvokerFailBack = config.getCaoyxRpcInvokerFailBack();
 
-        this.loadBalance = (LoadBalance) ExtensionLoader.getExtension(LoadBalance.class, loadBalanceType.getValue()).getValidExtensionInstance();
+        if (CollectionUtils.isNotEmpty(config.getRpcFilters())) {
+            this.rpcFilters.addAll(config.getRpcFilters());
+        }
+        this.loadBalance = (LoadBalance) ExtensionLoader.getExtension(LoadBalance.class,
+                config.getLoadBalanceType() == null ? LoadBalanceType.RANDOM.getValue() : config.getLoadBalanceType().getValue()).getValidExtensionInstance();
     }
 
 
     public CaoyxRpcReferenceBean init() throws CaoyxRpcException {
         if (registerConfig != null) {
             register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();
-            register.initRegister(applicationName, applicationVersion);
+            register.initRegister(remoteApplicationName, remoteApplicationVersion);
             register.initRegisterConnect(registerConfig.getRegisterAddress());
 
             List<String> loadAddresses = registerConfig.getLoadAddresses();
@@ -131,20 +131,8 @@ public class CaoyxRpcReferenceBean {
             register.startRegisterLoopFetch();
         }
 
-        ClientManager clientManager = new ClientManager();
+        this.clientManager = new ClientManager();
         register.addOnChangeCallBack(clientManager);
-
-        //负载均衡 远程调用
-        LoadBalanceInvokerFilter loadBalanceInvokerFilter = new LoadBalanceInvokerFilter(
-                new RemoteInvokerFilter(clientManager, client, CaoyxRpcInvokerFactory.getInstance()),
-                loadBalance,
-                register);
-
-        //失败重试
-        InvokerRetryFilter retryFilter = new InvokerRetryFilter(loadBalanceInvokerFilter, retryTimes);
-
-        rpcFilterManager.addSystemFilterLast(retryFilter);
-        rpcFilterManager.addSystemFilterLast(loadBalanceInvokerFilter);
 
         return this;
     }
@@ -170,7 +158,7 @@ public class CaoyxRpcReferenceBean {
                         }
                         String className = method.getDeclaringClass().getName();
                         String methodName = method.getName();
-                        String implVersion = CaoyxRpcReferenceBean.this.implVersion;
+                        String implVersion = CaoyxRpcReferenceBean.this.remoteImplVersion;
                         String[] parameterTypes;
                         Object[] arguments = args;
                         long timeout = CaoyxRpcReferenceBean.this.timeout;
@@ -196,23 +184,62 @@ public class CaoyxRpcReferenceBean {
                         CaoyxRpcRequest rpcRequest = new CaoyxRpcRequest();
                         CaoyxRpcResponse rpcResponse = new CaoyxRpcResponse();
 
-                        CaoyxRpcContext.getContext().setCallType(callType);
-                        CaoyxRpcContext.getContext().setCallBack(caoyxRpcInvokerCallBack);
                         try {
                             rpcRequest.setRequestId(UUID.randomUUID().toString());
-                            rpcRequest.setApplicationName(applicationName);
-                            rpcRequest.setApplicationVersion(applicationVersion);
                             rpcRequest.setImplVersion(implVersion);
-                            rpcRequest.setSerializerAlgorithm(serializerAlgorithm.getAlgorithmId());
+                            rpcRequest.setSerializerType(serializerType.getType());
+                            rpcRequest.setCompressType(compressType.getType());
                             rpcRequest.setClassName(className);
-                            rpcRequest.setMethodName(methodName);
+                            rpcRequest.setMethodKey(MethodUtils.generateMethodKey(methodName, parameterTypes));
                             rpcRequest.setParameters(arguments);
-                            rpcRequest.setParameterTypes(parameterTypes);
                             rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
                             rpcRequest.setTimeout(timeout);
                             rpcRequest.setAccessToken(accessToken);
-                            rpcRequest.setInvokerAddress(NetUtils.getLocalAddress());
-                            rpcFilterManager.invoke(rpcRequest, rpcResponse);
+
+                            for (int i = 0; i < retryTimes + 1; i++) {
+                                Address remoteAddress = loadBalance.loadBalance(rpcRequest.getInvokerInfo(), register.getAllRegister(remoteApplicationName, remoteApplicationVersion));
+                                if (remoteAddress == null) {
+                                    throw new CaoyxRpcException("LoadBalanceFilter - targetAddress is null");
+                                }
+                                Client clientInstance = clientManager.getOrCreateClient(remoteAddress, client);
+                                rpcRequest.setMetaData(CaoyxRpcContext.getContext().getMetaData());
+
+                                for (int j = 0; j < rpcFilters.size(); j++) {
+                                    rpcFilters.get(j).invokeRequestHandler(rpcRequest);
+                                }
+
+                                CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(rpcRequest);
+                                CaoyxRpcPendingInvokerPool.INSTANCE.setPendingInvoke(rpcRequest.getRequestId(), futureResponse);
+                                clientInstance.doSend(rpcRequest);
+
+                                switch (callType) {
+                                    case SYNC:
+                                        CaoyxRpcResponse caoyxRpcResponse = futureResponse.get(rpcRequest.getTimeout(), TimeUnit.MILLISECONDS);
+                                        rpcResponse.setStatus(caoyxRpcResponse.getStatus());
+                                        rpcResponse.setErrorMsg(caoyxRpcResponse.getErrorMsg());
+                                        rpcResponse.setResult(caoyxRpcResponse.getResult());
+                                        break;
+                                    case FUTURE:
+                                        CaoyxRpcFuture caoyxRpcFuture = new CaoyxRpcFuture();
+                                        caoyxRpcFuture.setFutureResponse(futureResponse);
+                                        caoyxRpcFuture.setTimeout(rpcRequest.getTimeout());
+                                        caoyxRpcFuture.setUnit(TimeUnit.MILLISECONDS);
+                                        CaoyxRpcFuture.setFuture(caoyxRpcFuture);
+                                        rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
+                                        break;
+                                    case CALLBACK:
+                                        rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
+                                        futureResponse.setCaoyxRpcInvokerCallBack(caoyxRpcInvokerCallBack);
+                                }
+                                if (rpcResponse.isSuccess()) {
+                                    for (int j = rpcFilters.size() - 1; j >= 0; j--) {
+                                        rpcFilters.get(j).invokeResponseHandler(rpcResponse);
+                                    }
+                                    break;
+                                } else {
+                                    log.error("remoteInvoker:[" + rpcRequest.getInvokerInfo() + "]" + "caoyxRpc RetryTimes is" + ++i);
+                                }
+                            }
                         } finally {
                             CaoyxRpcContext.removeContext();
                         }

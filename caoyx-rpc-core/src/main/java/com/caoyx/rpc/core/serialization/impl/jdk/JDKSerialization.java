@@ -3,8 +3,8 @@ package com.caoyx.rpc.core.serialization.impl.jdk;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.annotation.Implement;
-import com.caoyx.rpc.core.serialization.api.Serialization;
-import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
+import com.caoyx.rpc.core.serialization.Serialization;
+import com.caoyx.rpc.core.serialization.SerializerType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,8 +20,8 @@ import java.io.ObjectOutputStream;
 public class JDKSerialization implements Serialization {
 
     @Override
-    public byte getSerializerAlgorithm() {
-        return SerializerAlgorithm.JDK.getAlgorithmId();
+    public byte getSerializerType() {
+        return SerializerType.JDK.getType();
     }
 
     @Override

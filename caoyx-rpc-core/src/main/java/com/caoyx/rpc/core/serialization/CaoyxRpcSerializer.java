@@ -2,8 +2,8 @@ package com.caoyx.rpc.core.serialization;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
-import com.caoyx.rpc.core.serialization.api.Serialization;
-import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,25 +26,24 @@ public enum CaoyxRpcSerializer {
     /**
      * 二进制转换成Java对象
      */
-    public <T> T deserialize(Class<T> clazz, byte[] bytes, byte serializerAlgorithm) throws CaoyxRpcException {
-        return getSerializer(serializerAlgorithm).deserialize(clazz, bytes);
+    public <T> T deserialize(Class<T> clazz, byte[] bytes, byte serializerType) throws CaoyxRpcException {
+        return getSerializer(serializerType).deserialize(clazz, bytes);
     }
 
-    private Serialization getSerializer(byte serializerAlgorithm) throws CaoyxRpcException {
-        Serialization serializer = serializerMap.get(serializerAlgorithm);
+    private Serialization getSerializer(byte serializerType) throws CaoyxRpcException {
+        Serialization serializer = serializerMap.get(serializerType);
         if (serializer != null) {
             return serializer;
         }
-        serializer = createSerializer(serializerAlgorithm);
-        serializerMap.put(serializerAlgorithm, serializer);
-        return serializer;
+        serializerMap.putIfAbsent(serializerType, createSerializer(serializerType));
+        return serializerMap.get(serializerType);
     }
 
     private Serialization createSerializer(byte serializerAlgorithmId) throws CaoyxRpcException {
-        SerializerAlgorithm algorithm = SerializerAlgorithm.findByAlgorithmId(serializerAlgorithmId);
-        if (algorithm == null) {
-            throw new CaoyxRpcException(serializerAlgorithmId + "is the not support serializerAlgorithm");
+        SerializerType serializerType = SerializerType.findByAlgorithmId(serializerAlgorithmId);
+        if (serializerType == null) {
+            throw new CaoyxRpcException(serializerAlgorithmId + "is the not support serializerType");
         }
-        return (Serialization) ExtensionLoader.getExtension(Serialization.class, algorithm.getLabel()).getValidExtensionInstance();
+        return (Serialization) ExtensionLoader.getExtension(Serialization.class, serializerType.getLabel()).getValidExtensionInstance();
     }
 }

@@ -2,8 +2,8 @@ package com.caoyx.rpc.core.serialization.impl.hessian2;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.annotation.Implement;
-import com.caoyx.rpc.core.serialization.api.Serialization;
-import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
+import com.caoyx.rpc.core.serialization.Serialization;
+import com.caoyx.rpc.core.serialization.SerializerType;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 
@@ -21,8 +21,8 @@ public class Hessian2Serialization implements Serialization {
 
 
     @Override
-    public byte getSerializerAlgorithm() {
-        return SerializerAlgorithm.HESSIAN2.getAlgorithmId();
+    public byte getSerializerType() {
+        return SerializerType.HESSIAN2.getType();
     }
 
     @Override

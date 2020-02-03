@@ -27,11 +27,12 @@ public abstract class CaoyxRpcRegister implements Register {
     @Getter
     private volatile CopyOnWriteArraySet<Address> loadAddressCache = new CopyOnWriteArraySet<>();
 
-    private volatile CopyOnWriteArraySet<Address> allAddressesCache = new CopyOnWriteArraySet<>();
+    private final CopyOnWriteArraySet<Address> allAddressesCache = new CopyOnWriteArraySet<>();
 
     private CopyOnWriteArrayList<RegisterOnChangeCallBack> changeCallBacks = new CopyOnWriteArrayList<>();
 
     private volatile long lastUpdatedTimeMills;
+    private volatile boolean updatedFinish = true;
     private final Object lock = new Object();
     private volatile ScheduledFuture<?> addressFetchFuture;
 
@@ -96,9 +97,27 @@ public abstract class CaoyxRpcRegister implements Register {
         changeCallBacks.add(changeCallBack);
     }
 
-    protected final void fetchAll(String applicationName, String version) {
-        lastUpdatedTimeMills = System.currentTimeMillis();
+    protected final synchronized void fetchAll(String applicationName, String version) {
+        if (isValidCache()) {
+            return;
+        }
+        updatedFinish = false;
+
+
         Set<Address> latestRemoteAddresses = fetchAllAddress(applicationName, version);
+
+        if (CollectionUtils.isEmpty(latestRemoteAddresses)) {
+            remoteAddressesCache = new CopyOnWriteArraySet();
+        } else {
+            remoteAddressesCache = new CopyOnWriteArraySet<>(latestRemoteAddresses);
+        }
+        lastUpdatedTimeMills = System.currentTimeMillis();
+        allAddressesCache.clear();
+        allAddressesCache.addAll(remoteAddressesCache);
+        allAddressesCache.addAll(loadAddressCache);
+
+        updatedFinish = true;
+
         Set<Address> deletedAddresses = new HashSet<>();
         for (Address address : remoteAddressesCache) {
             if (!latestRemoteAddresses.contains(address)) {
@@ -108,15 +127,6 @@ public abstract class CaoyxRpcRegister implements Register {
         for (RegisterOnChangeCallBack changeCallBack : changeCallBacks) {
             changeCallBack.onAddressesDeleted(deletedAddresses);  //TODO 切换为线程池操作
         }
-
-        if (CollectionUtils.isEmpty(latestRemoteAddresses)) {
-            remoteAddressesCache = new CopyOnWriteArraySet();
-        } else {
-            remoteAddressesCache = new CopyOnWriteArraySet<>(latestRemoteAddresses);
-        }
-        allAddressesCache.clear();
-        allAddressesCache.addAll(remoteAddressesCache);
-        allAddressesCache.addAll(loadAddressCache);
     }
 
     private boolean isValidUpdated() {
@@ -124,6 +134,6 @@ public abstract class CaoyxRpcRegister implements Register {
     }
 
     private boolean isValidCache() {
-        return allAddressesCache != null && !allAddressesCache.isEmpty() && isValidUpdated();
+        return isValidUpdated() && !allAddressesCache.isEmpty() && updatedFinish;
     }
 }

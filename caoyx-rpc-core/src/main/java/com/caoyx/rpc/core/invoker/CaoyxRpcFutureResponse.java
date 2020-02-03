@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author caoyixiong
@@ -16,14 +19,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
 
-    private CaoyxRpcRequest request;
-    private CaoyxRpcResponse response;
+    private final CaoyxRpcRequest request;
+    private volatile CaoyxRpcResponse response;
 
     @Setter
     @Getter
-    private CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;
+    private volatile CaoyxRpcInvokerCallBack caoyxRpcInvokerCallBack;  //TODO 有线程问题
 
-    private boolean done = false;
+    private volatile boolean done = false;
     private final Object lock = new Object();
 
     public CaoyxRpcFutureResponse(CaoyxRpcRequest request) {
@@ -36,8 +39,8 @@ public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
     }
 
     public void notifyResponse(CaoyxRpcResponse response) {
-        this.response = response;
         synchronized (lock) {
+            this.response = response;
             done = true;
             lock.notifyAll();
         }
@@ -68,22 +71,29 @@ public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
 
     @Override
     public CaoyxRpcResponse get(long timeout, TimeUnit unit) throws InterruptedException {
+        long lastTime = (TimeUnit.MILLISECONDS == unit) ? timeout : TimeUnit.MILLISECONDS.convert(timeout, unit);
         if (!done) {
             synchronized (lock) {
-                if (timeout < 0) {
-                    lock.wait();
+                if (lastTime <= 0) {
+                    while (!done) {
+                        lock.wait();
+                    }
                 } else {
-                    long timeoutMillis = (TimeUnit.MILLISECONDS == unit) ? timeout : TimeUnit.MILLISECONDS.convert(timeout, unit);
-                    lock.wait(timeoutMillis);
+                    while (!done && lastTime > 0) { // fix spurious wakeup
+                        long startTime = System.currentTimeMillis();
+                        lock.wait(lastTime);
+                        lastTime -= (System.currentTimeMillis() - startTime);
+                    }
                 }
             }
         }
+
         if (!done) {
             CaoyxRpcResponse response = new CaoyxRpcResponse();
             response.setStatus(CaoyxRpcStatus.TIMEOUT);
             response.setErrorMsg("caoyx-rpc, request timeout at:" + System.currentTimeMillis() + ", request:" + request.toString());
             response.setRequestId(request.getRequestId());
-            log.warn(response.getErrorMsg());
+            CaoyxRpcPendingInvokerPool.INSTANCE.removeInvokerFuture(request.getRequestId());
             return response;
         }
         return response;

@@ -6,6 +6,7 @@ import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcEncoder;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
+import com.caoyx.rpc.core.utils.ThrowableUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -46,7 +47,7 @@ public class NettyServer implements Server {
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     protected void initChannel(NioSocketChannel channel) throws Exception {
                         channel.pipeline()
-                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 5, 4))
+                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 10, 4))
                                 .addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS))
                                 .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class))
                                 .addLast(new CaoyxRpcEncoder())
@@ -59,9 +60,9 @@ public class NettyServer implements Server {
                 @Override
                 public void operationComplete(Future<? super Void> future) throws Exception {
                     if (future.isSuccess()) {
-                        System.out.println("server bind success");
+                        log.info("server start success, port:" + caoyxRpcProviderFactory.getPort());
                     } else {
-                        System.out.println("server bind failure");
+                        log.error("server start fail, errorMsg: " + ThrowableUtils.throwable2String(future.cause()));
                     }
                 }
             });

@@ -1,20 +1,22 @@
 package com.caoyx.rpc.core.provider;
 
 import com.caoyx.rpc.core.context.CaoyxRpcContext;
+import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
-import com.caoyx.rpc.core.filter.CaoyxRpcFilterManager;
 import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.utils.CollectionUtils;
 import com.caoyx.rpc.core.utils.NetUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,11 +37,10 @@ public class CaoyxRpcProviderFactory {
     @Setter
     private String applicationVersion;
     @Setter
-    private CaoyxRpcProviderHandler rpcProviderHandler;
-    @Setter
     private String accessToken = null;
 
-    private CaoyxRpcFilterManager rpcFilterManager;
+    private final CaoyxRpcProviderHandler rpcProviderHandler;
+    private final List<CaoyxRpcFilter> caoyxRpcFilters = new ArrayList<>();
 
     public CaoyxRpcProviderFactory(String applicationName,
                                    Server server,
@@ -50,10 +51,10 @@ public class CaoyxRpcProviderFactory {
         this.server = server;
         this.registerConfig = registerConfig;
         this.applicationVersion = applicationVersion;
-        this.rpcFilterManager = new CaoyxRpcFilterManager();
-        this.rpcFilterManager.addAllUserFilters(rpcFilters);
-
         this.rpcProviderHandler = new CaoyxRpcProviderHandler();
+        if (CollectionUtils.isNotEmpty(rpcFilters)) {
+            caoyxRpcFilters.addAll(rpcFilters);
+        }
     }
 
     public void init() throws CaoyxRpcException {
@@ -65,31 +66,25 @@ public class CaoyxRpcProviderFactory {
             register.register(NetUtils.getLocalAddress(), port);
         }
 
-        rpcFilterManager.addSystemFilterLast(rpcProviderHandler);
     }
 
-    public void onExportSuccess() {
-        log.info("applicationName:[" + applicationName + "],applicationVersion:[" + applicationVersion + "], port:[" + this.port + "] export successfully");
-    }
-
-    public void onExportFail() {
-        log.info("applicationName:[" + applicationName + "],applicationVersion:[" + applicationVersion + "], port:[" + this.port + "] export fail");
-    }
-
-    public void addServiceBean(String className, String implVersion, Object service) {
-        rpcProviderHandler.addServiceBean(className, implVersion, service);
+    public void addServiceProvider(String className, String implVersion, Object service) {
+        rpcProviderHandler.addServiceMethodProvider(className, implVersion, service);
         log.info("className:[" + className + "],implVersion:[" + implVersion + "] export successfully");
 
     }
 
     public CaoyxRpcResponse invoke(ServerInvokerArgs serverInvokerArgs) throws Exception {
         try {
-            CaoyxRpcContext caoyxRpcContext = CaoyxRpcContext.getContext();
-            caoyxRpcContext.setRemoteAddress(serverInvokerArgs.getRemoteAddress());
-            caoyxRpcContext.setMetaData(serverInvokerArgs.getRequestPacket().getMetaData());
-            CaoyxRpcResponse caoyxRpcResponse = new CaoyxRpcResponse();
-            rpcFilterManager.invoke(serverInvokerArgs.getRequestPacket(), caoyxRpcResponse);
-            return caoyxRpcResponse;
+            CaoyxRpcRequest request = serverInvokerArgs.getRequestPacket();
+            for (int i = 0; i < caoyxRpcFilters.size(); i++) {
+                caoyxRpcFilters.get(i).invokeRequestHandler(request);
+            }
+            CaoyxRpcResponse response = rpcProviderHandler.invoke(request);
+            for (int i = caoyxRpcFilters.size() - 1; i >= 0; i--) {
+                caoyxRpcFilters.get(i).invokeResponseHandler(response);
+            }
+            return response;
         } finally {
             CaoyxRpcContext.removeContext();
         }

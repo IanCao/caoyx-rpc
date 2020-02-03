@@ -1,7 +1,6 @@
 package com.caoyx.rpc.core.net.api;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.register.RegisterOnChangeCallBack;
 import com.caoyx.rpc.core.utils.CollectionUtils;
@@ -19,7 +18,7 @@ public class ClientManager implements RegisterOnChangeCallBack {
 
     private static volatile ConcurrentHashMap<Address, Client> clientPool = new ConcurrentHashMap<>();
 
-    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl, CaoyxRpcInvokerFactory invokerFactory) throws CaoyxRpcException {
+    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl) throws CaoyxRpcException {
         Client client = clientPool.get(address);
         if (client != null && client.isValid()) {
             return client;
@@ -38,7 +37,7 @@ public class ClientManager implements RegisterOnChangeCallBack {
             Client clientInstance = null;
             try {
                 clientInstance = clientImpl.newInstance();
-                clientInstance.init(address, invokerFactory);
+                clientInstance.init(address);
                 clientPool.put(address, clientInstance);
             } catch (Exception e) {
                 if (clientInstance != null) {

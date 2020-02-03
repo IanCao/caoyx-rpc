@@ -1,5 +1,6 @@
 package com.caoyx.rpc.spring.invoker;
 
+import com.caoyx.rpc.core.config.CaoyxRpcInvokerConfig;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 import com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack;
@@ -55,32 +56,35 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                         }
                     }
 
-                    try {
-                        CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(field.getType(),
-                                caoyxRpcReference.implVersion(),
-                                caoyxRpcReference.applicationVersion(),
-                                caoyxRpcReference.remoteApplicationName(),
-                                new RegisterConfig(
-                                        caoyxRpcReference.register().getValue(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())),
-                                caoyxRpcReference.client(),
-                                caoyxRpcReference.serializer(),
-                                caoyxRpcReference.loadBalance(),
-                                caoyxRpcFilters);
-                        referenceBean.setRetryTimes(caoyxRpcReference.retryTimes());
-                        referenceBean.setTimeout(caoyxRpcReference.timeout());
-                        referenceBean.setCallType(caoyxRpcReference.callType());
-                        if (StringUtils.hasText(caoyxRpcReference.failBack())) {
-                            Object failBack = applicationContext.getBean(caoyxRpcReference.failBack());
-                            if (failBack == null) {
-                                log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not exist");
+                    CaoyxRpcInvokerConfig config = new CaoyxRpcInvokerConfig();
+                    config.setIFace(field.getType());
+                    config.setRemoteApplicationName(caoyxRpcReference.remoteApplicationName());
+                    config.setRegisterConfig(new RegisterConfig(
+                            caoyxRpcReference.register().getValue(), caoyxRpcReference.registerAddress(), Arrays.asList(caoyxRpcReference.loadAddress())));
+                    config.setSerializerType(caoyxRpcReference.serializer());
+                    config.setLoadBalanceType(caoyxRpcReference.loadBalance());
+                    config.setRpcFilters(caoyxRpcFilters);
+                    config.setRetryTimes(caoyxRpcReference.retryTimes());
+                    config.setTimeout(caoyxRpcReference.timeout());
+                    config.setCallType(caoyxRpcReference.callType());
+
+                    if (StringUtils.hasText(caoyxRpcReference.failBack())) {
+                        Object failBack = applicationContext.getBean(caoyxRpcReference.failBack());
+                        if (failBack == null) {
+                            log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not exist");
+                        } else {
+                            if (failBack instanceof CaoyxRpcInvokerFailBack) {
+                                config.setCaoyxRpcInvokerFailBack((CaoyxRpcInvokerFailBack) failBack);
                             } else {
-                                if (failBack instanceof CaoyxRpcInvokerFailBack) {
-                                    referenceBean.setCaoyxRpcInvokerFailBack((CaoyxRpcInvokerFailBack) failBack);
-                                } else {
-                                    log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not an instance of CaoyxRpcInvokerFailBack");
-                                }
+                                log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not an instance of CaoyxRpcInvokerFailBack");
                             }
                         }
+                    }
+                    config.setRemoteApplicationVersion(caoyxRpcReference.remoteapplicationVersion());
+                    config.setRemoteImplVersion(caoyxRpcReference.remoteImplVersion());
+
+                    try {
+                        CaoyxRpcReferenceBean referenceBean = new CaoyxRpcReferenceBean(config);
                         referenceBean.init();
                         Object proxy = referenceBean.getObject();
                         field.setAccessible(true);

@@ -1,7 +1,6 @@
 package com.caoyx.rpc.core.net.api;
 
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
-import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerFactory;
 import com.caoyx.rpc.core.data.Address;
 
 /**
@@ -9,7 +8,7 @@ import com.caoyx.rpc.core.data.Address;
  */
 public interface Client {
 
-    void init(Address address, CaoyxRpcInvokerFactory invokerFactory) throws InterruptedException;
+    void init(Address address) throws InterruptedException;
 
     void close();
 

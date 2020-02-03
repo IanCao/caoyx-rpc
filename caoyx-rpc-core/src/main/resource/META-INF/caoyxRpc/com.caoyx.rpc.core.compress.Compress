@@ -1,0 +1,2 @@
+com.caoyx.rpc.core.compress.impl.Lz4Compress
+com.caoyx.rpc.core.compress.impl.NoCompress

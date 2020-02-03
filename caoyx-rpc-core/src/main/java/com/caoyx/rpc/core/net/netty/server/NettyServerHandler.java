@@ -42,14 +42,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<CaoyxRpcRequ
                 try {
                     InetSocketAddress socketAddress = (InetSocketAddress) channelHandlerContext.channel().remoteAddress();
                     ServerInvokerArgs serverInvokerArgs = new ServerInvokerArgs();
-                    serverInvokerArgs.setRemoteAddress(new Address(socketAddress.getHostName(), socketAddress.getPort()));
+                    serverInvokerArgs.setInvokerAddress(new Address(socketAddress.getHostName(), socketAddress.getPort()));
                     serverInvokerArgs.setRequestPacket(requestPacket);
                     rpcResponsePacket = caoyxRpcProviderFactory.invoke(serverInvokerArgs);
                 } catch (Exception e) {
                     rpcResponsePacket.setErrorMsg(ThrowableUtils.throwable2String(e));
                     rpcResponsePacket.setStatus(CaoyxRpcStatus.FAIL);
                 }
-
                 try {
                     channelHandlerContext.writeAndFlush(rpcResponsePacket).sync();
                 } catch (InterruptedException e) {

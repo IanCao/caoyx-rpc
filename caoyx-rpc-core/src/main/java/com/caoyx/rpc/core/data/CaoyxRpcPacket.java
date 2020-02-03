@@ -1,7 +1,5 @@
 package com.caoyx.rpc.core.data;
 
-
-import com.caoyx.rpc.core.serialization.api.SerializerAlgorithm;
 import lombok.Data;
 
 /**
@@ -11,7 +9,9 @@ import lombok.Data;
 @Data
 public abstract class CaoyxRpcPacket implements Packet {
 
-    byte serializerAlgorithm = SerializerAlgorithm.JDK.getAlgorithmId();
+    byte serializerType;
+
+    byte compressType;
 
     private String requestId;
 
