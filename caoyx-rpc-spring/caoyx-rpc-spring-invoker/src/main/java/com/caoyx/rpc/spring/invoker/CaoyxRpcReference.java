@@ -49,5 +49,5 @@ public @interface CaoyxRpcReference {
 
     String[] filters() default {};
 
-    String failBack() default "";
+    String failCallBack() default "";
 }

@@ -68,15 +68,15 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                     config.setTimeout(caoyxRpcReference.timeout());
                     config.setCallType(caoyxRpcReference.callType());
 
-                    if (StringUtils.hasText(caoyxRpcReference.failBack())) {
-                        Object failBack = applicationContext.getBean(caoyxRpcReference.failBack());
+                    if (StringUtils.hasText(caoyxRpcReference.failCallBack())) {
+                        Object failBack = applicationContext.getBean(caoyxRpcReference.failCallBack());
                         if (failBack == null) {
-                            log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not exist");
+                            log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failCallBack() + "] is not exist");
                         } else {
                             if (failBack instanceof CaoyxRpcInvokerFailBack) {
                                 config.setCaoyxRpcInvokerFailBack((CaoyxRpcInvokerFailBack) failBack);
                             } else {
-                                log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failBack() + "] is not an instance of CaoyxRpcInvokerFailBack");
+                                log.warn("CaoyxRpcInvokerFailBack-BeanName-[" + caoyxRpcReference.failCallBack() + "] is not an instance of CaoyxRpcInvokerFailBack");
                             }
                         }
                     }

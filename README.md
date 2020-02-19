@@ -22,7 +22,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 11. 与SpringBoot高度集成
 12. 支持调用方设置**超时时间**和**失败重试次数**
 13. 支持服务版本与实现版本调用：服务提供方可以设置其服务版本和其实现实现版本，调用方同时设置提供方的服务版本和实现版本进行调用
-14. 支持调用方的FailFast
+14. 支持调用方的failCallBack
 15. 支持LZ4压缩
 
 
@@ -70,8 +70,8 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
  long timeout() default 3000L;
  // 用户自定义的filter的BeanName，选填
  String[] filters() default {};
- // 用户自定义的快速失败，填写用户实现`com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack`的Bean的beanName
- String failBack() default "";
+ // 用户自定义的失败/超时回调，填写用户实现`com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack`的Bean的beanName
+ String failCallBack() default "";
 ```
 
 ##### a.服务提供方
