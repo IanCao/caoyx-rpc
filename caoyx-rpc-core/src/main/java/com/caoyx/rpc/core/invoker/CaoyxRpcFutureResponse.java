@@ -48,7 +48,7 @@ public class CaoyxRpcFutureResponse implements Future<CaoyxRpcResponse> {
             if (response.getStatus() == CaoyxRpcStatus.SUCCESS) {
                 caoyxRpcInvokerCallBack.onSuccess(response.getResult());
             } else if (response.getStatus() == CaoyxRpcStatus.FAIL
-                    || response.getStatus() == CaoyxRpcStatus.PARAM_ERROR) {
+                    || response.getStatus() == CaoyxRpcStatus.ILLEGAL) {
                 caoyxRpcInvokerCallBack.onFail(response.getErrorMsg());
             }
         }

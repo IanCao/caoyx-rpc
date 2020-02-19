@@ -67,6 +67,7 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                     config.setRetryTimes(caoyxRpcReference.retryTimes());
                     config.setTimeout(caoyxRpcReference.timeout());
                     config.setCallType(caoyxRpcReference.callType());
+                    config.setAccessToken(caoyxRpcReference.accessToken());
 
                     if (StringUtils.hasText(caoyxRpcReference.failCallBack())) {
                         Object failBack = applicationContext.getBean(caoyxRpcReference.failCallBack());

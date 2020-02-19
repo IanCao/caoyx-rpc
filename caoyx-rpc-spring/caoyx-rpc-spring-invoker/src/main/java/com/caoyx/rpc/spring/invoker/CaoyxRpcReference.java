@@ -50,4 +50,6 @@ public @interface CaoyxRpcReference {
     String[] filters() default {};
 
     String failCallBack() default "";
+
+    String accessToken() default "";
 }

@@ -1,5 +1,6 @@
 package com.caoyx.rpc.spring.provider.autoconfiguration;
 
+import com.caoyx.rpc.core.config.CaoyxRpcProviderConfig;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.net.netty.server.NettyServer;
 import com.caoyx.rpc.core.register.RegisterConfig;
@@ -20,31 +21,36 @@ public class CaoyxRpcProviderSpringConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(CaoyxRpcProviderSpringConfiguration.class);
 
-    @Value("${caoyxRpc.port:1118}")
+    @Value("${caoyxRpc.server.port:1118}")
     private int port;
 
-    @Value("${caoyxRpc.applicationName}")
+    @Value("${caoyxRpc.server.applicationName}")
     private String applicationName;
 
-    @Value("${caoyxRpc.register.type:noRegister}")
+    @Value("${caoyxRpc.server.register.type:noRegister}")
     private String registerType;
 
-    @Value("${caoyxRpc.register.address:}")
+    @Value("${caoyxRpc.server.register.address:}")
     private String registerAddress;
 
-    @Value("${caoyxRpc.applicationVersion:0}")
+    @Value("${caoyxRpc.server.applicationVersion:0}")
     private String applicationVersion;
+
+    @Value("${caoyxRpc.server.accessToken:}")
+    private String accessToken;
 
     @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
     @Bean
     public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws InterruptedException, CaoyxRpcException {
         log.info("caoyxRpcSpringProviderFactory init");
-        CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(applicationName,
-                new NettyServer(),
-                new RegisterConfig(registerType, registerAddress),
-                applicationVersion,
-                null);
-        factory.setPort(port);
+        CaoyxRpcProviderConfig config = new CaoyxRpcProviderConfig();
+        config.setApplicationName(applicationName);
+        config.setRegisterConfig(new RegisterConfig(registerType, registerAddress));
+        config.setApplicationVersion(applicationVersion);
+        config.setAccessToken(accessToken);
+        config.setPort(port);
+
+        CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(config);
         factory.init();
         return factory;
     }

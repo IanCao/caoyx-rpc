@@ -1,5 +1,6 @@
 package com.caoyx.rpc.spring.provider;
 
+import com.caoyx.rpc.core.config.CaoyxRpcProviderConfig;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
 import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
@@ -18,8 +19,8 @@ import java.util.Map;
 
 public class CaoyxRpcSpringProviderFactory extends CaoyxRpcProviderFactory implements ApplicationContextAware {
 
-    public CaoyxRpcSpringProviderFactory(String applicationName, Server server, RegisterConfig registerConfig, String version, List<CaoyxRpcFilter> rpcFilters) {
-        super(applicationName, server, registerConfig, version, rpcFilters);
+    public CaoyxRpcSpringProviderFactory(CaoyxRpcProviderConfig providerConfig) {
+        super(providerConfig);
     }
 
     @Override

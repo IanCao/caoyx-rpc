@@ -24,6 +24,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 13. 支持服务版本与实现版本调用：服务提供方可以设置其服务版本和其实现实现版本，调用方同时设置提供方的服务版本和实现版本进行调用
 14. 支持调用方的failCallBack
 15. 支持LZ4压缩
+16. 支持调用方与提供方之间的鉴权，服务提供方配置一个accessToken，即只接受具有相同accessToken的Request请求。
 
 
 ### 高级使用
@@ -72,6 +73,8 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
  String[] filters() default {};
  // 用户自定义的失败/超时回调，填写用户实现`com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack`的Bean的beanName
  String failCallBack() default "";
+ // 用作调用方与提供方之间的鉴权使用
+ String accessToken() default "";
 ```
 
 ##### a.服务提供方
@@ -90,16 +93,17 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 
 ```
  // 服务提供方的名称
- caoyxRpc.applicationName=caoyxRpc-sample-springboot-client，必填
+ caoyxRpc.server.applicationName=caoyxRpc-sample-springboot-client，必填
  // 服务提供方暴露的端口，默认1118，必填
- caoyxRpc.port=1118 
+ caoyxRpc.server.port=1118 
  // 服务提供方自动注册的方式，默认为noRegister，可以选择noRegister不使用自动注册方式，选填
- caoyxRpc.register.type=zookeeper
+ caoyxRpc.server.register.type=zookeeper
  // 自动注册的组件的地址 ，选填
- caoyxRpc.register.address=127.0.0.1:2181
+ caoyxRpc.server.register.address=127.0.0.1:2181
  // 服务提供方的版本，默认为0， 选填
- caoyxRpc.applicationVersion=0
-
+ caoyxRpc.server.applicationVersion=0
+ // 服务提供方的鉴权Token，默认无鉴权，选填
+ caoyxRpc.server.accessToken=xxxx
 ```
 
 #### 2. 原生接入
@@ -149,23 +153,21 @@ public interface IUser {
 
 ##### b.服务提供方
 ```
-  public static void main(String[] args) {
-        String applicationName = "caoyxRpc-sample-simple-server";
-        String applicationVersion = "0";
-        String implVersion = "0";
-        CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(applicationName,
-                new NettyServer(),
-                new RegisterConfig(
-                        "noRegister",
-                        "",
-                        null
-                ),
-                applicationVersion
-                , null);
-        caoyxRpcProviderFactory.setPort(1118);
-        caoyxRpcProviderFactory.addServiceProvider(IUser.class.getName(), implVersion, new IUserImpl());
-        caoyxRpcProviderFactory.init();
-    }
+   public static void main(String[] args) throws CaoyxRpcException {
+          CaoyxRpcProviderConfig config = new CaoyxRpcProviderConfig();
+          config.setApplicationName("caoyxRpc-sample-simple-server");
+          config.setApplicationVersion("0");
+          config.setRegisterConfig(new RegisterConfig(
+                  "noRegister",
+                  "",
+                  null
+          ));
+          config.setPort(1118);
+  
+          CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(config);
+          caoyxRpcProviderFactory.addServiceProvider(IUser.class.getName(), "0", new UserImpl());
+          caoyxRpcProviderFactory.init();
+      }
 ```
 
 

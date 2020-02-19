@@ -8,7 +8,7 @@ import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
  */
 public interface Server {
 
-    void start(CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws CaoyxRpcException;
+    void start(int port, CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws CaoyxRpcException;
 
     void stop();
 }

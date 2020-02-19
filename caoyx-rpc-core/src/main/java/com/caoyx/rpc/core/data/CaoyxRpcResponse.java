@@ -18,4 +18,11 @@ public class CaoyxRpcResponse extends CaoyxRpcPacket {
     public boolean isSuccess() {
         return status != null && status == CaoyxRpcStatus.SUCCESS;
     }
+
+    public static CaoyxRpcResponse buildIllegalResponse(String errorMsg) {
+        CaoyxRpcResponse response = new CaoyxRpcResponse();
+        response.setStatus(CaoyxRpcStatus.ILLEGAL);
+        response.setErrorMsg(errorMsg);
+        return response;
+    }
 }

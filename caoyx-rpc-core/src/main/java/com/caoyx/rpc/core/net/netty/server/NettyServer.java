@@ -31,13 +31,12 @@ import java.util.concurrent.TimeUnit;
 public class NettyServer implements Server {
     private EventLoopGroup receiveGroup;
     private EventLoopGroup workGroup;
-    private ServerBootstrap serverBootstrap;
 
-    public void start(final CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws CaoyxRpcException {
+    public void start(final int port, final CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws CaoyxRpcException {
         receiveGroup = new NioEventLoopGroup();
         workGroup = new NioEventLoopGroup();
 
-        serverBootstrap = new ServerBootstrap();
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(receiveGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 32 * 1024 * 1024)
@@ -55,12 +54,12 @@ public class NettyServer implements Server {
                     }
                 });
         try {
-            ChannelFuture channelFuture = serverBootstrap.bind(caoyxRpcProviderFactory.getPort()).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
             channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
                 @Override
                 public void operationComplete(Future<? super Void> future) throws Exception {
                     if (future.isSuccess()) {
-                        log.info("server start success, port:" + caoyxRpcProviderFactory.getPort());
+                        log.info("server start success, port:" + port);
                     } else {
                         log.error("server start fail, errorMsg: " + ThrowableUtils.throwable2String(future.cause()));
                     }
