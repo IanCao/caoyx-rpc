@@ -24,11 +24,11 @@ public class CaoyxRpcInvokerConfig {
 
     private CallType callType;
 
-    private String remoteApplicationName;
+    private String applicationName;
 
-    private String remoteApplicationVersion;
+    private String providerApplicationName;
 
-    private String remoteImplVersion;
+    private int providerImplVersion;
 
     private int retryTimes;
 

@@ -6,6 +6,7 @@ import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.utils.MethodUtils;
 import com.caoyx.rpc.core.utils.ThrowableUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author: caoyixiong
  * @Date: 2020-01-06 18:36
  */
+@Slf4j
 public class CaoyxRpcProviderHandler {
 
     private ConcurrentHashMap<String, MethodProvider> methodProviderMap = new ConcurrentHashMap<>();
 
-    public void addServiceMethodProvider(String className, String implVersion, Object service) {
+    public boolean exportService(String className, int implVersion, Object service) {
         Class clazz;
         try {
             clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
@@ -28,20 +30,23 @@ public class CaoyxRpcProviderHandler {
 
         Method[] methods = clazz.getMethods();
         if (methods.length == 0) {
-            return;
+            return false;
         }
 
         for (int i = 0; i < methods.length; i++) {
             Method method = methods[i];
             String methodUniqueKey = generateMethodUniqueKey(className, implVersion, MethodUtils.generateMethodKey(method));
             if (methodProviderMap.containsKey(methodUniqueKey)) {
-                return;
+                continue;
             }
+            //生成代理对象
             methodProviderMap.putIfAbsent(methodUniqueKey, new JavassistProvider(className, implVersion, method, service));
+            log.info("methodUniqueKey:[" + methodUniqueKey + "] export successfully");
         }
+        return true;
     }
 
-    private MethodProvider getServiceMethodProvider(String className, String implVersion, String methodKey) {
+    private MethodProvider getServiceMethodProvider(String className, int implVersion, String methodKey) {
         String methodUniqueKey = generateMethodUniqueKey(className, implVersion, methodKey);
         return methodProviderMap.get(methodUniqueKey);
     }
@@ -56,7 +61,7 @@ public class CaoyxRpcProviderHandler {
         MethodProvider methodProvider = getServiceMethodProvider(requestPacket.getClassName(), requestPacket.getImplVersion(), requestPacket.getMethodKey());
 
         if (methodProvider == null) {
-            response.setStatus(CaoyxRpcStatus.FAIL);
+            response.setStatus(CaoyxRpcStatus.ILLEGAL);
             response.setErrorMsg(requestPacket.getClassName() + ":" + requestPacket.getImplVersion() + ":" + requestPacket.getMethodKey() + " has no valid bean");
             return response;
         }
@@ -71,7 +76,7 @@ public class CaoyxRpcProviderHandler {
         return response;
     }
 
-    private String generateMethodUniqueKey(String className, String implVersion, String methodKey) {
+    private String generateMethodUniqueKey(String className, int implVersion, String methodKey) {
         return className + "@" + implVersion + "@" + methodKey;
     }
 }

@@ -1,10 +1,7 @@
 package com.caoyx.rpc.sample.simple.client;
 
-import com.caoyx.rpc.core.compress.CompressType;
 import com.caoyx.rpc.core.config.CaoyxRpcInvokerConfig;
 import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
-import com.caoyx.rpc.core.loadbalance.LoadBalanceType;
-import com.caoyx.rpc.core.serialization.SerializerType;
 import com.caoyx.rpc.sample.simple.api.IUser;
 import com.caoyx.rpc.sample.simple.api.UserDto;
 import com.caoyx.rpc.core.enums.CallType;
@@ -14,8 +11,6 @@ import com.caoyx.rpc.core.invoker.reference.CaoyxRpcReferenceBean;
 import com.caoyx.rpc.core.register.RegisterConfig;
 import com.caoyx.rpc.core.register.RegisterType;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author caoyixiong
@@ -60,30 +55,21 @@ public class UserClient {
 
     private static void testGenericCall() throws Exception {
         CaoyxRpcGenericInvoker invoker = (CaoyxRpcGenericInvoker) init(CaoyxRpcGenericInvoker.class, CallType.SYNC, null);
-        Object object = invoker.invoke("com.caoyx.rpc.sample.simple.api.IUser", "0", "getUsers", null, null);
+        Object object = invoker.invoke("com.caoyx.rpc.sample.simple.api.IUser", 0, "getUsers", null, null);
         System.out.println("testGenericCall : " + object.toString());
     }
 
     private static Object init(Class clazz, CallType callType, CaoyxRpcInvokerCallBack callBack) throws Exception {
-        List<String> loadAddresses = new ArrayList<String>();
-        loadAddresses.add("127.0.0.1:1118");
         CaoyxRpcInvokerConfig config = new CaoyxRpcInvokerConfig();
         config.setIFace(clazz);
-        config.setRemoteApplicationVersion("0");
-        config.setRemoteImplVersion("0");
-        config.setRemoteApplicationName("caoyxRpc-sample-simple-server");
-        config.setRegisterConfig(new RegisterConfig(
-                RegisterType.NO_REGISTER.getValue(),
-                "",
-                loadAddresses));
-        config.setSerializerType(SerializerType.HESSIAN2);
-//        config.setCompressType(CompressType.LZ4);
-        config.setLoadBalanceType(LoadBalanceType.RANDOM);
+        config.setProviderImplVersion(0);
+        config.setProviderApplicationName("caoyxRpc-sample-simple-server");
+        config.setApplicationName("caoyxRpc-sample-simple-client");
+        config.setRegisterConfig(new RegisterConfig("127.0.0.1:1118", RegisterType.DIRECT));
         config.setCallType(callType);
         config.setCaoyxRpcInvokerCallBack(callBack);
 
         CaoyxRpcReferenceBean rpcReferenceBean = new CaoyxRpcReferenceBean(config);
-        rpcReferenceBean.init();
         return rpcReferenceBean.getObject();
     }
 }

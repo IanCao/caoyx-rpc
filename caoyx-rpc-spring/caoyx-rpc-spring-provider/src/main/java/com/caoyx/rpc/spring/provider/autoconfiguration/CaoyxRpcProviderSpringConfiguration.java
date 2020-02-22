@@ -4,6 +4,8 @@ import com.caoyx.rpc.core.config.CaoyxRpcProviderConfig;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.net.netty.server.NettyServer;
 import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.register.RegisterType;
+import com.caoyx.rpc.core.utils.StringUtils;
 import com.caoyx.rpc.spring.provider.CaoyxRpcSpringProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,34 +26,32 @@ public class CaoyxRpcProviderSpringConfiguration {
     @Value("${caoyxRpc.server.port:1118}")
     private int port;
 
-    @Value("${caoyxRpc.server.applicationName}")
+    @Value("${caoyxRpc.provider.applicationName}")
     private String applicationName;
 
-    @Value("${caoyxRpc.server.register.type:noRegister}")
-    private String registerType;
+    @Value("${caoyxRpc.provider.register.type:}")
+    private String register;
 
-    @Value("${caoyxRpc.server.register.address:}")
-    private String registerAddress;
+    @Value("${caoyxRpc.provider.register.address:}")
+    private String address;
 
-    @Value("${caoyxRpc.server.applicationVersion:0}")
-    private String applicationVersion;
-
-    @Value("${caoyxRpc.server.accessToken:}")
+    @Value("${caoyxRpc.provider.accessToken:}")
     private String accessToken;
 
     @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
     @Bean
-    public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws InterruptedException, CaoyxRpcException {
-        log.info("caoyxRpcSpringProviderFactory init");
+    public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws CaoyxRpcException {
+        log.info("caoyxRpc-spring-provider starting.....");
+
         CaoyxRpcProviderConfig config = new CaoyxRpcProviderConfig();
         config.setApplicationName(applicationName);
-        config.setRegisterConfig(new RegisterConfig(registerType, registerAddress));
-        config.setApplicationVersion(applicationVersion);
         config.setAccessToken(accessToken);
         config.setPort(port);
 
-        CaoyxRpcSpringProviderFactory factory = new CaoyxRpcSpringProviderFactory(config);
-        factory.init();
-        return factory;
+        RegisterType registerType = RegisterType.findByValue(register);
+        if (StringUtils.isNotBlank(address) && registerType != null) {
+            config.setRegisterConfig(new RegisterConfig(address, registerType));
+        }
+        return new CaoyxRpcSpringProviderFactory(config);
     }
 }

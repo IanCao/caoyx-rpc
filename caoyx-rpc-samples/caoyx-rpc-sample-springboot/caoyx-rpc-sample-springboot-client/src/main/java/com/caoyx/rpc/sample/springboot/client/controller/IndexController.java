@@ -1,7 +1,6 @@
 package com.caoyx.rpc.sample.springboot.client.controller;
 
 
-import com.caoyx.rpc.core.serialization.SerializerType;
 import com.caoyx.rpc.sample.springboot.api.IUser;
 import com.caoyx.rpc.sample.springboot.api.UserDto;
 import com.caoyx.rpc.spring.invoker.CaoyxRpcReference;
@@ -13,16 +12,10 @@ import java.util.List;
 @RestController
 public class IndexController {
 
-    @CaoyxRpcReference(loadAddress = {"127.0.0.1:1118"},
-            remoteApplicationName = "caoyxRpc-sample-springboot-server",
-            serializer = SerializerType.PROTOSTUFF,
-            retryTimes = 2)
+    @CaoyxRpcReference(providerApplicationName = "caoyxRpc-sample-springboot-server")
     private IUser user;
 
-    @CaoyxRpcReference(loadAddress = {"127.0.0.1:1118"},
-            remoteApplicationName = "caoyxRpc-sample-springboot-server",
-            serializer = SerializerType.HESSIAN2,
-            retryTimes = 2)
+    @CaoyxRpcReference(providerApplicationName = "caoyxRpc-sample-springboot-server")
     private IUser user1;
 
     @GetMapping("/addDefaultUser")

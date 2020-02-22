@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface CaoyxRpcService {
-    String implVersion() default "0";
+    int implVersion() default 0;
 
     String[] filter() default {};
 }

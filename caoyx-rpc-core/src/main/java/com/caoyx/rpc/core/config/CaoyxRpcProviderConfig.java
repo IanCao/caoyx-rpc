@@ -19,8 +19,6 @@ public class CaoyxRpcProviderConfig {
 
     private RegisterConfig registerConfig;
 
-    private String applicationVersion;
-
     private List<CaoyxRpcFilter> rpcFilters;
 
     private String accessToken;

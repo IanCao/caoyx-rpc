@@ -13,4 +13,8 @@ public class Constants {
     public static final int PROCESS_NUM = Runtime.getRuntime().availableProcessors();
 
     public static final int MSG_MAX_SIZE_IN_BYTE = 3 * 1024 * 1024;
+
+    public static final String PROVIDER = "provider";
+
+    public static final String INVOKER = "invoker";
 }

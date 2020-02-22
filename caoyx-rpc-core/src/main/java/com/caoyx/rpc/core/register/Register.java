@@ -1,8 +1,10 @@
 package com.caoyx.rpc.core.register;
 
-import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.data.ClassKey;
+import com.caoyx.rpc.core.url.register.InvokerURL;
+import com.caoyx.rpc.core.url.register.ProviderURL;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @Author: caoyixiong
@@ -10,17 +12,33 @@ import java.util.Set;
  */
 public interface Register {
 
-    void initRegister(String applicationName, String version);
+    /**
+     * for Invoker register
+     *
+     * @param address
+     * @param applicationName
+     * @param providerApplicationName
+     */
+    void initInvokerRegister(String address, String applicationName, String providerApplicationName);
 
-    void initRegisterConnect(String address);
+    /**
+     * for Provider register
+     *
+     * @param address
+     * @param providerApplicationName
+     * @param port
+     */
+    void initProviderRegister(String address, String providerApplicationName, int port);
 
-    void startRegisterLoopFetch();
+    InvokerURL registerInvoker(ClassKey classKey);
 
-    void register(String ip, int port);
+    ProviderURL registerProvider(ClassKey classKey, int port);
 
-    Set<Address> getAllRegister(String applicationName, String version);
+    List<ProviderURL> getProviderURLsByInvokerURL(InvokerURL invokerURL);
 
-    void loadAddress(Address address);
+    void subscribe(InvokerURL invokerURL, NotifyListener listener);
+
+    void unsubscribe(InvokerURL invokerURL, NotifyListener listener);
 
     void stop();
 }

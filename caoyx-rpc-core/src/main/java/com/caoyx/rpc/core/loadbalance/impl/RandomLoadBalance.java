@@ -1,12 +1,12 @@
 package com.caoyx.rpc.core.loadbalance.impl;
 
-import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.extension.annotation.Implement;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
+import com.caoyx.rpc.core.url.URL;
+import com.caoyx.rpc.core.url.register.ProviderURL;
 
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * @Author: caoyixiong
@@ -18,10 +18,10 @@ public class RandomLoadBalance implements LoadBalance {
     private Random random = new Random(System.currentTimeMillis());
 
     @Override
-    public Address loadBalance(String invokerInfo, Set<Address> addresses) {
-        if (addresses == null || addresses.isEmpty()) {
+    public ProviderURL loadBalance(String classWithMethodKey, List<ProviderURL> providerURLs) {
+        if (providerURLs == null || providerURLs.isEmpty()) {
             return null;
         }
-        return (Address) addresses.toArray()[random.nextInt(addresses.size())];
+        return (ProviderURL) providerURLs.toArray()[random.nextInt(providerURLs.size())];
     }
 }

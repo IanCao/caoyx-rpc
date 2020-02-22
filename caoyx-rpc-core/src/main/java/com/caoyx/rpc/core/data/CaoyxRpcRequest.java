@@ -15,7 +15,7 @@ public class CaoyxRpcRequest extends CaoyxRpcPacket {
 
     private String className;
 
-    private String implVersion;
+    private int implVersion;
     
     private String methodKey;
 
@@ -27,7 +27,7 @@ public class CaoyxRpcRequest extends CaoyxRpcPacket {
 
     private Map<String, Object> metaData = new HashMap<>();
 
-    public String getInvokerInfo() {
+    public String getClassWithMethodKey() {
         return this.className + "@" + this.methodKey;
     }
 

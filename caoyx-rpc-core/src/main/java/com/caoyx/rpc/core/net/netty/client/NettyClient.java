@@ -6,7 +6,6 @@ import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.net.api.Client;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcDecoder;
 import com.caoyx.rpc.core.net.netty.codec.CaoyxRpcEncoder;
-import com.caoyx.rpc.core.data.Address;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -30,7 +29,7 @@ public class NettyClient implements Client {
     private Channel channel;
 
     @Override
-    public void init(Address address) throws InterruptedException {
+    public void init(String ipPort) throws InterruptedException {
         group = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
@@ -45,7 +44,7 @@ public class NettyClient implements Client {
                                 .addLast(new NettyClientHandler());
                     }
                 });
-        channel = bootstrap.connect(address.getIp(), address.getPort()).sync().channel();
+        channel = bootstrap.connect(ipPort.split(":")[0], Integer.valueOf(ipPort.split(":")[1])).sync().channel();
     }
 
 

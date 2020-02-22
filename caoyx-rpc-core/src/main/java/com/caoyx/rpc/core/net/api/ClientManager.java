@@ -1,12 +1,10 @@
 package com.caoyx.rpc.core.net.api;
 
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
-import com.caoyx.rpc.core.data.Address;
-import com.caoyx.rpc.core.register.RegisterOnChangeCallBack;
-import com.caoyx.rpc.core.utils.CollectionUtils;
+import com.caoyx.rpc.core.url.URL;
+import com.caoyx.rpc.core.url.register.ProviderURL;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,31 +12,31 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date: 2019-12-27 15:55
  */
 @Slf4j
-public class ClientManager implements RegisterOnChangeCallBack {
+public class ClientManager {
 
-    private static volatile ConcurrentHashMap<Address, Client> clientPool = new ConcurrentHashMap<>();
+    private static volatile ConcurrentHashMap<String, Client> clientPool = new ConcurrentHashMap<>();
 
-    public Client getOrCreateClient(Address address, Class<? extends Client> clientImpl) throws CaoyxRpcException {
-        Client client = clientPool.get(address);
+    public Client getOrCreateClient(ProviderURL providerURL, Class<? extends Client> clientImpl) throws CaoyxRpcException {
+        Client client = clientPool.get(providerURL.getHostPort());
         if (client != null && client.isValid()) {
             return client;
         }
-        synchronized (address.toString().intern()) {
+        synchronized (providerURL.getHostPort().intern()) {
             //double check
-            client = clientPool.get(address);
+            client = clientPool.get(providerURL.getHostPort());
             if (client != null && client.isValid()) {
                 return client;
             }
 
             if (client != null) {
                 client.close();
-                clientPool.remove(address);
+                clientPool.remove(providerURL.getHostPort());
             }
             Client clientInstance = null;
             try {
                 clientInstance = clientImpl.newInstance();
-                clientInstance.init(address);
-                clientPool.put(address, clientInstance);
+                clientInstance.init(providerURL.getHostPort());
+                clientPool.put(providerURL.getHostPort(), clientInstance);
             } catch (Exception e) {
                 if (clientInstance != null) {
                     clientInstance.close();
@@ -47,26 +45,6 @@ public class ClientManager implements RegisterOnChangeCallBack {
                 throw new CaoyxRpcException(e);
             }
             return clientInstance;
-        }
-    }
-
-    private void removeClient(Address address) {
-        synchronized (address.toString().intern()) {
-            Client client = clientPool.get(address);
-            if (client != null) {
-                client.close();
-                clientPool.remove(address);
-            }
-        }
-    }
-
-    @Override
-    public void onAddressesDeleted(Set<Address> addresses) {
-        if (CollectionUtils.isEmpty(addresses)) {
-            return;
-        }
-        for (Address address : addresses) {
-            removeClient(address);
         }
     }
 }

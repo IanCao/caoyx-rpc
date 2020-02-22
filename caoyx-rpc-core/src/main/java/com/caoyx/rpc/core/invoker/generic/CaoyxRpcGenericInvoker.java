@@ -6,5 +6,5 @@ package com.caoyx.rpc.core.invoker.generic;
  */
 public interface CaoyxRpcGenericInvoker {
 
-    Object invoke(String IFace, String version, String methodName, String[] parameterTypes, Object[] args);
+    Object invoke(String IFace, int version, String methodName, String[] parameterTypes, Object[] args);
 }

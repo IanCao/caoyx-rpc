@@ -1,11 +1,11 @@
 package com.caoyx.rpc.core.loadbalance;
 
-import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.enums.ExtensionType;
 import com.caoyx.rpc.core.extension.annotation.SPI;
+import com.caoyx.rpc.core.url.URL;
+import com.caoyx.rpc.core.url.register.ProviderURL;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @Author: caoyixiong
@@ -13,5 +13,5 @@ import java.util.Set;
  */
 @SPI(type = ExtensionType.LOADBALANCE)
 public interface LoadBalance {
-    Address loadBalance(String invokerInfo, Set<Address> addresses);
+    ProviderURL loadBalance(String classWithMethodKey, List<ProviderURL> providerURLs);
 }

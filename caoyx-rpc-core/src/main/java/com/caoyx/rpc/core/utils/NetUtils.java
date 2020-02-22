@@ -94,6 +94,10 @@ public class NetUtils {
                 && !IP_PATTERN.matcher(name).matches());
     }
 
+    /**
+     * @param address eg. 127.0.0.1:1234   localhost:1234
+     * @return
+     */
     public static Address format(String address) {
         try {
             String[] ipPort = address.split(":");

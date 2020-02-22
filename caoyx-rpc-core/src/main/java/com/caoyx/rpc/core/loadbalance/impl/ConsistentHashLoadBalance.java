@@ -1,15 +1,16 @@
 package com.caoyx.rpc.core.loadbalance.impl;
 
-import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.extension.annotation.Implement;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
+import com.caoyx.rpc.core.url.URL;
+import com.caoyx.rpc.core.url.register.ProviderURL;
 import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,18 +25,18 @@ public class ConsistentHashLoadBalance implements LoadBalance {
 
     @Override
 
-    public Address loadBalance(String invokerInfo, Set<Address> addresses) {
-        long invokerInfoHash = hash(invokerInfo);
+    public ProviderURL loadBalance(String classWithMethodKey, List<ProviderURL> providerURLs) {
+        long invokerInfoHash = hash(classWithMethodKey);
 
         ConsistentHashSelector selector = selectorConcurrentHashMap.get(invokerInfoHash);
         if (selector != null && selector.getSelectorHashCode() == invokerInfoHash) {
-            return selector.select(invokerInfo);
+            return selector.select(classWithMethodKey);
         }
-        ConsistentHashSelector consistentHashSelector = selectorConcurrentHashMap.putIfAbsent(invokerInfoHash, new ConsistentHashSelector(addresses));
+        ConsistentHashSelector consistentHashSelector = selectorConcurrentHashMap.putIfAbsent(invokerInfoHash, new ConsistentHashSelector(providerURLs));
         if (consistentHashSelector == null) {
-            return selectorConcurrentHashMap.get(invokerInfoHash).select(invokerInfo);
+            return selectorConcurrentHashMap.get(invokerInfoHash).select(classWithMethodKey);
         }
-        return consistentHashSelector.select(invokerInfo);
+        return consistentHashSelector.select(classWithMethodKey);
     }
 
     public static class ConsistentHashSelector {
@@ -45,25 +46,25 @@ public class ConsistentHashLoadBalance implements LoadBalance {
         @Getter
         private Long selectorHashCode;
 
-        private TreeMap<Long, Address> addressTreeMap = new TreeMap<>();
+        private TreeMap<Long, ProviderURL> hash2UrlMap = new TreeMap<>();
 
-        ConsistentHashSelector(Set<Address> addresses) {
-            selectorHashCode = hash(addresses.toString());
-            for (Address address : addresses) {
+        ConsistentHashSelector(List<ProviderURL> urls) {
+            selectorHashCode = hash(urls.toString());
+            for (ProviderURL url : urls) {
                 for (int i = 0; i < VIRTUAL_NODE; i++) {
-                    long addressHash = hash("CAOYX_RPC-SHARD-" + address + "-NODE-" + i);
-                    addressTreeMap.put(addressHash, address);
+                    long urlHash = hash("CAOYX_RPC-SHARD-" + url + "-NODE-" + i);
+                    hash2UrlMap.put(urlHash, url);
                 }
             }
         }
 
-        Address select(String invokerInfo) {
-            long invokerInfoHash = hash(invokerInfo);
-            Entry<Long, Address> addressEntry = addressTreeMap.ceilingEntry(invokerInfoHash);
+        ProviderURL select(String classWithMethodKey) {
+            long classWithMethodKeyHash = hash(classWithMethodKey);
+            Entry<Long, ProviderURL> addressEntry = hash2UrlMap.ceilingEntry(classWithMethodKeyHash);
             if (addressEntry != null) {
                 return addressEntry.getValue();
             }
-            return addressTreeMap.firstEntry().getValue();
+            return hash2UrlMap.firstEntry().getValue();
         }
     }
 

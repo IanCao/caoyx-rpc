@@ -1,18 +1,13 @@
 package com.caoyx.rpc.core.register;
 
-import com.caoyx.rpc.core.data.Address;
+import com.caoyx.rpc.core.data.ClassKey;
 import com.caoyx.rpc.core.enums.ExtensionType;
 import com.caoyx.rpc.core.extension.annotation.SPI;
-import com.caoyx.rpc.core.utils.CollectionUtils;
+import com.caoyx.rpc.core.url.register.InvokerURL;
+import com.caoyx.rpc.core.url.register.ProviderURL;
+import com.caoyx.rpc.core.utils.NetUtils;
 import lombok.Getter;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: caoyixiong
@@ -21,119 +16,80 @@ import java.util.concurrent.TimeUnit;
 @SPI(type = ExtensionType.REGISTER)
 public abstract class CaoyxRpcRegister implements Register {
 
-    private static final long FETCH_INTERVAL_IN_MILLS = 5 * 1000L;
-
-    private volatile CopyOnWriteArraySet<Address> remoteAddressesCache = new CopyOnWriteArraySet<>();
     @Getter
-    private volatile CopyOnWriteArraySet<Address> loadAddressCache = new CopyOnWriteArraySet<>();
-
-    private final CopyOnWriteArraySet<Address> allAddressesCache = new CopyOnWriteArraySet<>();
-
-    private CopyOnWriteArrayList<RegisterOnChangeCallBack> changeCallBacks = new CopyOnWriteArrayList<>();
-
-    private volatile long lastUpdatedTimeMills;
-    private volatile boolean updatedFinish = true;
-    private final Object lock = new Object();
-    private volatile ScheduledFuture<?> addressFetchFuture;
-
-    protected String applicationName;
-
-    protected String applicationVersion;
-
-    protected abstract Set<Address> fetchAllAddress(String applicationName, String applicationVersion);
+    private String applicationName;
+    @Getter
+    private String providerApplicationName;
+    @Getter
+    private String address;
+    @Getter
+    private int port;
 
     protected abstract void doStop();
 
     @Override
-    public final void initRegister(String applicationName, String applicationVersion) {
+    public void initInvokerRegister(String address, String applicationName, String providerApplicationName) {
+        this.address = address;
         this.applicationName = applicationName;
-        this.applicationVersion = applicationVersion;
+        this.providerApplicationName = providerApplicationName;
+        initRegisterConnect();
     }
 
     @Override
-    public void startRegisterLoopFetch() {
-        addressFetchFuture = Executors
-                .newSingleThreadScheduledExecutor()
-                .scheduleAtFixedRate(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isValidUpdated()) {
-                            return;
-                        }
-                        fetchAll(applicationName, applicationVersion);
+    public void initProviderRegister(String address, String applicationName, int port) {
+        this.address = address;
+        this.applicationName = applicationName;
+        this.providerApplicationName = applicationName;
+        this.port = port;
+        initRegisterConnect();
+    }
 
-                    }
-                }, 0, FETCH_INTERVAL_IN_MILLS, TimeUnit.MILLISECONDS);
+    protected abstract void initRegisterConnect();
+
+    @Override
+    public InvokerURL registerInvoker(ClassKey classKey) {
+        InvokerURL url = new InvokerURL();
+        url.setClassName(classKey.getClassName());
+        url.setImplVersion(classKey.getVersion());
+        url.setHostPort(NetUtils.getLocalAddress());
+        url.setProviderApplicationName(providerApplicationName);
+        url.setApplicationName(applicationName);
+        doRegisterInvoker(url);
+        return url;
     }
 
     @Override
-    public final Set<Address> getAllRegister(String applicationName, String applicationVersion) {
-        if (isValidCache()) {
-            return allAddressesCache;
-        }
-        synchronized (lock) {
-            if (isValidCache()) {
-                return allAddressesCache;
-            }
-            fetchAll(applicationName, applicationVersion);
-            return allAddressesCache;
-        }
+    public ProviderURL registerProvider(ClassKey classKey, int port) {
+        ProviderURL url = new ProviderURL();
+        url.setClassName(classKey.getClassName());
+        url.setImplVersion(classKey.getVersion());
+        url.setHostPort(NetUtils.getLocalAddress() + ":" + port);
+        url.setApplicationName(applicationName);
+        doRegisterProvider(url);
+        return url;
     }
 
-    @Override
-    public final void loadAddress(Address address) {
-        loadAddressCache.add(address);
-    }
+
+    protected abstract void doRegisterInvoker(InvokerURL url);
+
+    protected abstract void doRegisterProvider(ProviderURL url);
 
     @Override
     public final void stop() {
-        if (addressFetchFuture != null) {
-            addressFetchFuture.cancel(true);
-        }
         doStop();
     }
 
-    public final void addOnChangeCallBack(RegisterOnChangeCallBack changeCallBack) {
-        changeCallBacks.add(changeCallBack);
+    @Override
+    public final void subscribe(InvokerURL url, NotifyListener listener) {
+        doSubscribe(url, listener);
     }
 
-    protected final synchronized void fetchAll(String applicationName, String version) {
-        if (isValidCache()) {
-            return;
-        }
-        updatedFinish = false;
-
-
-        Set<Address> latestRemoteAddresses = fetchAllAddress(applicationName, version);
-
-        if (CollectionUtils.isEmpty(latestRemoteAddresses)) {
-            remoteAddressesCache = new CopyOnWriteArraySet();
-        } else {
-            remoteAddressesCache = new CopyOnWriteArraySet<>(latestRemoteAddresses);
-        }
-        lastUpdatedTimeMills = System.currentTimeMillis();
-        allAddressesCache.clear();
-        allAddressesCache.addAll(remoteAddressesCache);
-        allAddressesCache.addAll(loadAddressCache);
-
-        updatedFinish = true;
-
-        Set<Address> deletedAddresses = new HashSet<>();
-        for (Address address : remoteAddressesCache) {
-            if (!latestRemoteAddresses.contains(address)) {
-                deletedAddresses.add(address);
-            }
-        }
-        for (RegisterOnChangeCallBack changeCallBack : changeCallBacks) {
-            changeCallBack.onAddressesDeleted(deletedAddresses);  //TODO 切换为线程池操作
-        }
+    @Override
+    public final void unsubscribe(InvokerURL url, NotifyListener listener) {
+        doUnsubscribe(url, listener);
     }
 
-    private boolean isValidUpdated() {
-        return System.currentTimeMillis() - lastUpdatedTimeMills <= FETCH_INTERVAL_IN_MILLS;
-    }
+    protected abstract void doSubscribe(InvokerURL url, NotifyListener listener);
 
-    private boolean isValidCache() {
-        return isValidUpdated() && !allAddressesCache.isEmpty() && updatedFinish;
-    }
+    protected abstract void doUnsubscribe(InvokerURL url, NotifyListener listener);
 }

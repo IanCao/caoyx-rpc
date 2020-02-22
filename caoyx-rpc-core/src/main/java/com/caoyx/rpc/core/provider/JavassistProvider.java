@@ -1,6 +1,7 @@
 package com.caoyx.rpc.core.provider;
 
 import com.caoyx.rpc.core.classloader.SingleClassLoader;
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.utils.ClassUtils;
 import com.caoyx.rpc.core.utils.ThrowableUtils;
 import javassist.ClassPool;
@@ -23,13 +24,13 @@ import java.util.Arrays;
 public class JavassistProvider implements MethodProvider {
     private String className;
     private String methodName;
-    private String implVersion;
+    private int implVersion;
     private Class[] paramTypeNames;
     private Class returnType;
     private Object serviceBean;
     private MethodProvider methodProvider;
 
-    public JavassistProvider(String className, String implVersion, Method method, Object serviceBean) {
+    public JavassistProvider(String className, int implVersion, Method method, Object serviceBean) {
         this.className = className;
         this.methodName = method.getName();
         this.implVersion = implVersion;
@@ -39,8 +40,9 @@ public class JavassistProvider implements MethodProvider {
 
         try {
             this.methodProvider = generateMethodProvider();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error(ThrowableUtils.throwable2String(e));
+            throw new CaoyxRpcException(e);
         }
     }
 
@@ -88,9 +90,9 @@ public class JavassistProvider implements MethodProvider {
         String boxInvokeBuilder = ClassUtils.box(returnType, invokeBuilder.toString());
         if (ClassUtils.isVoid(returnType)) {
             invokeMethodBuilder.append(boxInvokeBuilder).append(";\r\n");
-            invokeBuilder.append("return null");
+            invokeMethodBuilder.append("return null;\r\n}");
         } else {
-            invokeMethodBuilder.append("return ").append(boxInvokeBuilder).append("\r\n; }");
+            invokeMethodBuilder.append("return ").append(boxInvokeBuilder).append("; }");
 
         }
 

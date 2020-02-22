@@ -4,6 +4,7 @@ import com.caoyx.rpc.core.config.CaoyxRpcProviderConfig;
 import com.caoyx.rpc.core.context.CaoyxRpcContext;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
+import com.caoyx.rpc.core.data.ClassKey;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
@@ -11,12 +12,9 @@ import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.net.netty.server.NettyServer;
 import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
-import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.register.Register;
 import com.caoyx.rpc.core.utils.CollectionUtils;
-import com.caoyx.rpc.core.utils.NetUtils;
 import com.caoyx.rpc.core.utils.StringUtils;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -28,51 +26,52 @@ import java.util.List;
 @Slf4j
 public class CaoyxRpcProviderFactory {
 
-    private Server server;
-
-    private RegisterConfig registerConfig;
-
-    private String applicationName;
-    private int port = 1118;
-    private String applicationVersion;
     private String accessToken;
 
     private final CaoyxRpcProviderHandler rpcProviderHandler;
 
+    private CaoyxRpcRegister register;
+
+    private final int port;
+
     private final List<CaoyxRpcFilter> caoyxRpcFilters = new ArrayList<>();
 
     public CaoyxRpcProviderFactory(CaoyxRpcProviderConfig providerConfig) {
-        this.applicationName = providerConfig.getApplicationName();
-        this.registerConfig = providerConfig.getRegisterConfig();
-        this.applicationVersion = providerConfig.getApplicationVersion();
-        this.accessToken = providerConfig.getAccessToken();
-        if (providerConfig.getPort() > 0) {
-            this.port = providerConfig.getPort();
+        if (StringUtils.isBlank(providerConfig.getApplicationName())) {
+            throw new CaoyxRpcException("applicationName can not be empty");
         }
-
+        if (providerConfig.getPort() <= 0) {
+            throw new CaoyxRpcException("port can not be 0");
+        }
+        this.accessToken = providerConfig.getAccessToken();
         if (CollectionUtils.isNotEmpty(providerConfig.getRpcFilters())) {
             caoyxRpcFilters.addAll(providerConfig.getRpcFilters());
         }
-
-        this.rpcProviderHandler = new CaoyxRpcProviderHandler();
-        this.server = new NettyServer();
-    }
-
-    public void init() throws CaoyxRpcException {
-        server.start(port, this);
-        if (registerConfig != null) {
-            CaoyxRpcRegister register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterName()).getValidExtensionInstance();
-            register.initRegister(applicationName, applicationVersion);
-            register.initRegisterConnect(registerConfig.getRegisterAddress());
-            register.register(NetUtils.getLocalAddress(), port);
+        port = providerConfig.getPort();
+        Server server = new NettyServer();
+        server.start(providerConfig.getPort(), this);
+        if (providerConfig.getRegisterConfig() != null) {
+            register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, providerConfig.getRegisterConfig().getRegisterType().getValue()).getValidExtensionInstance();
+            register.initProviderRegister(providerConfig.getRegisterConfig().getAddress(), providerConfig.getApplicationName(), providerConfig.getPort());
         }
-
+        this.rpcProviderHandler = new CaoyxRpcProviderHandler();
     }
 
-    public void addServiceProvider(String className, String implVersion, Object service) {
-        rpcProviderHandler.addServiceMethodProvider(className, implVersion, service);
-        log.info("className:[" + className + "],implVersion:[" + implVersion + "] export successfully");
+    public void exportService(Class clazz, Object service) {
+        exportService(clazz.getName(), service);
+    }
 
+    public void exportService(String className, Object service) {
+        exportService(className, 0, service);
+    }
+
+    public void exportService(String className, int implVersion, Object service) {
+        boolean success = rpcProviderHandler.exportService(className, implVersion, service);
+        if (success && register != null) {
+            register.registerProvider(new ClassKey(className, implVersion), port);
+            return;
+        }
+        log.info("exportService: className[" + className + "] implVersion:[" + implVersion + "] success:[" + success + "]");
     }
 
     public CaoyxRpcResponse invoke(ServerInvokerArgs serverInvokerArgs) throws Exception {

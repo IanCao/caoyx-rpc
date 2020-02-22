@@ -17,4 +17,13 @@ public enum LoadBalanceType {
     public String getValue() {
         return this.value;
     }
+
+    public static LoadBalanceType findByValue(String value) {
+        for (LoadBalanceType loadBalanceType : values()) {
+            if (loadBalanceType.value.equals(value)) {
+                return loadBalanceType;
+            }
+        }
+        return null;
+    }
 }
