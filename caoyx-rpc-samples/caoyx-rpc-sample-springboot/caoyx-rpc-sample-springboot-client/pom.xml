@@ -10,7 +10,7 @@
     <parent>
         <groupId>com.github.iancao</groupId>
         <artifactId>caoyx-rpc-sample-springboot</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <properties>
@@ -39,12 +39,12 @@
         <dependency>
             <artifactId>caoyx-rpc-sample-springboot-api</artifactId>
             <groupId>com.github.iancao</groupId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.iancao</groupId>
             <artifactId>caoyx-rpc-spring-invoker</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 </project>
