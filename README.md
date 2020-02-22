@@ -35,25 +35,6 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 
 [Caoyx-Rpc Simple Demo](https://github.com/IanCao/caoyx-rpc/tree/master/caoyx-rpc-samples/caoyx-rpc-sample-simple)
 
-**Maven dependency**
-
-```xml
-<dependency>
-    <groupId>com.github.iancao</groupId>
-    <artifactId>caoyx-rpc-core</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-</dependency>
-```
-
-服务提供方定义的接口如下：
-```java
-public interface IUser {
-    
-    boolean addUser(UserDto userDto);
-
-    List<UserDto> getUsers();
-}
-```
 
 ### 如何联系
 - 在github提Issue
