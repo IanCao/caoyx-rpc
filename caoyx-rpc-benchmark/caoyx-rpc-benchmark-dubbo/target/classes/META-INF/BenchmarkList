@@ -1,0 +1,12 @@
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 65 com.caoyx.rpc.benchmark.generated.DubboBenchmark_listUser_jmhTest S 8 listUser S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 65 com.caoyx.rpc.benchmark.generated.DubboBenchmark_listUser_jmhTest S 8 listUser S 10 SampleTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 64 com.caoyx.rpc.benchmark.generated.DubboBenchmark_getUser_jmhTest S 7 getUser S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 66 com.caoyx.rpc.benchmark.generated.DubboBenchmark_existUser_jmhTest S 9 existUser S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 67 com.caoyx.rpc.benchmark.generated.DubboBenchmark_createUser_jmhTest S 10 createUser S 10 SampleTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 64 com.caoyx.rpc.benchmark.generated.DubboBenchmark_getUser_jmhTest S 7 getUser S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 64 com.caoyx.rpc.benchmark.generated.DubboBenchmark_getUser_jmhTest S 7 getUser S 10 SampleTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 65 com.caoyx.rpc.benchmark.generated.DubboBenchmark_listUser_jmhTest S 8 listUser S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 66 com.caoyx.rpc.benchmark.generated.DubboBenchmark_existUser_jmhTest S 9 existUser S 10 SampleTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 67 com.caoyx.rpc.benchmark.generated.DubboBenchmark_createUser_jmhTest S 10 createUser S 10 Throughput E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 66 com.caoyx.rpc.benchmark.generated.DubboBenchmark_existUser_jmhTest S 9 existUser S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 
+JMH S 38 com.caoyx.rpc.benchmark.DubboBenchmark S 67 com.caoyx.rpc.benchmark.generated.DubboBenchmark_createUser_jmhTest S 10 createUser S 11 AverageTime E A 1 1 1 E E E E E E E E E E E E E E U 12 MILLISECONDS E E 

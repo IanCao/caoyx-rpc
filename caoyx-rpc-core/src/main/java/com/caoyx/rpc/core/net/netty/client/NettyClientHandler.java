@@ -24,7 +24,6 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<CaoyxRpcResp
     }
 
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, CaoyxRpcResponse caoyxRpcResponse) throws Exception {
-//        log.info("NettyClientHandler channelRead0 :" + caoyxRpcResponse.getRequestId());
         CaoyxRpcPendingInvokerPool.INSTANCE.notifyResponse(caoyxRpcResponse);
     }
 

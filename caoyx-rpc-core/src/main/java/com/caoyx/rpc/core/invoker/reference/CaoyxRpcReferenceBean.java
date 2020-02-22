@@ -93,7 +93,7 @@ public class CaoyxRpcReferenceBean {
             throw new CaoyxRpcException("applicationName can not be null");
         }
         if (StringUtils.isBlank(config.getProviderApplicationName())) {
-            throw new CaoyxRpcException("remoteApplicationName can not be null");
+            throw new CaoyxRpcException("providerApplicationName can not be null");
         }
         if (config.getRegisterConfig() == null) {
             throw new CaoyxRpcException("registerConfig can not be null");

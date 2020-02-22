@@ -36,6 +36,9 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 [Caoyx-Rpc Simple Demo](https://github.com/IanCao/caoyx-rpc/tree/master/caoyx-rpc-samples/caoyx-rpc-sample-simple)
 
 
+### Benchmark基准测试
+[CaoyxRpc/Dubbo/Grpc/Thrift 基准测试](doc/Benchmark.md)
+
 ### 如何联系
 - 在github提Issue
 - 发送邮件至caoyixiong@apache.org
