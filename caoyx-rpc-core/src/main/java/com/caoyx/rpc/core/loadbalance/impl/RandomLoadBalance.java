@@ -22,6 +22,9 @@ public class RandomLoadBalance implements LoadBalance {
         if (providerURLs == null || providerURLs.isEmpty()) {
             return null;
         }
+        if (providerURLs.size() == 1) {
+            return providerURLs.get(0);
+        }
         return (ProviderURL) providerURLs.toArray()[random.nextInt(providerURLs.size())];
     }
 }

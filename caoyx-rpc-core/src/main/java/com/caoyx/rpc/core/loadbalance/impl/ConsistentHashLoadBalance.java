@@ -26,6 +26,9 @@ public class ConsistentHashLoadBalance implements LoadBalance {
     @Override
 
     public ProviderURL loadBalance(String classWithMethodKey, List<ProviderURL> providerURLs) {
+        if (providerURLs.size() == 1) {
+            return providerURLs.get(0);
+        }
         long invokerInfoHash = hash(classWithMethodKey);
 
         ConsistentHashSelector selector = selectorConcurrentHashMap.get(invokerInfoHash);
