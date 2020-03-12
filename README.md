@@ -24,6 +24,7 @@ caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可�
 14. 支持调用方的**失败回调**和**超时回调**
 15. 支持LZ4压缩
 16. 支持调用方与提供方之间的鉴权，服务提供方配置一个accessToken，即只接受具有相同accessToken的Request请求。
+17. 支持kill pid（非kill -9 ）的优雅停机
 
 ### 如何接入
 #### 1. [SpringBoot接入](doc/SpringBoot接入.md)

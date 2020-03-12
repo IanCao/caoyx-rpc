@@ -136,6 +136,7 @@ public class CaoyxRpcReferenceBean {
                 @Override
                 public void onChange(String classKey, List<ProviderURL> providers) {
                     synchronized (classKey.intern()) {
+                        log.info("classKey:[" + classKey + "] latest providers: " + providers.toString());
                         classKey2ProviderUrl.put(classKey, providers);
                     }
                 }

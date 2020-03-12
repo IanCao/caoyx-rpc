@@ -5,6 +5,7 @@ import com.caoyx.rpc.core.enums.ExtensionType;
 import com.caoyx.rpc.core.extension.annotation.SPI;
 import com.caoyx.rpc.core.url.register.InvokerURL;
 import com.caoyx.rpc.core.url.register.ProviderURL;
+import com.caoyx.rpc.core.url.register.RegisterURL;
 import com.caoyx.rpc.core.utils.NetUtils;
 import lombok.Getter;
 
@@ -69,6 +70,18 @@ public abstract class CaoyxRpcRegister implements Register {
         return url;
     }
 
+
+    @Override
+    public void unRegisterProvider(ClassKey classKey, int port) {
+        ProviderURL url = new ProviderURL();
+        url.setClassName(classKey.getClassName());
+        url.setImplVersion(classKey.getVersion());
+        url.setHostPort(NetUtils.getLocalAddress() + ":" + port);
+        url.setApplicationName(applicationName);
+        doUnRegisterProvider(url);
+    }
+
+    protected abstract void doUnRegisterProvider(ProviderURL url);
 
     protected abstract void doRegisterInvoker(InvokerURL url);
 

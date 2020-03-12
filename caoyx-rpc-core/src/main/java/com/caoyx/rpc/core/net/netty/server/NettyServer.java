@@ -31,11 +31,12 @@ import java.util.concurrent.TimeUnit;
 public class NettyServer implements Server {
     private EventLoopGroup receiveGroup;
     private EventLoopGroup workGroup;
+    private NettyServerHandler serverHandler;
 
     public void start(final int port, final CaoyxRpcProviderFactory caoyxRpcProviderFactory) throws CaoyxRpcException {
         receiveGroup = new NioEventLoopGroup();
         workGroup = new NioEventLoopGroup();
-
+        serverHandler = new NettyServerHandler(caoyxRpcProviderFactory);
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(receiveGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
@@ -50,7 +51,7 @@ public class NettyServer implements Server {
                                 .addLast(new IdleStateHandler(0, 0, 60, TimeUnit.SECONDS))
                                 .addLast(new CaoyxRpcDecoder(CaoyxRpcRequest.class))
                                 .addLast(new CaoyxRpcEncoder())
-                                .addLast(new NettyServerHandler(caoyxRpcProviderFactory));
+                                .addLast(serverHandler);
                     }
                 });
         try {
@@ -66,12 +67,16 @@ public class NettyServer implements Server {
                 }
             });
         } catch (InterruptedException e) {
-            stop();
+            shutdownGracefully();
             throw new CaoyxRpcException(e);
         }
     }
 
-    public void stop() {
+    @Override
+    public void shutdownGracefully() {
+        if (serverHandler != null) {
+            serverHandler.shutdownGracefully();
+        }
         if (receiveGroup != null) {
             receiveGroup.shutdownGracefully();
         }

@@ -43,6 +43,7 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
         }
     }
 
+
     @Override
     protected void doRegisterInvoker(InvokerURL url) {
         // /CaoyxRpc/providerApplicationName/className@1/invoker/
@@ -85,6 +86,24 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
             return;
         }
         zkClient.createEphemeral(pathBuilder.toString(), url.getMetadata());
+    }
+
+
+    @Override
+    protected void doUnRegisterProvider(ProviderURL url) {
+        StringBuilder pathBuilder = new StringBuilder();
+        pathBuilder.append(ROOT_PATH)
+                .append(SPLIT)
+                .append(getApplicationName())
+                .append(SPLIT)
+                .append(url.getClassKey())
+                .append(SPLIT)
+                .append(url.getProtocol().getLabel())
+                .append(SPLIT).append(url.getHostPort());
+        if (!zkClient.exists(pathBuilder.toString())) {
+            return;
+        }
+        zkClient.delete(pathBuilder.toString());
     }
 
     private String url2SubscribePath(InvokerURL url) {

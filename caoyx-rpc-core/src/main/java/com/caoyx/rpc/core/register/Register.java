@@ -34,6 +34,8 @@ public interface Register {
 
     ProviderURL registerProvider(ClassKey classKey, int port);
 
+    void unRegisterProvider(ClassKey classKey, int port);
+
     List<ProviderURL> getProviderURLsByInvokerURL(InvokerURL invokerURL);
 
     void subscribe(InvokerURL invokerURL, NotifyListener listener);

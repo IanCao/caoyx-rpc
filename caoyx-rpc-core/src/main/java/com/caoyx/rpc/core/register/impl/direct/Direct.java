@@ -30,6 +30,11 @@ public class Direct extends CaoyxRpcRegister {
     }
 
     @Override
+    protected void doUnRegisterProvider(ProviderURL url) {
+
+    }
+
+    @Override
     protected void doRegisterInvoker(InvokerURL url) {
 
     }

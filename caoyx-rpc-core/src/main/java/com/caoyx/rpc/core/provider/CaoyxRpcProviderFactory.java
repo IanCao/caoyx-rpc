@@ -12,19 +12,21 @@ import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.net.netty.server.NettyServer;
 import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
-import com.caoyx.rpc.core.register.Register;
+import com.caoyx.rpc.core.shutdown.GraceFullyShutDownCallBack;
+import com.caoyx.rpc.core.shutdown.GracefullyShutDown;
 import com.caoyx.rpc.core.utils.CollectionUtils;
 import com.caoyx.rpc.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author caoyixiong
  */
 @Slf4j
-public class CaoyxRpcProviderFactory {
+public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
 
     private String accessToken;
 
@@ -34,7 +36,20 @@ public class CaoyxRpcProviderFactory {
 
     private final int port;
 
+    private CaoyxRpcProviderConfig providerConfig;
+
     private final List<CaoyxRpcFilter> caoyxRpcFilters = new ArrayList<>();
+
+    private final CopyOnWriteArrayList<ClassKey> exportServices = new CopyOnWriteArrayList<ClassKey>();
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                GracefullyShutDown.INSTANCE.onShutDown();
+            }
+        }));
+    }
 
     public CaoyxRpcProviderFactory(CaoyxRpcProviderConfig providerConfig) {
         if (StringUtils.isBlank(providerConfig.getApplicationName())) {
@@ -43,6 +58,7 @@ public class CaoyxRpcProviderFactory {
         if (providerConfig.getPort() <= 0) {
             throw new CaoyxRpcException("port can not be 0");
         }
+        this.providerConfig = providerConfig;
         this.accessToken = providerConfig.getAccessToken();
         if (CollectionUtils.isNotEmpty(providerConfig.getRpcFilters())) {
             caoyxRpcFilters.addAll(providerConfig.getRpcFilters());
@@ -55,6 +71,8 @@ public class CaoyxRpcProviderFactory {
             register.initProviderRegister(providerConfig.getRegisterConfig().getAddress(), providerConfig.getApplicationName(), providerConfig.getPort());
         }
         this.rpcProviderHandler = new CaoyxRpcProviderHandler();
+        GracefullyShutDown.INSTANCE.addCallBack(this);
+        GracefullyShutDown.INSTANCE.addCallBack(server);
     }
 
     public void exportService(Class clazz, Object service) {
@@ -67,9 +85,12 @@ public class CaoyxRpcProviderFactory {
 
     public void exportService(String className, int implVersion, Object service) {
         boolean success = rpcProviderHandler.exportService(className, implVersion, service);
-        if (success && register != null) {
-            register.registerProvider(new ClassKey(className, implVersion), port);
-            return;
+        if (success) {
+            ClassKey classKey = new ClassKey(className, implVersion);
+            exportServices.addIfAbsent(classKey);
+            if (register != null) {
+                register.registerProvider(classKey, port);
+            }
         }
         log.info("exportService: className[" + className + "] implVersion:[" + implVersion + "] success:[" + success + "]");
     }
@@ -92,6 +113,16 @@ public class CaoyxRpcProviderFactory {
             return response;
         } finally {
             CaoyxRpcContext.removeContext();
+        }
+    }
+
+    @Override
+    public void shutdownGracefully() {
+        if (register != null) {
+            for (ClassKey classKey : exportServices) {
+                register.unRegisterProvider(classKey, providerConfig.getPort());
+                log.info("unExportService: className[" + classKey.getClassName() + "] implVersion:[" + classKey.getVersion() + "] success on ShutDown");
+            }
         }
     }
 }

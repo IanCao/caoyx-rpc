@@ -6,6 +6,8 @@ import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
+import com.caoyx.rpc.core.shutdown.GraceFullyShutDownCallBack;
+import com.caoyx.rpc.core.shutdown.GracefullyShutDown;
 import com.caoyx.rpc.core.utils.ThreadPoolUtils;
 import com.caoyx.rpc.core.utils.ThrowableUtils;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -68,5 +70,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<CaoyxRpcRequ
                 super.userEventTriggered(ctx, evt);
             }
         }
+    }
+
+    public void shutdownGracefully() {
+        executor.shutdown();
     }
 }

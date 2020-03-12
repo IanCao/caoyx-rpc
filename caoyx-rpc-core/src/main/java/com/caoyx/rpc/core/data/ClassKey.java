@@ -3,6 +3,8 @@ package com.caoyx.rpc.core.data;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Objects;
+
 /**
  * @Author: caoyixiong
  * @Date: 2020-02-21 16:26
@@ -21,5 +23,19 @@ public class ClassKey {
     @Override
     public String toString() {
         return className + "@" + version;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ClassKey classKey = (ClassKey) o;
+        return Objects.equals(className, classKey.className) &&
+                Objects.equals(version, classKey.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(className, version);
     }
 }
