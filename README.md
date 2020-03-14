@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/IanCao/caoyx-rpc.svg?branch=master)](https://travis-ci.com/IanCao/caoyx-rpc) 
 ![license](https://img.shields.io/github/license/IanCao/caoyx-rpc.svg)
 ![maven](https://img.shields.io/nexus/s/com.github.iancao/caoyx-rpc?server=https%3A%2F%2Foss.sonatype.org)
-
+![maven](https://img.shields.io/nexus/r/com.github.iancao/caoyx-rpc?server=https%3A%2F%2Foss.sonatype.org)
 # caoyx-rpc
 caoyx-rpc是一个基于Java语言开发的开源RPC服务框架，提供高可用，高可用的远程调用能力。
 
