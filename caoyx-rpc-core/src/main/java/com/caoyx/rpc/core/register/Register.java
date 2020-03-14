@@ -5,6 +5,7 @@ import com.caoyx.rpc.core.url.register.InvokerURL;
 import com.caoyx.rpc.core.url.register.ProviderURL;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: caoyixiong
@@ -32,7 +33,7 @@ public interface Register {
 
     InvokerURL registerInvoker(ClassKey classKey);
 
-    ProviderURL registerProvider(ClassKey classKey, int port);
+    ProviderURL registerProvider(ClassKey classKey, int port, Map<String, Object> metadata);
 
     void unRegisterProvider(ClassKey classKey, int port);
 

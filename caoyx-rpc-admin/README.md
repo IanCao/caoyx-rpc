@@ -1,0 +1,1 @@
+## 用于管理CaoyxRpc的 invoker端和provider具体信息，并可以做一些远程控制功能

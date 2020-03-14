@@ -16,7 +16,7 @@ public class CaoyxRpcRequest extends CaoyxRpcPacket {
     private String className;
 
     private int implVersion;
-    
+
     private String methodKey;
 
     private Object[] parameters;

@@ -26,7 +26,7 @@ public class MethodUtils {
 
     public static String generateMethodKey(String methodName, String[] paramTypes) {
         StringBuilder builder = new StringBuilder();
-        if(paramTypes != null) {
+        if (paramTypes != null) {
             for (int i = 0; i < paramTypes.length; i++) {
                 builder.append(paramTypes[i]).append("|");
             }

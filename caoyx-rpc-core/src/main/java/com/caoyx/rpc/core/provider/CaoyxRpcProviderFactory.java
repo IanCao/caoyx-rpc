@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -75,21 +76,34 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
         GracefullyShutDown.INSTANCE.addCallBack(server);
     }
 
-    public void exportService(Class clazz, Object service) {
-        exportService(clazz.getName(), service);
+    public void exportService(Class clazz, Object service) throws CaoyxRpcException {
+        exportService(clazz, service, null);
     }
 
-    public void exportService(String className, Object service) {
-        exportService(className, 0, service);
+    public void exportService(String className, Object service) throws CaoyxRpcException {
+        exportService(className, service, null);
     }
 
-    public void exportService(String className, int implVersion, Object service) {
+    public void exportService(Class clazz, Object service, Map<String, Object> metadata) throws CaoyxRpcException {
+        exportService(clazz.getName(), 0, service, metadata);
+    }
+
+    public void exportService(String className, Object service, Map<String, Object> metadata) throws CaoyxRpcException {
+        exportService(className, 0, service, metadata);
+    }
+
+    public void exportService(String className, int implVersion, Object service, Map<String, Object> metadata) throws CaoyxRpcException {
+
         boolean success = rpcProviderHandler.exportService(className, implVersion, service);
         if (success) {
             ClassKey classKey = new ClassKey(className, implVersion);
             exportServices.addIfAbsent(classKey);
             if (register != null) {
-                register.registerProvider(classKey, port);
+                try {
+                    register.registerProvider(classKey, port, metadata);
+                } catch (Exception e) {
+                    throw new CaoyxRpcException(e);
+                }
             }
         }
         log.info("exportService: className[" + className + "] implVersion:[" + implVersion + "] success:[" + success + "]");
@@ -120,8 +134,12 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
     public void shutdownGracefully() {
         if (register != null) {
             for (ClassKey classKey : exportServices) {
-                register.unRegisterProvider(classKey, providerConfig.getPort());
-                log.info("unExportService: className[" + classKey.getClassName() + "] implVersion:[" + classKey.getVersion() + "] success on ShutDown");
+                try {
+                    register.unRegisterProvider(classKey, providerConfig.getPort());
+                    log.info("unExportService: className[" + classKey.getClassName() + "] implVersion:[" + classKey.getVersion() + "] success on ShutDown");
+                } catch (Exception e) {
+                    log.info("unExportService: className[" + classKey.getClassName() + "] implVersion:[" + classKey.getVersion() + "] fail on ShutDown", e);
+                }
             }
         }
     }

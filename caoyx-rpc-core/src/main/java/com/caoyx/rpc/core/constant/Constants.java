@@ -17,4 +17,6 @@ public class Constants {
     public static final String PROVIDER = "provider";
 
     public static final String INVOKER = "invoker";
+
+    public static final String URL_METADATA_KEY_AVALIABLE = "avaliable";
 }

@@ -14,6 +14,7 @@
         <module>caoyx-rpc-spring</module>
         <module>caoyx-rpc-samples</module>
         <module>caoyx-rpc-benchmark</module>
+        <module>caoyx-rpc-admin</module>
     </modules>
 
     <properties>

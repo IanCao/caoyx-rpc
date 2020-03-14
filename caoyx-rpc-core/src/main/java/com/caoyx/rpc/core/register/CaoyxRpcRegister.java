@@ -2,12 +2,14 @@ package com.caoyx.rpc.core.register;
 
 import com.caoyx.rpc.core.data.ClassKey;
 import com.caoyx.rpc.core.enums.ExtensionType;
+import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.annotation.SPI;
 import com.caoyx.rpc.core.url.register.InvokerURL;
 import com.caoyx.rpc.core.url.register.ProviderURL;
-import com.caoyx.rpc.core.url.register.RegisterURL;
 import com.caoyx.rpc.core.utils.NetUtils;
 import lombok.Getter;
+
+import java.util.Map;
 
 
 /**
@@ -60,12 +62,13 @@ public abstract class CaoyxRpcRegister implements Register {
     }
 
     @Override
-    public ProviderURL registerProvider(ClassKey classKey, int port) {
+    public ProviderURL registerProvider(ClassKey classKey, int port, Map<String, Object> metadata) {
         ProviderURL url = new ProviderURL();
         url.setClassName(classKey.getClassName());
         url.setImplVersion(classKey.getVersion());
         url.setHostPort(NetUtils.getLocalAddress() + ":" + port);
         url.setApplicationName(applicationName);
+        url.setMetadata(metadata);
         doRegisterProvider(url);
         return url;
     }

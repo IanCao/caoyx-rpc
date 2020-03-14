@@ -10,9 +10,6 @@ import lombok.Data;
  */
 @Data
 public class ProviderURL extends RegisterURL {
-    private boolean inValid;
-    private int weight;
-
     public ProviderURL() {
         setProtocol(URLProtocol.PROVIDER);
     }

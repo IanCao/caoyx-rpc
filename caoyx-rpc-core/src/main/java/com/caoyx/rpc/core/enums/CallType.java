@@ -22,7 +22,7 @@ public enum CallType {
 
     public static CallType findByValue(String value) {
         for (CallType callType : values()) {
-            if(callType.value.equals(value)){
+            if (callType.value.equals(value)) {
                 return callType;
             }
         }
