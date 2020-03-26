@@ -109,7 +109,7 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
         log.info("exportService: className[" + className + "] implVersion:[" + implVersion + "] success:[" + success + "]");
     }
 
-    public CaoyxRpcResponse invoke(ServerInvokerArgs serverInvokerArgs) throws Exception {
+    public CaoyxRpcResponse doInvoke(ServerInvokerArgs serverInvokerArgs) {
         try {
             CaoyxRpcRequest request = serverInvokerArgs.getRequestPacket();
             if (StringUtils.isNotBlank(accessToken)) {
@@ -128,6 +128,17 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
         } finally {
             CaoyxRpcContext.removeContext();
         }
+    }
+
+    public CaoyxRpcResponse invoke(ServerInvokerArgs serverInvokerArgs) throws Exception {
+        long startTime = System.currentTimeMillis();
+        CaoyxRpcResponse response = doInvoke(serverInvokerArgs);
+        if (serverInvokerArgs.getRequestPacket().getTimeout() > 0
+                && System.currentTimeMillis() - startTime > serverInvokerArgs.getRequestPacket().getTimeout()) {
+            // this request has been abandoned by invoker
+            return null;
+        }
+        return response;
     }
 
     @Override

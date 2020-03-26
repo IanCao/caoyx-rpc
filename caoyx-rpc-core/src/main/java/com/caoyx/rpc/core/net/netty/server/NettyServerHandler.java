@@ -51,6 +51,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<CaoyxRpcRequ
                     rpcResponsePacket.setErrorMsg(ThrowableUtils.throwable2String(e));
                     rpcResponsePacket.setStatus(CaoyxRpcStatus.FAIL);
                 }
+                if (rpcResponsePacket == null) {
+                    return;
+                }
                 try {
                     channelHandlerContext.writeAndFlush(rpcResponsePacket).sync();
                 } catch (InterruptedException e) {
