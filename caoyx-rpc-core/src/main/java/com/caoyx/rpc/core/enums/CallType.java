@@ -5,16 +5,18 @@ package com.caoyx.rpc.core.enums;
  * @Date: 2019-12-27 18:21
  */
 public enum CallType {
-    UNKNOWN(0),
-    SYNC(1),
-    FUTURE(2),
-    CALLBACK(3),
-    ONE_WAY(4);
+    UNKNOWN(0, "unknown"),
+    SYNC(1, "sync"),
+    FUTURE(2, "future"),
+    CALLBACK(3, "callback"),
+    ONE_WAY(4, "oneWay");
 
     private int value;
+    private String label;
 
-    CallType(int value) {
+    CallType(int value, String label) {
         this.value = value;
+        this.label = label;
     }
 
     public int getValue() {
@@ -24,6 +26,15 @@ public enum CallType {
     public static CallType findByValue(int value) {
         for (CallType callType : values()) {
             if (callType.value == value) {
+                return callType;
+            }
+        }
+        return null;
+    }
+
+    public static CallType findByLabel(String label) {
+        for (CallType callType : values()) {
+            if (callType.label.equals(label)) {
                 return callType;
             }
         }

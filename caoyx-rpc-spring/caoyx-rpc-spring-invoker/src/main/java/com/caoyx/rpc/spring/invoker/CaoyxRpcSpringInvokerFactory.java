@@ -110,8 +110,8 @@ public class CaoyxRpcSpringInvokerFactory extends InstantiationAwareBeanPostProc
                         throw new CaoyxRpcException("loadBalance is invalid");
                     }
                     CallType callType = StringUtils.isEmpty(caoyxRpcReference.callType())
-                            ? CallType.findByValue(CaoyxRpcSpringInvokerFactory.this.callType)
-                            : CallType.findByValue(caoyxRpcReference.callType());
+                            ? CallType.findByLabel(CaoyxRpcSpringInvokerFactory.this.callType)
+                            : CallType.findByLabel(caoyxRpcReference.callType());
                     if (callType == null) {
                         throw new CaoyxRpcException("callType is invalid");
                     }
