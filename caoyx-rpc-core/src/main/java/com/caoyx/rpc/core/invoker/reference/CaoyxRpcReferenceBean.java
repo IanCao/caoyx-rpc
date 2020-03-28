@@ -209,6 +209,7 @@ public class CaoyxRpcReferenceBean {
                             rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
                             rpcRequest.setTimeout(timeout);
                             rpcRequest.setAccessToken(accessToken);
+                            rpcRequest.setCallType(callType.getValue());
 
                             for (int i = 0; i < retryTimes + 1; i++) {
                                 ProviderURL providerURL = loadBalance.loadBalance(classKey, classKey2ProviderUrl.get(classKey));
@@ -244,6 +245,11 @@ public class CaoyxRpcReferenceBean {
                                     case CALLBACK:
                                         rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
                                         futureResponse.setCaoyxRpcInvokerCallBack(caoyxRpcInvokerCallBack);
+                                        break;
+                                    case ONE_WAY:
+                                        rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
+                                        CaoyxRpcPendingInvokerPool.INSTANCE.removeInvokerFuture(rpcRequest.getRequestId());
+                                        break;
                                 }
                                 if (rpcResponse.isSuccess()) {
                                     for (int j = rpcFilters.size() - 1; j >= 0; j--) {

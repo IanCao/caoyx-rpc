@@ -25,22 +25,20 @@ public class CaoyxRpcRequest extends CaoyxRpcPacket {
 
     private long timeout;
 
-    private Map<String, Object> metaData = new HashMap<>();
+    private int callType;
 
-    public String getClassWithMethodKey() {
-        return this.className + "@" + this.methodKey;
-    }
+    private Map<String, Object> metaData = new HashMap<>();
 
     @Override
     public String toString() {
         return "CaoyxRpcRequest{" +
-                "requestId='" + getRequestId() + '\'' +
-                ", className='" + className + '\'' +
-                ", implVersion='" + implVersion + '\'' +
+                "className='" + className + '\'' +
+                ", implVersion=" + implVersion +
                 ", methodKey='" + methodKey + '\'' +
                 ", parameters=" + Arrays.toString(parameters) +
                 ", createdTimeMills=" + createdTimeMills +
                 ", timeout=" + timeout +
+                ", callType=" + callType +
                 ", metaData=" + metaData +
                 '}';
     }

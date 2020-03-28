@@ -5,6 +5,7 @@ import com.caoyx.rpc.core.context.CaoyxRpcContext;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.data.ClassKey;
+import com.caoyx.rpc.core.enums.CallType;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
@@ -132,9 +133,15 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
 
     public CaoyxRpcResponse invoke(ServerInvokerArgs serverInvokerArgs) throws Exception {
         long startTime = System.currentTimeMillis();
+        CaoyxRpcRequest rpcRequest = serverInvokerArgs.getRequestPacket();
         CaoyxRpcResponse response = doInvoke(serverInvokerArgs);
-        if (serverInvokerArgs.getRequestPacket().getTimeout() > 0
-                && System.currentTimeMillis() - startTime > serverInvokerArgs.getRequestPacket().getTimeout()) {
+
+        if (rpcRequest.getCallType() == CallType.ONE_WAY.getValue()) {
+            return null;
+        }
+        if (rpcRequest.getCallType() == CallType.SYNC.getValue()
+                && serverInvokerArgs.getRequestPacket().getTimeout() > 0
+                && System.currentTimeMillis() - startTime > rpcRequest.getTimeout()) {
             // this request has been abandoned by invoker
             return null;
         }
