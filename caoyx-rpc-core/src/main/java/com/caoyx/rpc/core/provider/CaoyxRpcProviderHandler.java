@@ -4,6 +4,7 @@ import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
+import com.caoyx.rpc.core.exception.CaoyxRpcIllegalMethodException;
 import com.caoyx.rpc.core.utils.MethodUtils;
 import com.caoyx.rpc.core.utils.ThrowableUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class CaoyxRpcProviderHandler {
     }
 
 
-    public CaoyxRpcResponse invoke(CaoyxRpcRequest requestPacket) {
+    CaoyxRpcResponse invoke(CaoyxRpcRequest requestPacket) {
         CaoyxRpcResponse response = new CaoyxRpcResponse();
         response.setRequestId(requestPacket.getRequestId());
         response.setSerializerType(requestPacket.getSerializerType());
@@ -61,9 +62,7 @@ public class CaoyxRpcProviderHandler {
         MethodProvider methodProvider = getServiceMethodProvider(requestPacket.getClassName(), requestPacket.getImplVersion(), requestPacket.getMethodKey());
 
         if (methodProvider == null) {
-            response.setStatus(CaoyxRpcStatus.ILLEGAL);
-            response.setErrorMsg(requestPacket.getClassName() + ":" + requestPacket.getImplVersion() + ":" + requestPacket.getMethodKey() + " has no valid bean");
-            return response;
+            throw new CaoyxRpcIllegalMethodException(requestPacket.getClassName() + ":" + requestPacket.getImplVersion() + ":" + requestPacket.getMethodKey() + " has no valid bean");
         }
         try {
             Object result = methodProvider.invoke(requestPacket.getParameters());

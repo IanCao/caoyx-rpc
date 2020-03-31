@@ -16,7 +16,8 @@ public class UserServer {
         CaoyxRpcProviderConfig config = new CaoyxRpcProviderConfig();
         config.setApplicationName("caoyxRpc-sample-simple-server");
         config.setPort(1118);
-
+        config.setRateLimit(1);
+        config.setAccessToken("caoyx");
         CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(config);
         caoyxRpcProviderFactory.exportService(IUser.class, new UserImpl());
     }

@@ -4,6 +4,9 @@ import com.caoyx.rpc.core.data.Address;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
+import com.caoyx.rpc.core.exception.CaoyxRpcAccessTokenIllegalException;
+import com.caoyx.rpc.core.exception.CaoyxRpcIllegalMethodException;
+import com.caoyx.rpc.core.exception.CaoyxRpcRateLimitException;
 import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
 import com.caoyx.rpc.core.provider.CaoyxRpcProviderFactory;
 import com.caoyx.rpc.core.shutdown.GraceFullyShutDownCallBack;
@@ -40,22 +43,34 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<CaoyxRpcRequ
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                CaoyxRpcResponse rpcResponsePacket = new CaoyxRpcResponse();
+                CaoyxRpcResponse response = new CaoyxRpcResponse();
+                response.setRequestId(requestPacket.getRequestId());
+                response.setSerializerType(requestPacket.getSerializerType());
+                response.setCompressType(requestPacket.getCompressType());
                 try {
                     InetSocketAddress socketAddress = (InetSocketAddress) channelHandlerContext.channel().remoteAddress();
                     ServerInvokerArgs serverInvokerArgs = new ServerInvokerArgs();
                     serverInvokerArgs.setInvokerAddress(new Address(socketAddress.getHostName(), socketAddress.getPort()));
                     serverInvokerArgs.setRequestPacket(requestPacket);
-                    rpcResponsePacket = caoyxRpcProviderFactory.invoke(serverInvokerArgs);
+                    response = caoyxRpcProviderFactory.invoke(serverInvokerArgs);
+                } catch (CaoyxRpcRateLimitException e) {
+                    response.setErrorMsg(ThrowableUtils.throwable2String(e));
+                    response.setStatus(CaoyxRpcStatus.RATE_LIMIT);
+                } catch (CaoyxRpcAccessTokenIllegalException e) {
+                    response.setErrorMsg(ThrowableUtils.throwable2String(e));
+                    response.setStatus(CaoyxRpcStatus.ILLEGAL_ACCESSS_TOKEN);
+                } catch (CaoyxRpcIllegalMethodException e) {
+                    response.setErrorMsg(ThrowableUtils.throwable2String(e));
+                    response.setStatus(CaoyxRpcStatus.ILLEHAL_METHOD);
                 } catch (Exception e) {
-                    rpcResponsePacket.setErrorMsg(ThrowableUtils.throwable2String(e));
-                    rpcResponsePacket.setStatus(CaoyxRpcStatus.FAIL);
+                    response.setErrorMsg(ThrowableUtils.throwable2String(e));
+                    response.setStatus(CaoyxRpcStatus.FAIL);
                 }
-                if (rpcResponsePacket == null) {
+                if (response == null) {
                     return;
                 }
                 try {
-                    channelHandlerContext.writeAndFlush(rpcResponsePacket).sync();
+                    channelHandlerContext.writeAndFlush(response).sync();
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }

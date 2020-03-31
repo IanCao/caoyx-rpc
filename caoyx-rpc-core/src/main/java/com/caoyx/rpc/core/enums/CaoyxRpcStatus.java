@@ -8,5 +8,7 @@ public enum CaoyxRpcStatus {
     SUCCESS,
     FAIL,
     TIMEOUT,
-    ILLEGAL
+    ILLEGAL_ACCESSS_TOKEN,
+    ILLEHAL_METHOD,
+    RATE_LIMIT,
 }

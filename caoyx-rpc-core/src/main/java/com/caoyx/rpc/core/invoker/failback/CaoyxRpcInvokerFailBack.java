@@ -8,4 +8,6 @@ public interface CaoyxRpcInvokerFailBack<T> {
     T onFail(String errorMsg);
 
     T onTimeout();
+
+    T onRateLimit();
 }

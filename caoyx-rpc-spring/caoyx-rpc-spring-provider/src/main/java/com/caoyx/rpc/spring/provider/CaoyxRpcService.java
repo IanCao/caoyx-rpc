@@ -19,4 +19,6 @@ public @interface CaoyxRpcService {
     int implVersion() default 0;
 
     String[] filter() default {};
+
+    int limitRate() default -1;
 }

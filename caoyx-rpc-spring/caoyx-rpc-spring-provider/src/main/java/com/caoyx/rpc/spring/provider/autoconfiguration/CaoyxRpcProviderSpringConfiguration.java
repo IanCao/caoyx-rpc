@@ -38,6 +38,9 @@ public class CaoyxRpcProviderSpringConfiguration {
     @Value("${caoyxRpc.provider.accessToken:}")
     private String accessToken;
 
+    @Value("${caoyxRpc.provider.limitRate:}")
+    private int limitRate;
+
     @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)
     @Bean
     public CaoyxRpcSpringProviderFactory caoyxRpcSpringProviderFactory() throws CaoyxRpcException {
@@ -47,6 +50,7 @@ public class CaoyxRpcProviderSpringConfiguration {
         config.setApplicationName(applicationName);
         config.setAccessToken(accessToken);
         config.setPort(port);
+        config.setRateLimit(limitRate);
 
         RegisterType registerType = RegisterType.findByValue(register);
         if (StringUtils.isNotBlank(address) && registerType != null) {

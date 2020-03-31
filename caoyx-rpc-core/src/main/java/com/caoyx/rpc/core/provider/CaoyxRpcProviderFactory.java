@@ -6,9 +6,11 @@ import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.data.ClassKey;
 import com.caoyx.rpc.core.enums.CallType;
+import com.caoyx.rpc.core.exception.CaoyxRpcAccessTokenIllegalException;
 import com.caoyx.rpc.core.exception.CaoyxRpcException;
 import com.caoyx.rpc.core.extension.ExtensionLoader;
 import com.caoyx.rpc.core.filter.CaoyxRpcFilter;
+import com.caoyx.rpc.core.filter.provider.RateLimiterFilter;
 import com.caoyx.rpc.core.net.api.Server;
 import com.caoyx.rpc.core.net.netty.server.NettyServer;
 import com.caoyx.rpc.core.net.param.ServerInvokerArgs;
@@ -62,6 +64,9 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
         }
         this.providerConfig = providerConfig;
         this.accessToken = providerConfig.getAccessToken();
+        if (providerConfig.getRateLimit() > 0) {
+            caoyxRpcFilters.add(new RateLimiterFilter(providerConfig.getRateLimit()));
+        }
         if (CollectionUtils.isNotEmpty(providerConfig.getRpcFilters())) {
             caoyxRpcFilters.addAll(providerConfig.getRpcFilters());
         }
@@ -73,6 +78,7 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
             register.initProviderRegister(providerConfig.getRegisterConfig().getAddress(), providerConfig.getApplicationName(), providerConfig.getPort());
         }
         this.rpcProviderHandler = new CaoyxRpcProviderHandler();
+
         GracefullyShutDown.INSTANCE.addCallBack(this);
         GracefullyShutDown.INSTANCE.addCallBack(server);
     }
@@ -115,7 +121,7 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
             CaoyxRpcRequest request = serverInvokerArgs.getRequestPacket();
             if (StringUtils.isNotBlank(accessToken)) {
                 if (!accessToken.equals(request.getAccessToken())) {
-                    return CaoyxRpcResponse.buildIllegalResponse("accessToken is not legal，with accessToken is " + request.getAccessToken());
+                    throw new CaoyxRpcAccessTokenIllegalException("accessToken is not legal，with accessToken is " + request.getAccessToken());
                 }
             }
             for (int i = 0; i < caoyxRpcFilters.size(); i++) {

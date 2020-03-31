@@ -22,4 +22,6 @@ public class CaoyxRpcProviderConfig {
     private List<CaoyxRpcFilter> rpcFilters;
 
     private String accessToken;
+
+    private int rateLimit;
 }

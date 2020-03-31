@@ -26,6 +26,12 @@ public class CaoyxRpcException extends RuntimeException {
                 return new CaoyxRpcFailException(msg);
             case TIMEOUT:
                 return new CaoyxRpcTimeoutException(msg);
+            case RATE_LIMIT:
+                return new CaoyxRpcRateLimitException(msg);
+            case ILLEGAL_ACCESSS_TOKEN:
+                return new CaoyxRpcAccessTokenIllegalException(msg);
+            case ILLEHAL_METHOD:
+                return new CaoyxRpcIllegalMethodException(msg);
             default:
                 return new CaoyxRpcException(msg);
         }

@@ -281,11 +281,15 @@ public class CaoyxRpcReferenceBean {
                         }
 
                         if (caoyxRpcInvokerFailBack != null) {
-                            if (rpcResponse.getStatus() == CaoyxRpcStatus.FAIL) {
-                                return caoyxRpcInvokerFailBack.onFail(rpcResponse.getErrorMsg());
-                            }
-                            if (rpcResponse.getStatus() == CaoyxRpcStatus.TIMEOUT) {
-                                return caoyxRpcInvokerFailBack.onTimeout();
+                            switch (rpcResponse.getStatus()) {
+                                case FAIL:
+                                case ILLEGAL_ACCESSS_TOKEN:
+                                case ILLEHAL_METHOD:
+                                    return caoyxRpcInvokerFailBack.onFail(rpcResponse.getErrorMsg());
+                                case RATE_LIMIT:
+                                    return caoyxRpcInvokerFailBack.onRateLimit();
+                                case TIMEOUT:
+                                    return caoyxRpcInvokerFailBack.onTimeout();
                             }
                         }
                         throw CaoyxRpcException.buildByStatusAndMsg(rpcResponse.getStatus(), rpcResponse.getErrorMsg());

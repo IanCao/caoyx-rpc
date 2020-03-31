@@ -42,7 +42,7 @@ public enum CaoyxRpcSerializer {
     private Serialization createSerializer(byte serializerAlgorithmId) throws CaoyxRpcException {
         SerializerType serializerType = SerializerType.findByAlgorithmId(serializerAlgorithmId);
         if (serializerType == null) {
-            throw new CaoyxRpcException(serializerAlgorithmId + "is the not support serializerType");
+            throw new CaoyxRpcException(serializerAlgorithmId + " is the not support serializerType");
         }
         return (Serialization) ExtensionLoader.getExtension(Serialization.class, serializerType.getLabel()).getValidExtensionInstance();
     }
