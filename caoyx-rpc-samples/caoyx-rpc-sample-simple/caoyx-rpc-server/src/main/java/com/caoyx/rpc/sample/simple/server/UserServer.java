@@ -18,6 +18,7 @@ public class UserServer {
         config.setPort(1118);
         config.setRateLimit(1);
         config.setAccessToken("caoyx");
+        config.setRegisterConfig(new RegisterConfig("127.0.0.1:8848",RegisterType.NACOS));
         CaoyxRpcProviderFactory caoyxRpcProviderFactory = new CaoyxRpcProviderFactory(config);
         caoyxRpcProviderFactory.exportService(IUser.class, new UserImpl());
     }

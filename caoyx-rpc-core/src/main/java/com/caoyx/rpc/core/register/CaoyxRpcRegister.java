@@ -54,7 +54,8 @@ public abstract class CaoyxRpcRegister implements Register {
         InvokerURL url = new InvokerURL();
         url.setClassName(classKey.getClassName());
         url.setImplVersion(classKey.getVersion());
-        url.setHostPort(NetUtils.getLocalAddress());
+        url.setHost(NetUtils.getLocalAddress());
+        url.setPort(0);
         url.setProviderApplicationName(providerApplicationName);
         url.setApplicationName(applicationName);
         doRegisterInvoker(url);
@@ -62,11 +63,12 @@ public abstract class CaoyxRpcRegister implements Register {
     }
 
     @Override
-    public ProviderURL registerProvider(ClassKey classKey, int port, Map<String, Object> metadata) {
+    public ProviderURL registerProvider(ClassKey classKey, int port, Map<String, String> metadata) {
         ProviderURL url = new ProviderURL();
         url.setClassName(classKey.getClassName());
         url.setImplVersion(classKey.getVersion());
-        url.setHostPort(NetUtils.getLocalAddress() + ":" + port);
+        url.setHost(NetUtils.getLocalAddress());
+        url.setPort(port);
         url.setApplicationName(applicationName);
         url.setMetadata(metadata);
         doRegisterProvider(url);
@@ -79,7 +81,8 @@ public abstract class CaoyxRpcRegister implements Register {
         ProviderURL url = new ProviderURL();
         url.setClassName(classKey.getClassName());
         url.setImplVersion(classKey.getVersion());
-        url.setHostPort(NetUtils.getLocalAddress() + ":" + port);
+        url.setHost(NetUtils.getLocalAddress());
+        url.setPort(port);
         url.setApplicationName(applicationName);
         doUnRegisterProvider(url);
     }

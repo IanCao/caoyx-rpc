@@ -33,7 +33,7 @@ public interface Register {
 
     InvokerURL registerInvoker(ClassKey classKey);
 
-    ProviderURL registerProvider(ClassKey classKey, int port, Map<String, Object> metadata);
+    ProviderURL registerProvider(ClassKey classKey, int port, Map<String, String> metadata);
 
     void unRegisterProvider(ClassKey classKey, int port);
 

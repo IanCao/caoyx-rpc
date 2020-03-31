@@ -71,7 +71,8 @@ public class Direct extends CaoyxRpcRegister {
             provider.setApplicationName(invokerURL.getProviderApplicationName());
             provider.setClassName(invokerURL.getClassName());
             provider.setImplVersion(invokerURL.getImplVersion());
-            provider.setHostPort(addresses[i]);
+            provider.setHost(addresses[i].split(":")[0]);
+            provider.setPort(Integer.valueOf(addresses[i].split(":")[1]));
             provider.setApplicationName(invokerURL.getApplicationName());
             providerUrls.add(provider);
         }

@@ -6,7 +6,8 @@ package com.caoyx.rpc.core.register;
  */
 public enum RegisterType {
     DIRECT("direct"),
-    ZOOKEEPER("zookeeper");
+    ZOOKEEPER("zookeeper"),
+    NACOS("nacos");
 
     private String value;
 

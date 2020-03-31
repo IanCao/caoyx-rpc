@@ -25,6 +25,7 @@ import com.caoyx.rpc.core.net.netty.client.NettyClient;
 import com.caoyx.rpc.core.register.CaoyxRpcRegister;
 import com.caoyx.rpc.core.register.NotifyListener;
 import com.caoyx.rpc.core.register.RegisterConfig;
+import com.caoyx.rpc.core.register.RegisterType;
 import com.caoyx.rpc.core.serialization.SerializerType;
 import com.caoyx.rpc.core.url.register.InvokerURL;
 import com.caoyx.rpc.core.url.register.ProviderURL;
@@ -123,25 +124,23 @@ public class CaoyxRpcReferenceBean {
 
 
     private CaoyxRpcReferenceBean init() throws CaoyxRpcException {
-        if (registerConfig != null) {
-            CaoyxRpcRegister register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterType().getValue()).getValidExtensionInstance();
-            register.initInvokerRegister(registerConfig.getAddress(), applicationName, providerApplicationName);
+        CaoyxRpcRegister register = (CaoyxRpcRegister) ExtensionLoader.getExtension(CaoyxRpcRegister.class, registerConfig.getRegisterType().getValue()).getValidExtensionInstance();
+        register.initInvokerRegister(registerConfig.getAddress(), applicationName, providerApplicationName);
 
-            InvokerURL url = register.registerInvoker(new ClassKey(iFace.getName(), providerImplVersion));
+        InvokerURL url = register.registerInvoker(new ClassKey(iFace.getName(), providerImplVersion));
 
-            List<ProviderURL> providerURLs = register.getProviderURLsByInvokerURL(url);
-            classKey2ProviderUrl.put(url.getClassKey(), providerURLs);
+        List<ProviderURL> providerURLs = register.getProviderURLsByInvokerURL(url);
+        classKey2ProviderUrl.put(url.getClassKey(), providerURLs);
 
-            register.subscribe(url, new NotifyListener() {
-                @Override
-                public void onChange(String classKey, List<ProviderURL> providers) {
-                    synchronized (classKey.intern()) {
-                        log.info("classKey:[" + classKey + "] latest providers: " + providers.toString());
-                        classKey2ProviderUrl.put(classKey, providers);
-                    }
+        register.subscribe(url, new NotifyListener() {
+            @Override
+            public void onChange(String classKey, List<ProviderURL> providers) {
+                synchronized (classKey.intern()) {
+                    log.info("classKey:[" + classKey + "] latest providers: " + providers.toString());
+                    classKey2ProviderUrl.put(classKey, providers);
                 }
-            });
-        }
+            }
+        });
         this.clientManager = new ClientManager();
         return this;
     }
@@ -174,14 +173,17 @@ public class CaoyxRpcReferenceBean {
 
                         String classKey;
                         if (className.equals(CaoyxRpcGenericInvoker.class.getName())) {
+                            // 泛化调用不支持注册中心
+                            if (CaoyxRpcReferenceBean.this.registerConfig.getRegisterType() != RegisterType.DIRECT) {
+                                throw new CaoyxRpcException("generic invoker only support direct type");
+                            }
                             if (method.getName().equals("invoke")) {
                                 className = (String) args[0];
                                 implVersion = args[1] == null ? 0 : (Integer) args[1];
                                 methodName = (String) args[2];
                                 parameterTypes = (String[]) args[3];
                                 arguments = (Object[]) args[4];
-
-                                classKey = CaoyxRpcGenericInvoker.class.getName() + "@" + providerImplVersion;
+                                classKey = CaoyxRpcGenericInvoker.class.getName() + "_" + CaoyxRpcReferenceBean.this.providerImplVersion;
                             } else {
                                 throw new IllegalStateException(String.valueOf(method));
                             }
@@ -191,7 +193,7 @@ public class CaoyxRpcReferenceBean {
                             for (int i = 0; i < parameterClassTypes.length; i++) {
                                 parameterTypes[i] = parameterClassTypes[i].getName();
                             }
-                            classKey = className + "@" + implVersion;
+                            classKey = className + "_" + implVersion;
                         }
 
                         CaoyxRpcRequest rpcRequest = new CaoyxRpcRequest();

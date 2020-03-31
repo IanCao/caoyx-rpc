@@ -8,7 +8,8 @@
     <artifactId>caoyx-rpc</artifactId>
     <packaging>pom</packaging>
     <version>1.0.1-SNAPSHOT</version>
-    <description>High Performance and High Avaliable distributed RPC framework Based on Java</description>
+    <description>High Performance and High Avaliable distributed RPC framework Based on Java
+    </description>
     <name>CaoyxRpc</name>
     <url>https://github.com/IanCao/caoyx-rpc</url>
 
@@ -120,6 +121,34 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+
+                                    <!-- 并把文件复制到target/conf目录下-->
+                                    <outputDirectory>${project.build.directory}/resou
+                                    </outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources</directory>
+                                            <!-- 指定不需要处理的资源 <excludes> <exclude>WEB-INF/*.*</exclude> </excludes> -->
+                                            <excludes>
+                                                <exclude>**/*.xml</exclude>
+                                            </excludes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

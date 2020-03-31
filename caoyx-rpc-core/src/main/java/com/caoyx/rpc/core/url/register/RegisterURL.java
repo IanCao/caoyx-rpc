@@ -11,14 +11,19 @@ import java.util.Map;
  */
 @Data
 public class RegisterURL extends URL {
-    private String hostPort;
+    private String host;
+    private int port;
     private String applicationName;
-    private Map<String, Object> metadata;
+    private Map<String, String> metadata;
 
     private String className;
     private int implVersion;
 
     public String getClassKey() {
-        return className + "@" + implVersion;
+        return className + "_" + implVersion;
+    }
+
+    public String getHostPort() {
+        return host + ":" + port;
     }
 }

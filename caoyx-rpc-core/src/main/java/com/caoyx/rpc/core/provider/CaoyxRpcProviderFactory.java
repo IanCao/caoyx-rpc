@@ -91,15 +91,15 @@ public class CaoyxRpcProviderFactory implements GraceFullyShutDownCallBack {
         exportService(className, service, null);
     }
 
-    public void exportService(Class clazz, Object service, Map<String, Object> metadata) throws CaoyxRpcException {
+    public void exportService(Class clazz, Object service, Map<String, String> metadata) throws CaoyxRpcException {
         exportService(clazz.getName(), 0, service, metadata);
     }
 
-    public void exportService(String className, Object service, Map<String, Object> metadata) throws CaoyxRpcException {
+    public void exportService(String className, Object service, Map<String, String> metadata) throws CaoyxRpcException {
         exportService(className, 0, service, metadata);
     }
 
-    public void exportService(String className, int implVersion, Object service, Map<String, Object> metadata) throws CaoyxRpcException {
+    public void exportService(String className, int implVersion, Object service, Map<String, String> metadata) throws CaoyxRpcException {
 
         boolean success = rpcProviderHandler.exportService(className, implVersion, service);
         if (success) {

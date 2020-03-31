@@ -39,7 +39,7 @@ public class Extension {
 
         Class validClazz = loadValidExtension(clazz, name);
         if (validClazz == null) {
-            throw new CaoyxRpcException(clazz.getName() + "| not exist " + name + " class");
+            throw new CaoyxRpcException(clazz.getName() + " not exist " + name + " class");
         }
         try {
             this.validExtensionInstance = validClazz.newInstance();

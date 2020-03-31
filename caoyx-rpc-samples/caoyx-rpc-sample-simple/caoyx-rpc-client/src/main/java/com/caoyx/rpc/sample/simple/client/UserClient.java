@@ -30,12 +30,12 @@ public class UserClient {
 
     private static void testSync() throws Exception {
         UserDto userDto = new UserDto("testSync : UserDto==> testSync");
-        IUser user = (IUser) init(IUser.class, CallType.SYNC, null);
+        IUser user = (IUser) init(IUser.class, CallType.SYNC, null, true);
         System.out.println(user.addUser(userDto));
     }
 
     private static void testFuture() throws Exception {
-        IUser user = (IUser) init(IUser.class, CallType.FUTURE, null);
+        IUser user = (IUser) init(IUser.class, CallType.FUTURE, null, true);
         user.getUsers();
         System.out.println(CaoyxRpcFuture.getFuture().get().toString());
         UserDto userDto = new UserDto("testFuture : UserDto==> testFuture");
@@ -53,23 +53,27 @@ public class UserClient {
             public void onFail(String errorMsg) {
                 System.out.println("testCallBack: " + errorMsg);
             }
-        });
+        }, true);
         user.getUsers();
     }
 
     private static void testGenericCall() throws Exception {
-        CaoyxRpcGenericInvoker invoker = (CaoyxRpcGenericInvoker) init(CaoyxRpcGenericInvoker.class, CallType.SYNC, null);
+        CaoyxRpcGenericInvoker invoker = (CaoyxRpcGenericInvoker) init(CaoyxRpcGenericInvoker.class, CallType.SYNC, null, false);
         Object object = invoker.invoke("com.caoyx.rpc.sample.simple.api.IUser", 0, "getUsers", null, null);
         System.out.println("testGenericCall : " + object.toString());
     }
 
-    private static Object init(Class clazz, CallType callType, CaoyxRpcInvokerCallBack callBack) throws Exception {
+    private static Object init(Class clazz, CallType callType, CaoyxRpcInvokerCallBack callBack, boolean nacos) throws Exception {
         CaoyxRpcInvokerConfig config = new CaoyxRpcInvokerConfig();
         config.setIFace(clazz);
         config.setProviderImplVersion(0);
         config.setProviderApplicationName("caoyxRpc-sample-simple-server");
         config.setApplicationName("caoyxRpc-sample-simple-client");
-        config.setRegisterConfig(new RegisterConfig("127.0.0.1:1118", RegisterType.DIRECT));
+        if (nacos) {
+            config.setRegisterConfig(new RegisterConfig("127.0.0.1:8848", RegisterType.NACOS));
+        } else {
+            config.setRegisterConfig(new RegisterConfig("127.0.0.1:1118", RegisterType.DIRECT));
+        }
         config.setCallType(callType);
         config.setAccessToken("caoyx");
         config.setCaoyxRpcInvokerCallBack(callBack);

@@ -146,7 +146,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
         url2TreeCacheListener.putIfAbsent(subscribePath, new TreeCacheListener() {
             @Override
             public void childEvent(CuratorFramework curatorFramework, TreeCacheEvent treeCacheEvent) throws Exception {
-                ChildData eventData = treeCacheEvent.getData();
                 switch (treeCacheEvent.getType()) {
                     case NODE_ADDED:
                     case NODE_UPDATED:
@@ -163,12 +162,13 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
                             // /CaoyxRpc/caoyxRpc-server/className@1/provider/ip:port
                             ProviderURL providerURL = new ProviderURL();
                             providerURL.setApplicationName(subscribePathInfos[2]);
-                            providerURL.setHostPort(childPath);
-                            providerURL.setClassName(subscribePathInfos[3].split("@")[0]);
-                            providerURL.setImplVersion(Integer.valueOf(subscribePathInfos[3].split("@")[1]));
+                            providerURL.setHost(childPath.split(":")[0]);
+                            providerURL.setPort(Integer.valueOf(childPath.split(":")[1]));
+                            providerURL.setClassName(subscribePathInfos[3].split("_")[0]);
+                            providerURL.setImplVersion(Integer.valueOf(subscribePathInfos[3].split("_")[1]));
                             byte[] data = client.getData().forPath(subscribePath + "/" + childPath);
                             if (data != null && data.length > 0) {
-                                Map<String, Object> metaData = JsonUtils.fromJson(new String(data), new TypeToken<Map<String, Object>>() {
+                                Map<String, String> metaData = JsonUtils.fromJson(new String(data), new TypeToken<Map<String, Object>>() {
                                 }.getType());
                                 if (metaData.containsKey(Constants.URL_METADATA_KEY_AVALIABLE) &&
                                         metaData.get(Constants.URL_METADATA_KEY_AVALIABLE).equals(Boolean.FALSE)) {
@@ -178,8 +178,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
                             }
                             urls.add(providerURL);
                         }
-
-
                         listener.onChange(url.getClassKey(), urls);
                     default:
                         break;
@@ -238,7 +236,8 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
             for (String provider : providers) {
                 ProviderURL providerURL = new ProviderURL();
                 providerURL.setApplicationName(invokerURL.getProviderApplicationName());
-                providerURL.setHostPort(provider);
+                providerURL.setHost(provider.split(":")[0]);
+                providerURL.setPort(Integer.valueOf(provider.split(":")[1]));
                 providerURL.setClassName(invokerURL.getClassName());
                 providerURL.setImplVersion(invokerURL.getImplVersion());
                 byte[] bytes = client.getData().forPath(providerUrlString + "/" + provider);
