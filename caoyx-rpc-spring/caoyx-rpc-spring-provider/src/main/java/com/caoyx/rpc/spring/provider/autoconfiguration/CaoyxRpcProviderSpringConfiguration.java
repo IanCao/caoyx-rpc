@@ -23,7 +23,7 @@ public class CaoyxRpcProviderSpringConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(CaoyxRpcProviderSpringConfiguration.class);
 
-    @Value("${caoyxRpc.server.port:1118}")
+    @Value("${caoyxRpc.provider.port:1118}")
     private int port;
 
     @Value("${caoyxRpc.provider.applicationName}")
@@ -38,7 +38,7 @@ public class CaoyxRpcProviderSpringConfiguration {
     @Value("${caoyxRpc.provider.accessToken:}")
     private String accessToken;
 
-    @Value("${caoyxRpc.provider.limitRate:}")
+    @Value("${caoyxRpc.provider.limitRate:-1}")
     private int limitRate;
 
     @ConditionalOnMissingBean(CaoyxRpcSpringProviderFactory.class)

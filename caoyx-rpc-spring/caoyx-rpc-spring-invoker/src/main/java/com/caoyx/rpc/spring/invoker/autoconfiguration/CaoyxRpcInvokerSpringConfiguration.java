@@ -17,7 +17,7 @@ public class CaoyxRpcInvokerSpringConfiguration {
     @ConditionalOnMissingBean(CaoyxRpcSpringInvokerFactory.class)
     @Bean
     public CaoyxRpcSpringInvokerFactory caoyxRpcSpringInvokerFactory() {
-        log.info("caoyxRpcSpringInvokerFactory init");
+        log.info("caoyxRpcSpringInvoker init");
         return new CaoyxRpcSpringInvokerFactory();
     }
 }

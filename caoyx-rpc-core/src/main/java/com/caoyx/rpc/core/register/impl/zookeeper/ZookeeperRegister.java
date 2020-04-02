@@ -150,7 +150,6 @@ public class ZookeeperRegister extends CaoyxRpcRegister {
                     case NODE_ADDED:
                     case NODE_UPDATED:
                     case NODE_REMOVED:
-                        System.out.println(JsonUtils.toJson(treeCacheEvent));
                         List<String> childPaths = client.getChildren().forPath(subscribePath);
                         if (CollectionUtils.isEmpty(childPaths)) {
                             listener.onChange(url.getClassKey(), Collections.<ProviderURL>emptyList());
