@@ -14,4 +14,8 @@ public interface Client {
     void doSend(CaoyxRpcRequest requestPacket);
 
     boolean isValid();
+
+    String getHost();
+
+    int getPort();
 }

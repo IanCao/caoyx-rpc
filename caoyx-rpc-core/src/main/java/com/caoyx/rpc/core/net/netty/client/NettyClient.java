@@ -27,6 +27,8 @@ public class NettyClient implements Client {
 
     private EventLoopGroup group;
     private Channel channel;
+    private String host;
+    private int port;
 
     @Override
     public void init(String ipPort) throws InterruptedException {
@@ -44,7 +46,11 @@ public class NettyClient implements Client {
                                 .addLast(new NettyClientHandler());
                     }
                 });
-        channel = bootstrap.connect(ipPort.split(":")[0], Integer.valueOf(ipPort.split(":")[1])).sync().channel();
+        host = ipPort.split(":")[0];
+        port = Integer.valueOf(ipPort.split(":")[1]);
+
+        channel = bootstrap.connect(host, port).sync().channel();
+
     }
 
 
@@ -72,5 +78,15 @@ public class NettyClient implements Client {
     @Override
     public boolean isValid() {
         return channel != null && channel.isActive();
+    }
+
+    @Override
+    public String getHost() {
+        return null;
+    }
+
+    @Override
+    public int getPort() {
+        return 0;
     }
 }

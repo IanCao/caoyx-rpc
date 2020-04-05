@@ -15,6 +15,7 @@ import com.caoyx.rpc.core.invoker.CaoyxRpcFuture;
 import com.caoyx.rpc.core.invoker.CaoyxRpcFutureResponse;
 import com.caoyx.rpc.core.invoker.CaoyxRpcInvokerCallBack;
 import com.caoyx.rpc.core.invoker.CaoyxRpcPendingInvokerPool;
+import com.caoyx.rpc.core.invoker.Invocation;
 import com.caoyx.rpc.core.invoker.failback.CaoyxRpcInvokerFailBack;
 import com.caoyx.rpc.core.invoker.generic.CaoyxRpcGenericInvoker;
 import com.caoyx.rpc.core.loadbalance.LoadBalance;
@@ -85,6 +86,7 @@ public class CaoyxRpcReferenceBean {
     private List<CaoyxRpcFilter> rpcFilters = new ArrayList<>();
 
     private ClientManager clientManager;
+    private CaoyxRpcInvoker invoker;
 
     public CaoyxRpcReferenceBean(CaoyxRpcInvokerConfig config) throws CaoyxRpcException {
         if (config.getIFace() == null) {
@@ -120,6 +122,7 @@ public class CaoyxRpcReferenceBean {
         this.loadBalance = (LoadBalance) ExtensionLoader.getExtension(LoadBalance.class,
                 config.getLoadBalanceType() == null ? LoadBalanceType.RANDOM.getValue() : config.getLoadBalanceType().getValue()).getValidExtensionInstance();
         init();
+        invoker = new CaoyxRpcInvoker();
     }
 
 
@@ -197,21 +200,23 @@ public class CaoyxRpcReferenceBean {
                         }
 
                         CaoyxRpcRequest rpcRequest = new CaoyxRpcRequest();
-                        CaoyxRpcResponse rpcResponse = new CaoyxRpcResponse();
+                        rpcRequest.setRequestId(UUID.randomUUID().toString());
+                        rpcRequest.setImplVersion(implVersion);
+                        rpcRequest.setSerializerType(serializerType.getType());
+                        rpcRequest.setCompressType(compressType.getType());
+                        rpcRequest.setClassName(className);
+                        rpcRequest.setMethodKey(MethodUtils.generateMethodKey(methodName, parameterTypes));
+                        rpcRequest.setParameters(arguments);
+                        rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
+                        rpcRequest.setTimeout(timeout);
+                        rpcRequest.setAccessToken(accessToken);
+                        rpcRequest.setCallType(callType.getValue());
 
+
+                        CaoyxRpcResponse rpcResponse = null;
 
                         try {
-                            rpcRequest.setRequestId(UUID.randomUUID().toString());
-                            rpcRequest.setImplVersion(implVersion);
-                            rpcRequest.setSerializerType(serializerType.getType());
-                            rpcRequest.setCompressType(compressType.getType());
-                            rpcRequest.setClassName(className);
-                            rpcRequest.setMethodKey(MethodUtils.generateMethodKey(methodName, parameterTypes));
-                            rpcRequest.setParameters(arguments);
-                            rpcRequest.setCreatedTimeMills(System.currentTimeMillis());
-                            rpcRequest.setTimeout(timeout);
-                            rpcRequest.setAccessToken(accessToken);
-                            rpcRequest.setCallType(callType.getValue());
+                            rpcRequest.setMetaData(CaoyxRpcContext.getContext().getMetaData());
 
                             for (int i = 0; i < retryTimes + 1; i++) {
                                 ProviderURL providerURL = loadBalance.loadBalance(classKey, classKey2ProviderUrl.get(classKey));
@@ -219,54 +224,27 @@ public class CaoyxRpcReferenceBean {
                                     throw new CaoyxRpcException("LoadBalanceFilter - providerURL is null");
                                 }
                                 Client clientInstance = clientManager.getOrCreateClient(providerURL, client);
-                                rpcRequest.setMetaData(CaoyxRpcContext.getContext().getMetaData());
 
-                                for (int j = 0; j < rpcFilters.size(); j++) {
-                                    rpcFilters.get(j).invokeRequestHandler(rpcRequest);
-                                }
+                                Invocation invocation = new Invocation();
+                                invocation.setCallType(callType);
+                                invocation.setCaoyxRpcInvokerCallBack(caoyxRpcInvokerCallBack);
+                                invocation.setCaoyxRpcInvokerFailBack(caoyxRpcInvokerFailBack);
+                                invocation.setClientInstance(clientInstance);
+                                invocation.setRpcFilters(rpcFilters);
 
-                                CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(rpcRequest);
-                                CaoyxRpcPendingInvokerPool.INSTANCE.setPendingInvoke(rpcRequest.getRequestId(), futureResponse);
-                                clientInstance.doSend(rpcRequest);
-
-                                switch (callType) {
-                                    case SYNC:
-                                        CaoyxRpcResponse caoyxRpcResponse = futureResponse.get(rpcRequest.getTimeout(), TimeUnit.MILLISECONDS);
-                                        rpcResponse.setStatus(caoyxRpcResponse.getStatus());
-                                        rpcResponse.setErrorMsg(caoyxRpcResponse.getErrorMsg());
-                                        rpcResponse.setResult(caoyxRpcResponse.getResult());
-                                        break;
-                                    case FUTURE:
-                                        CaoyxRpcFuture caoyxRpcFuture = new CaoyxRpcFuture();
-                                        caoyxRpcFuture.setFutureResponse(futureResponse);
-                                        caoyxRpcFuture.setTimeout(rpcRequest.getTimeout());
-                                        caoyxRpcFuture.setUnit(TimeUnit.MILLISECONDS);
-                                        CaoyxRpcFuture.setFuture(caoyxRpcFuture);
-                                        rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
-                                        break;
-                                    case CALLBACK:
-                                        rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
-                                        futureResponse.setCaoyxRpcInvokerCallBack(caoyxRpcInvokerCallBack);
-                                        break;
-                                    case ONE_WAY:
-                                        rpcResponse.setStatus(CaoyxRpcStatus.SUCCESS);
-                                        CaoyxRpcPendingInvokerPool.INSTANCE.removeInvokerFuture(rpcRequest.getRequestId());
-                                        break;
-                                }
+                                rpcResponse = invoker.doInvoke(rpcRequest, invocation);
                                 if (rpcResponse.isSuccess()) {
-                                    for (int j = rpcFilters.size() - 1; j >= 0; j--) {
-                                        rpcFilters.get(j).invokeResponseHandler(rpcResponse);
-                                    }
                                     break;
-                                } else {
-                                    log.error("classKey:[" + classKey + "]" + "caoyxRpc RetryTimes is" + ++i);
                                 }
+                                log.error("classKey:[" + classKey + "]" + "caoyxRpc RetryTimes is" + ++i);
                             }
                         } finally {
                             CaoyxRpcContext.removeContext();
                         }
 
-                        if (callType == CallType.FUTURE || callType == CallType.CALLBACK) {
+                        if (callType == CallType.FUTURE
+                                || callType == CallType.CALLBACK
+                                || callType == CallType.ONE_WAY) {
                             Class<?> returnType = method.getReturnType();
                             if (BASIC_DATA_TYPE_2_DEFAULT_VALUE.containsKey(returnType.getName())) {
                                 return BASIC_DATA_TYPE_2_DEFAULT_VALUE.get(returnType.getName());
@@ -274,25 +252,12 @@ public class CaoyxRpcReferenceBean {
                             return null;
                         }
 
-                        if (rpcResponse.getStatus() == null) {
+                        if (rpcResponse == null || rpcResponse.getStatus() == null) {
                             throw CaoyxRpcException.buildByMsg("rpcResponse is not exist, please check remote invoker");
                         }
 
                         if (rpcResponse.isSuccess()) {
                             return rpcResponse.getResult();
-                        }
-
-                        if (caoyxRpcInvokerFailBack != null) {
-                            switch (rpcResponse.getStatus()) {
-                                case FAIL:
-                                case ILLEGAL_ACCESSS_TOKEN:
-                                case ILLEHAL_METHOD:
-                                    return caoyxRpcInvokerFailBack.onFail(rpcResponse.getErrorMsg());
-                                case RATE_LIMIT:
-                                    return caoyxRpcInvokerFailBack.onRateLimit();
-                                case TIMEOUT:
-                                    return caoyxRpcInvokerFailBack.onTimeout();
-                            }
                         }
                         throw CaoyxRpcException.buildByStatusAndMsg(rpcResponse.getStatus(), rpcResponse.getErrorMsg());
                     }
