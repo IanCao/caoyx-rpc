@@ -82,11 +82,11 @@ public class NettyClient implements Client {
 
     @Override
     public String getHost() {
-        return null;
+        return this.host;
     }
 
     @Override
     public int getPort() {
-        return 0;
+        return this.port;
     }
 }

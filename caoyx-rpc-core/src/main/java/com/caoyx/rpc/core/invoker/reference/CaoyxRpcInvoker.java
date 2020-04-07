@@ -1,5 +1,6 @@
 package com.caoyx.rpc.core.invoker.reference;
 
+import com.caoyx.rpc.core.context.CaoyxRpcContext;
 import com.caoyx.rpc.core.data.CaoyxRpcRequest;
 import com.caoyx.rpc.core.data.CaoyxRpcResponse;
 import com.caoyx.rpc.core.enums.CaoyxRpcStatus;
@@ -31,6 +32,8 @@ public class CaoyxRpcInvoker {
 
         CaoyxRpcFutureResponse futureResponse = new CaoyxRpcFutureResponse(rpcRequest);
         CaoyxRpcPendingInvokerPool.INSTANCE.setPendingInvoke(rpcRequest.getRequestId(), futureResponse);
+        rpcRequest.getMetaData().putAll(CaoyxRpcContext.getContext().getMetaData());
+
         invocation.getClientInstance().doSend(rpcRequest);
 
         switch (invocation.getCallType()) {

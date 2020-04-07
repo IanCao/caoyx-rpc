@@ -5,6 +5,7 @@ import io.netty.util.concurrent.FastThreadLocal;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,5 +36,5 @@ public class CaoyxRpcContext {
 
     @Getter
     @Setter
-    private Map<String, Object> metaData;
+    private Map<String, Object> metaData = new HashMap<>();
 }
